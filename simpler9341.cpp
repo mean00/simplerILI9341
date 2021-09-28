@@ -40,56 +40,8 @@ ili9341::~ili9341()
  */              
 void ili9341::fillScreen(int color) // 16 bits!
 {
-//    square(color,0,0,_width,_height);
+    square(color,0,0,_width,_height);
 }
-#if 0
-/**
- * 
- * @param x
- * @param y
- * @param w
- * @param h
- */
-void ili9341::setAddress(int x, int y, int w, int h)
-{
-    int a1,a2,b1,b2;
-    a1=x+_xOffset;
-    a2=a1+w-1;
-    b1=y+_yOffset;
-    b2=b1+h-1;
-    
-      
-      cmdMode();
-      sendByte(0x2a);
-      dataMode();
-      sendWord(a1);
-      sendWord(a2);
-      cmdMode();
-      sendByte(0x2b);
-      dataMode();
-      sendWord(b1);
-      sendWord(b2);
-      cmdMode();
-      sendByte(0x2c);      
-}
-/**
- * 
- * @param color
- * @param x
- * @param y
- * @param w
- * @param h
- */
-void ili9341::square(int color, int x, int y, int w, int h)
-{
-    csOn();
-    setAddress(x,y,w,h);
-    int f=w*h;
-    dataMode();
-    floodWords(f,color);
-    csOff();
-}
-#endif
 /**
  * 
  * @param rotation
@@ -125,4 +77,21 @@ void ili9341::baseInit()
 {
   
 }
+
+
+/**
+ * 
+ * @param color
+ * @param x
+ * @param y
+ * @param w
+ * @param h
+ */
+void ili9341::square(int color, int x, int y, int w, int h)
+{
+    setAddress(x,y,w,h);
+    int f=w*h;
+    floodWords(f,color);
+}
+
 // EOF

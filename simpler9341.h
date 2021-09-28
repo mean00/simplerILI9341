@@ -19,7 +19,8 @@ public:
             virtual void updateHwRotation()=0;
             virtual void dataMode()=0;
             virtual void cmdMode()=0;
-            virtual void floodWords(int nb, const uint16_t data)=0; // 16 bits
+            virtual void floodWords(int nb, const uint16_t data)=0; // 16 bits            
+            virtual void setAddress(int x, int y, int w, int h)=0;
 //---------------------------------------------------------------    
                enum FontSize
                {
@@ -45,7 +46,7 @@ public:
                 virtual void init()=0;
                 
                 void fillScreen(int color); // 16 bits!
-                void setAddress(int x, int y, int w, int h);
+                
                 void square(int color, int x, int y, int w, int g);
                 void setRotation(int rotation);  // 0 1 2 3
                 void push2Colors(uint8_t *data, int len, boolean first,uint16_t fg, uint16_t bg);
@@ -64,8 +65,7 @@ protected:
                 int _PhysicalYoffset;
                 int _xOffset;
                 int _yOffset;
-protected:
-                void sendCommand(uint8_t cmd, int size, const uint8_t *data);
+protected:                
                 void baseInit();
                 
 public: // freetype font
@@ -75,7 +75,6 @@ public: // freetype font
                     _bg=bg;
                 }
                 int     myDrawChar(int x, int y, unsigned char c,  int color, int bg,FontInfo &infos);
-                void    square(int x,int y,int w, int h, bool color);
                 void    setFontSize(FontSize size);
                 void    setFontFamily(const GFXfont *small, const GFXfont *medium, const GFXfont *big);
                 void    print(int x,int y,const char *z);
@@ -99,7 +98,7 @@ public: // freetype font
                 
 protected:
                 int     mySquare(int x, int y, int w, int xheight, uint16_t filler);
-                void    pushColors16(uint16_t *data,int nb);
+                
 #define         ST7735_BUFFER_SIZE_WORD 256
                 uint16_t scrbuf[ST7735_BUFFER_SIZE_WORD];
                 int     cursor_x,cursor_y;

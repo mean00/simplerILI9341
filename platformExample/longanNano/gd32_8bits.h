@@ -39,6 +39,10 @@ class ln8bit9341 : public ili9341
             virtual void sendWords(int nb, const uint16_t *data); // 16 bits
             virtual void floodWords(int nb, const uint16_t data); // 16 bits
             virtual void updateHwRotation();
+            virtual void setAddress(int x, int y, int w, int h);
+
+            
+            
                     uint32_t readChipId();
     protected:
                     void reset();
@@ -48,6 +52,7 @@ class ln8bit9341 : public ili9341
                     void write8(uint8_t c);
                     uint8_t read8();
                     uint32_t readRegister32(int reg);
+                    void writeRegister32(int r,uint32_t  val);
                     void setReadDir();
                     void setWriteDir();
                     

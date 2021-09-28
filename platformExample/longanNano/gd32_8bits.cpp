@@ -104,8 +104,7 @@ uint8_t  ln8bit9341::read8()
 void ln8bit9341::writeCmdParam(uint16_t cmd, int payload, const uint8_t * data)
 {
     CD_COMMAND;
-    write8(cmd>>8);
-    write8(cmd);
+    sendWord(cmd);
     if(payload)
     {
         CD_DATA;
@@ -124,7 +123,9 @@ void ln8bit9341::writeCommand(uint16_t c)
 {
     writeCmdParam(c,0,NULL);
 }
-
+//------------------------------
+// This is very seldom used....
+//-------------------------------
 void ln8bit9341::setReadDir()
 {
     for(int i=0;i<8;i++)
@@ -155,16 +156,29 @@ uint32_t ln8bit9341::readRegister32(int r)
   setReadDir();  // Set up LCD data port(s) for READ operations
   CD_DATA;
   lnDelayUs(50);
-  val = read8();          // Do not merge or otherwise simplify
-  val <<= 8;              // these lines.  It's an unfortunate  
-  val  |= read8();        // shenanigans that are going on.
-  val <<= 8;              // these lines.  It's an unfortunate
-  val  |= read8();;        // shenanigans that are going on.
-  val <<= 8;              // these lines.  It's an unfortunat
-  val  |= read8();;        // shenanigans that are going on.
+  val = read8();          
+  val <<= 8;              
+  val  |= read8();        
+  val <<= 8;              
+  val  |= read8();;       
+  val <<= 8;              
+  val  |= read8();;       
   CS_IDLE;
+  setWriteDir();    
   return val;
 }
+
+/**
+ * 
+ * @param reg
+ * @return 
+ */
+void ln8bit9341::writeRegister32(int r,uint32_t  val)
+{    
+  uint8_t flat[4]={(uint8_t)(val>>24),(uint8_t)((val>>16)&0xff),(uint8_t)((val>>8)&0xff),(uint8_t)(val&0xff)};
+  writeCmdParam(r,4,flat);
+}
+
 /**
  * 
  */
@@ -183,26 +197,26 @@ uint32_t ln8bit9341::readChipId()
  */
 void ln8bit9341::reset()
 {
-        _ioWrite.on();
-        _ioRead.on();
-        _ioCS.on();
-        _ioDC.on();
-        
-	CS_IDLE; 
-        WR_IDLE;
-	RD_IDLE;
-	CD_DATA; 	
-        setWriteDir();
-        
-	if(_pinReset!=-1)
-        {            
-            lnPinMode(_pinReset,lnOUTPUT);    
-            lnDigitalWrite(_pinReset,HIGH);
-            xDelay(50);
-            lnDigitalWrite(_pinReset,LOW);
-            xDelay(50);
-            lnDigitalWrite(_pinReset,HIGH);	
-	}
+    _ioWrite.on();
+    _ioRead.on();
+    _ioCS.on();
+    _ioDC.on();
+
+    CS_IDLE; 
+    WR_IDLE;
+    RD_IDLE;
+    CD_DATA; 	
+    setWriteDir();
+
+    if(_pinReset!=-1)
+    {            
+        lnPinMode(_pinReset,lnOUTPUT);    
+        lnDigitalWrite(_pinReset,HIGH);
+        xDelay(50);
+        lnDigitalWrite(_pinReset,LOW);
+        xDelay(50);
+        lnDigitalWrite(_pinReset,HIGH);	
+    }
 }
 /**
  * 
@@ -253,9 +267,15 @@ void ln8bit9341::sendByte(int c)
  * 
  * @param byte
  */
-void ln8bit9341::sendWord(int byte)
+void ln8bit9341::sendWord(int xbyte)
 {
-    //    _spi->write16(byte);
+    int cc=(int )xbyte;
+    int cl=cc&0xff;
+    int ch=cc>>8;
+    *_bop=  (((ch^0xFF)<<16) | (ch));
+    WR_STROBE;
+    *_bop=  (((cl^0xFF)<<16) | (cl));
+    WR_STROBE;        
 }
 /**
  * 
@@ -264,7 +284,13 @@ void ln8bit9341::sendWord(int byte)
  */
 void ln8bit9341::sendBytes(int nb, const uint8_t *data)
 {
-    //    _spi->write(nb,data);
+    const uint8_t *tail=data+nb;
+    while(data<tail)
+    {
+        int cc=(int )*data++;
+        *_bop=  (((cc^0xFF)<<16) | (cc));
+        WR_STROBE;
+    }
 }
 /**
  * 
@@ -273,12 +299,18 @@ void ln8bit9341::sendBytes(int nb, const uint8_t *data)
  */
 void ln8bit9341::sendWords(int nb, const uint16_t *data)
 {
-#ifdef SPI_USE_DMA      
-    //    _spi->dmaWrite16(nb,data);
-#else
-//     for(int i=0;i<nb;i++)
- //         _spi->write16(data[i]);      
-#endif
+    const uint16_t *tail=data+nb;
+    while(data<tail)
+    {
+        int cc=(int )*data++;
+        int cl=cc&0xff;
+        int ch=cc>>8;
+        *_bop=  (((ch^0xFF)<<16) | (ch));
+        WR_STROBE;
+        *_bop=  (((cl^0xFF)<<16) | (cl));
+        WR_STROBE;        
+    }
+    
 }
 /**
 * 
@@ -286,13 +318,35 @@ void ln8bit9341::sendWords(int nb, const uint16_t *data)
 * @param data
 */
 void ln8bit9341::floodWords(int nb, const uint16_t data)
-{
-#ifdef SPI_USE_DMA  
-    //      _spi->dmaWrite16Repeat(nb,data);
-#else
-//      for(int i=0;i<nb;i++)
-  //        _spi->write16(data);      
-#endif
+{      
+    int cl=data&0xff;
+    int ch=data>>8;
+    
+    cl= (((cl^0xFF)<<16) | (cl));
+    ch= (((ch^0xFF)<<16) | (ch));
+    CS_ACTIVE;
+    CD_COMMAND;
+    sendWord(ILI9341_MEMORYWRITE);
+    CD_DATA;
+    if(cl==ch)
+    {
+         *_bop=  ch;
+         for(int i=0;i<nb;i++)
+         {
+            WR_STROBE;
+            WR_STROBE;
+         }
+    }else
+    {
+        for(int i=0;i<nb;i++)
+        {
+            *_bop=  ch;
+            WR_STROBE;
+            *_bop=  cl;
+            WR_STROBE;        
+        }
+    }
+    CS_IDLE;
 }
   
 static const uint8_t rotMode[4]={0x8,0xc8,0x78,0xa8};
@@ -301,17 +355,55 @@ static const uint8_t rotMode[4]={0x8,0xc8,0x78,0xa8};
  */
 void ln8bit9341::updateHwRotation(void)
 {
-//    sendCommand(ST7735_MADCTL,1,rotMode+_rotation);
+    uint8_t t;
+    switch(_rotation) 
+    {
+        case 1:
+          t = ILI9341_MADCTL_MX | ILI9341_MADCTL_MY | ILI9341_MADCTL_MV | ILI9341_MADCTL_RGB;
+          break;
+        case 2:
+          t = ILI9341_MADCTL_MX | ILI9341_MADCTL_RGB;
+          break;
+        case 3:
+          t = ILI9341_MADCTL_MV | ILI9341_MADCTL_RGB;
+          break;
+        case 0:
+        default:
+         t = ILI9341_MADCTL_MY | ILI9341_MADCTL_RGB;
+         break;
+   }
+    CS_ACTIVE;
+    writeCmdParam(ILI9341_MADCTL,1,&t);
+    CS_IDLE;   
 }
 
+
+/**
+ * 
+ * @param x
+ * @param y
+ * @param w
+ * @param h
+ */
+void ln8bit9341::setAddress(int x, int y, int w, int h)
+{
+    int a1,a2,b1,b2;
+    a1=x+_xOffset;
+    a2=a1+w-1;
+    b1=y+_yOffset;
+    b2=b1+h-1;
+    CS_ACTIVE;    
+    writeRegister32(ILI9341_COLADDRSET,  ((uint32_t)(a1<<16) | a2));  // HX8357D uses same registers!
+    writeRegister32(ILI9341_PAGEADDRSET, ((uint32_t)(b1<<16) | b2)); // HX8357D uses same registers!
+    CS_IDLE;
+}
 void ln8bit9341::dataMode()
 {
-    
+    CD_DATA;
 }
 void ln8bit9341::cmdMode()
 {
-    
+    CD_COMMAND;
 }
-
 
 // EOF
