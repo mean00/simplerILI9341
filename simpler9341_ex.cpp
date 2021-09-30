@@ -118,7 +118,7 @@ int ili9341::writeChar(char c)
     }
 
     int xo = glyph->xOffset; // sic
-    if ( ((cursor_x +  (xo + w)) > 128)) 
+    if ( ((cursor_x +  (xo + w)) > _width)) 
     {
       cursor_x = 0;
       cursor_y +=   gfxFont->yAdvance;

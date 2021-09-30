@@ -17,6 +17,27 @@
  */
 #pragma once
 #include "simpler9341.h"
+
+/**
+ * 
+ * @param bop
+ * @param writePin
+ */
+class lnFast8bitIo: public lnFastIO
+{
+    public : 
+                lnFast8bitIo( uint32_t *bop, lnPin writePin) : lnFastIO(writePin)
+                {
+                    _bop=bop;
+                }
+                void pulsesLow(int count);
+                void pulseData(int count, int hi, int lo);
+                void push2Colors(int len, uint8_t *data,int fg, int bg);
+                
+    protected:                
+                volatile uint32_t *_bop;
+};
+
 /**
  * 
  * @param w
@@ -40,12 +61,14 @@ class ln8bit9341 : public ili9341
             virtual void floodWords(int nb, const uint16_t data); // 16 bits
             virtual void updateHwRotation();
             virtual void setAddress(int x, int y, int w, int h);
+            virtual void push2Colors(uint8_t *data, int len, bool first,int fg, int bg);
 
             
             
                     uint32_t readChipId();
     protected:
                     void reset();
+                    void floodSameWords(int nb, const uint8_t data);
                     void writeCmdParam(uint16_t cmd, int payload, const uint8_t * data);
                     void writeCommand(uint16_t c);
                     void sendSequence(int size, const uint8_t *data);
@@ -56,9 +79,10 @@ class ln8bit9341 : public ili9341
                     void setReadDir();
                     void setWriteDir();
                     
-            lnFastIO _ioWrite, _ioRead, _ioCS, _ioDC;
+            lnFastIO     _ioRead, _ioCS, _ioDC;
+            lnFast8bitIo *_ioWrite;
             lnPin    _pinReset;
             int     _dataPort;
-            volatile uint32_t *_bop;
+            uint32_t *_bop;
 };
 // EOF

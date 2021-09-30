@@ -21,6 +21,7 @@ public:
             virtual void cmdMode()=0;
             virtual void floodWords(int nb, const uint16_t data)=0; // 16 bits            
             virtual void setAddress(int x, int y, int w, int h)=0;
+            virtual void push2Colors(uint8_t *data, int len, bool first,int fg, int bg)=0;
 //---------------------------------------------------------------    
                enum FontSize
                {
@@ -49,7 +50,6 @@ public:
                 
                 void square(int color, int x, int y, int w, int g);
                 void setRotation(int rotation);  // 0 1 2 3
-                void push2Colors(uint8_t *data, int len, boolean first,uint16_t fg, uint16_t bg);
                 void setCursor(int x, int y)
                 {
                      cursor_x=x;

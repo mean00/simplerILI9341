@@ -20,13 +20,14 @@
  * @param pinDc
  * @param pinCS
  */
-ln8bit9341::ln8bit9341( int w, int h ,int port, int pinDC,int pinCS, int pinWrite, int pinRead, int pinReset)   : ili9341(w,h), _ioWrite(pinWrite),_ioRead(pinRead),_ioCS(pinCS),_ioDC(pinDC)
+ln8bit9341::ln8bit9341( int w, int h ,int port, int pinDC,int pinCS, int pinWrite, int pinRead, int pinReset)   : ili9341(w,h),_ioRead(pinRead),_ioCS(pinCS),_ioDC(pinDC)
 {    
     _dataPort=port;    
     _pinReset=pinReset;
     _PhysicalXoffset=0;
     _PhysicalYoffset=0;
-    _bop=lnGetGpioToggleRegister(_dataPort);
+    _bop=(uint32_t *)lnGetGpioToggleRegister(_dataPort);
+    _ioWrite=new lnFast8bitIo(_bop,pinWrite);
 }
 /**
  * 
@@ -60,13 +61,13 @@ static const uint8_t wakeOn[] = {
 #define CD_DATA     {_ioDC.on();}
 #define CD_COMMAND  {_ioDC.off();}
 
-#define WR_ACTIVE   {_ioWrite.off();}
-#define WR_IDLE     {_ioWrite.on();}
+#define WR_ACTIVE   {_ioWrite->off();}
+#define WR_IDLE     {_ioWrite->on();}
 
 #define RD_ACTIVE   {_ioRead.off();}
 #define RD_IDLE     {_ioRead.on();}
 
-#define WR_STROBE {WR_ACTIVE;WR_IDLE;}
+#define WR_STROBE {_ioWrite->pulseLow();}
 #define CS_ACTIVE_CD_COMMAND {CS_ACTIVE;CD_COMMAND}
 
 
@@ -124,7 +125,7 @@ void ln8bit9341::writeCommand(uint16_t c)
     writeCmdParam(c,0,NULL);
 }
 //------------------------------
-// This is very seldom used....
+// This is *very* seldom used....
 //-------------------------------
 void ln8bit9341::setReadDir()
 {
@@ -140,7 +141,7 @@ void ln8bit9341::setWriteDir()
 
 
 /**
- * 
+ * This is not used much
  * @param reg
  * @return 
  */
@@ -197,7 +198,7 @@ uint32_t ln8bit9341::readChipId()
  */
 void ln8bit9341::reset()
 {
-    _ioWrite.on();
+    _ioWrite->on();
     _ioRead.on();
     _ioCS.on();
     _ioDC.on();
@@ -313,14 +314,41 @@ void ln8bit9341::sendWords(int nb, const uint16_t *data)
     
 }
 /**
+ * 
+ * @param nb
+ * @param data
+ */
+void ln8bit9341::floodSameWords(int nb, const uint8_t data)
+{      
+    register int cl=data;    
+    cl= (((cl^0xFF)<<16) | (cl));    
+    CS_ACTIVE;
+    CD_COMMAND;
+    sendWord(ILI9341_MEMORYWRITE);
+    CD_DATA;
+    *_bop=  cl;
+    _ioWrite->pulsesLow(nb);
+    CS_IDLE;
+}
+
+/**
 * 
 * @param nb
 * @param data
+ * 
+ * GD32M4 : Simple = 33 ms, same = 28 ms
+ * Quad16            26 ms  same = 21 ms
+ * 
+ * pulsesLow Simple  = 26 ms , same = 8 ms
+ * 
 */
 void ln8bit9341::floodWords(int nb, const uint16_t data)
 {      
-    int cl=data&0xff;
-    int ch=data>>8;
+    
+    if((data&0xff)==(data>>8)) return floodSameWords(nb,data&0xff);
+    
+    register int cl=data&0xff;
+    register int ch=data>>8;
     
     cl= (((cl^0xFF)<<16) | (cl));
     ch= (((ch^0xFF)<<16) | (ch));
@@ -328,27 +356,29 @@ void ln8bit9341::floodWords(int nb, const uint16_t data)
     CD_COMMAND;
     sendWord(ILI9341_MEMORYWRITE);
     CD_DATA;
-    if(cl==ch)
-    {
-         *_bop=  ch;
-         for(int i=0;i<nb;i++)
-         {
-            WR_STROBE;
-            WR_STROBE;
-         }
-    }else
-    {
-        for(int i=0;i<nb;i++)
-        {
-            *_bop=  ch;
-            WR_STROBE;
-            *_bop=  cl;
-            WR_STROBE;        
-        }
-    }
+    _ioWrite->pulseData(nb,ch,cl);
     CS_IDLE;
 }
-  
+/**
+ * 
+ * @param data
+ * @param len
+ * @param first
+ * @param fg
+ * @param bg
+ */
+ void ln8bit9341::push2Colors(uint8_t *data, int len, bool first,int fg, int bg)
+ {
+    CS_ACTIVE;
+    if(first)
+    {
+        CD_COMMAND;
+        sendWord(ILI9341_MEMORYWRITE);
+    }
+    CD_DATA;
+    _ioWrite->push2Colors(len,data,fg,bg);
+    CS_IDLE;
+ } 
 static const uint8_t rotMode[4]={0x8,0xc8,0x78,0xa8};
 /**
  * 
@@ -406,4 +436,102 @@ void ln8bit9341::cmdMode()
     CD_COMMAND;
 }
 
+
+/**
+ * 
+ * @param count
+ */
+void lnFast8bitIo::pulsesLow(int count)
+{
+    register uint32_t on=_onbit,off=_offbit;
+    register volatile uint32_t *a=_onoff;
+    
+    int block=count>>4;
+    int leftover=count&15;
+
+#define DO4 *a=off; *a=on;*a=off; *a=on;*a=off; *a=on;*a=off; *a=on;*a=off; *a=on;*a=off; *a=on;*a=off; *a=on;*a=off; *a=on;
+    
+    for(int i=0;i<block;i++)
+    {
+        DO4
+        DO4
+        DO4
+        DO4
+    }
+    
+    for(int i=0;i<leftover;i++)
+    {
+        *a=off;
+        *a=on;
+        *a=off;
+        *a=on;
+    }    
+}   
+/**
+ * 28 ms => 13 ms
+ * \brief This is a high speed data sending of the same 16 byte pattern
+ * @param count
+ * @param hi
+ * @param lo
+ */
+void lnFast8bitIo::pulseData(int nb, int hi, int lo)
+{
+    
+#define WRP    *onoff=down;*onoff=up;
+    
+    register uint32_t hh=hi,ll=lo,up=_onbit,down=_offbit;
+    volatile register uint32_t *bop=_bop,*onoff=_onoff;
+    
+    
+        int block=nb>>4;
+        int leftover=nb&15;
+        for(int i=0;i<block;i++)
+        {
+#define SINGD            *bop=  hh;      WRP;         *bop=  ll;            WRP;        
+#define QUADD            SINGD;SINGD;SINGD;SINGD
+             QUADD;
+             QUADD;
+             QUADD;
+             QUADD;
+             
+        }
+        for(int i=0;i<leftover;i++)
+        {        
+            SINGD
+        }
+}
+/**
+ * 
+ * @param len
+ * @param data
+ * @param fg
+ * @param bg
+ */
+void   lnFast8bitIo::push2Colors(int len, uint8_t *data, int fg, int bg)
+{
+    uint32_t fhi=fg>>8;
+    uint32_t flo=fg&0xff;
+    uint32_t bhi=bg>>8;
+    uint32_t blo=bg&0xff;
+    volatile register uint32_t *bop=_bop,*onoff=_onoff;
+    register uint32_t up=_onbit,down=_offbit;
+#define EXP(x) x=  (((x^0xFF)<<16) | (x));
+    EXP(fhi);
+    EXP(flo);
+    EXP(bhi);
+    EXP(blo);
+    
+    uint8_t *tail=len+data;
+    while( data<tail)
+    {
+        if(*(data++))
+        {
+              *bop=  fhi;      WRP;         *bop=  flo;            WRP;        
+              continue;
+        } else
+        {
+              *bop=  bhi;      WRP;         *bop=  blo;            WRP;    
+        }
+    }
+}
 // EOF
