@@ -144,7 +144,7 @@ void ili9341::drawRLEBitmap(int widthInPixel, int height, int wx, int wy, int fg
     int ready=0;
     int repeat;
     uint16_t color;
-    
+    dataBegin();
     while(pixel<nbPixel)        
     {
         // load next
@@ -183,6 +183,7 @@ void ili9341::drawRLEBitmap(int widthInPixel, int height, int wx, int wy, int fg
     }
     if(ready)
         sendWords(ready,scrbuf);
+    dataEnd();
     
 }
 

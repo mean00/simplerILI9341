@@ -60,7 +60,8 @@ class ln8bit9341 : public ili9341
             virtual void updateHwRotation();
             virtual void setAddress(int x, int y, int w, int h);
             virtual void push2Colors(uint8_t *data, int len, bool first,int fg, int bg);
-
+            virtual void dataBegin();
+            virtual void dataEnd();
             
             
                     uint32_t readChipId();

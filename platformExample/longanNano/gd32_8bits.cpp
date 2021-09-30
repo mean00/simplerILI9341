@@ -330,6 +330,24 @@ void ln8bit9341::floodSameWords(int nb, const uint8_t data)
     _ioWrite->pulsesLow(nb);
     CS_IDLE;
 }
+/**
+ * 
+ */
+void ln8bit9341::dataBegin()
+{
+    CS_ACTIVE;
+    CD_COMMAND;
+    sendWord(ILI9341_MEMORYWRITE);
+    CD_DATA;
+}
+/**
+ * 
+ */
+void ln8bit9341::dataEnd()
+{
+     CD_COMMAND;
+     CS_IDLE;
+}
 
 /**
 * 
