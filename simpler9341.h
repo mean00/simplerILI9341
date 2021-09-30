@@ -11,14 +11,14 @@
 class ili9341 
 {
 public:
+//             this is the part you have to reimplment for your setup
+//              in the derived class            
 //---------------------------------------------------------------    
             virtual void sendByte(int byte)=0; // 8 bytes
             virtual void sendWord(int byte)=0; // 16 bytes
             virtual void sendBytes(int nb, const uint8_t *data)=0; // 8 bits
             virtual void sendWords(int nb, const uint16_t *data)=0; // 16 bits
             virtual void updateHwRotation()=0;
-            virtual void dataMode()=0;
-            virtual void cmdMode()=0;
             virtual void floodWords(int nb, const uint16_t data)=0; // 16 bits            
             virtual void setAddress(int x, int y, int w, int h)=0;
             virtual void push2Colors(uint8_t *data, int len, bool first,int fg, int bg)=0;

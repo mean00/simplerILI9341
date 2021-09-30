@@ -427,14 +427,6 @@ void ln8bit9341::setAddress(int x, int y, int w, int h)
     writeRegister32(ILI9341_PAGEADDRSET, ((uint32_t)(b1<<16) | b2)); // HX8357D uses same registers!
     CS_IDLE;
 }
-void ln8bit9341::dataMode()
-{
-    CD_DATA;
-}
-void ln8bit9341::cmdMode()
-{
-    CD_COMMAND;
-}
 
 
 /**

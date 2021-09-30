@@ -138,7 +138,6 @@ void ili9341::drawRLEBitmap(int widthInPixel, int height, int wx, int wy, int fg
     int nbPixel=widthInPixel*height;
     int pixel=0;
     setAddress(wx, wy,  widthInPixel, height);
-    dataMode();
     int mask=0;
     int cur;   
     uint16_t *o=scrbuf;

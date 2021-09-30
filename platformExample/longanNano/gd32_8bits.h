@@ -52,8 +52,6 @@ class ln8bit9341 : public ili9341
                         ln8bit9341(int w, int h , int port,  int pinDc, int pinCS, int pinWrite, int pinRead, int pinReset);
             virtual      ~ln8bit9341();
             virtual void init();
-            virtual void dataMode();
-            virtual void cmdMode();
             virtual void sendByte(int byte); // 8 bytes
             virtual void sendWord(int byte); // 16 bytes
             virtual void sendBytes(int nb, const uint8_t *data); // 8 bits
