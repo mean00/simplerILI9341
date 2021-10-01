@@ -21,7 +21,7 @@ public:
             virtual void updateHwRotation()=0;
             virtual void floodWords(int nb, const uint16_t data)=0; // 16 bits            
             virtual void setAddress(int x, int y, int w, int h)=0;
-            virtual void push2Colors(uint8_t *data, int len, bool first,int fg, int bg)=0;
+            virtual void push2Colors(uint8_t *data, int len, int fg, int bg)=0;
             virtual void dataEnd()=0;
             virtual void dataBegin()=0;
 //---------------------------------------------------------------    

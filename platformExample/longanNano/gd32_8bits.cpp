@@ -385,17 +385,9 @@ void ln8bit9341::floodWords(int nb, const uint16_t data)
  * @param fg
  * @param bg
  */
- void ln8bit9341::push2Colors(uint8_t *data, int len, bool first,int fg, int bg)
- {
-    CS_ACTIVE;
-    if(first)
-    {
-        CD_COMMAND;
-        sendWord(ILI9341_MEMORYWRITE);
-    }
-    CD_DATA;
+ void ln8bit9341::push2Colors(uint8_t *data, int len, int fg, int bg)
+ {  
     _ioWrite->push2Colors(len,data,fg,bg);
-    CS_IDLE;
  } 
 static const uint8_t rotMode[4]={0x8,0xc8,0x78,0xa8};
 /**

@@ -60,7 +60,8 @@ int ili9341::myDrawChar(int x, int y, unsigned char c,  int color, int bg,FontIn
     memset(column,0,left);
     memset(column+left+w,0,right);
     // fill in body
-    bool first=true;
+    
+    dataBegin();
     for( int line=h-1;line>=0;line--)
     {      
         col=column+left;     
@@ -114,9 +115,9 @@ int ili9341::myDrawChar(int x, int y, unsigned char c,  int color, int bg,FontIn
             bit=bit>>1;
         }
         // 9ms here
-        push2Colors(column,glyph->xAdvance,first,color,bg);
-        first=false;
+        push2Colors(column,glyph->xAdvance,color,bg);
     }   
+    dataEnd();
     return glyph->xAdvance;
 }
 
