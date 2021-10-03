@@ -67,7 +67,6 @@ class ln8bit9341 : public ili9341
                     uint32_t readChipId();
     protected:
                     void reset();
-                    void floodSameWords(int nb, const uint8_t data);
                     void writeCmdParam(uint16_t cmd, int payload, const uint8_t * data);
                     void writeCommand(uint16_t c);
                     void sendSequence(int size, const uint8_t *data);

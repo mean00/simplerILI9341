@@ -278,6 +278,7 @@ void ln8bit9341::reset()
         lnDigitalWrite(_pinReset,LOW);
         xDelay(50);
         lnDigitalWrite(_pinReset,HIGH);	
+        xDelay(50);
     }
     _chipId=readChipId();
 }
@@ -397,23 +398,6 @@ void ln8bit9341::dataEnd()
      CS_IDLE;
 }
 /**
- * 
- * @param nb
- * @param data
- */
-void ln8bit9341::floodSameWords(int nb, const uint8_t data)
-{      
-    register int cl=data;    
-    cl= WR_DATA8(cl);
-    CS_ACTIVE;
-    CD_COMMAND;
-    sendWord(ILI9341_MEMORYWRITE);
-    CD_DATA;
-    *_bop= ( cl );
-    _ioWrite->pulsesLow(nb);
-    CS_IDLE;
-}
-/**
 * 
 * @param nb
 * @param data
@@ -426,11 +410,7 @@ void ln8bit9341::floodSameWords(int nb, const uint8_t data)
 */
 void ln8bit9341::floodWords(int nb, const uint16_t data)
 {      
-    if((data&0xff)==(data>>8))  
-    {
-        floodSameWords(nb,data&0xff);
-        return;
-    }   
+    
     register int cl=data&0xff;
     register int ch=data>>8;
     
@@ -438,6 +418,14 @@ void ln8bit9341::floodWords(int nb, const uint16_t data)
     CD_COMMAND;
     sendWord(ILI9341_MEMORYWRITE);
     CD_DATA;
+    if(1 && (data&0xff)==(data>>8))   // this does not work ?
+    {
+        uint32_t cl= WR_DATA8(cl&0xff);
+        *_bop= ( cl );
+        _ioWrite->pulsesLow(nb);
+        CS_IDLE;
+        return;
+    }   
     _ioWrite->pulseData(nb,ch,cl);
     CS_IDLE;
 }
@@ -515,34 +503,6 @@ void ln8bit9341::setAddress(int x, int y, int w, int h)
 //--- If you use another implementation, this where the speed is lost
 
 /**
- * 
- * @param count
- */
-void lnFast8bitIo::pulsesLow(int count)
-{
-    register uint32_t on=_onbit,off=_offbit;
-    register volatile uint32_t *onoff=_onoff;
-    
-    int block=count>>4;
-    int leftover=count&15;
-
-#define DO1 *onoff=off; *onoff=on;*onoff=off; *onoff=on; // 2 pulses to send 16 bits
-#define DO4 DO1;DO1;DO1;DO1; // 4 pixels
-    
-    for(int i=0;i<block;i++)
-    {
-        DO4 // 16 pixels per round
-        DO4
-        DO4
-        DO4
-    }
-    
-    for(int i=0;i<leftover;i++)
-    {
-        DO1
-    }    
-}   
-/**
  * 28 ms => 13 ms
  * \brief This is a high speed data sending of the same 16 byte pattern
  * @param count
@@ -574,6 +534,36 @@ void lnFast8bitIo::pulseData(int nb, int  hi, int lo)
             SINGD
         }
 }
+/**
+ * 
+ * @param count
+ */
+void lnFast8bitIo::pulsesLow(int nb)
+{
+      
+#define WRP    *onoff=down;*onoff=up;
+    
+    register uint32_t           up=_onbit,down=_offbit;
+    volatile register uint32_t *onoff=_onoff;
+    
+    
+        int block=nb>>4;
+        int leftover=nb&15;
+        for(int i=0;i<block;i++)
+        {
+#define PULSE            WRP; WRP;        
+#define QUADD            PULSE;PULSE;PULSE;PULSE
+             QUADD;
+             QUADD;
+             QUADD;
+             QUADD;             
+        }
+        for(int i=0;i<leftover;i++)
+        {        
+            PULSE
+        }    
+}   
+
 /**
  * 
  * @param len
