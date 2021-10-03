@@ -11,6 +11,37 @@
 #include "simpler9341_priv.h"
 
 #define FAKE_DELAY_COMMAND 0xff
+#define LOW_LEVEL_PRINT(...) {}
+/*
+ * Replace PB3 by PB8 and output BOP word
+ */
+int swapper(int val)
+{
+    int extra=0;
+    LOW_LEVEL_PRINT("Swapper : %x->",val);
+    if(val & (1<<3))
+    {
+        extra=(1<<8);
+        val&=~(1<<3);
+    }
+    else
+    {
+        extra=(1<<(8+16));
+    }
+    
+    uint32_t r= ((((val^0xFF)<<16) | (val)) );
+    r&=0xF700F7; // only change B0..B7 and NOT B3    
+    r|=extra;    
+    xAssert(!(r&(1<<3)));
+    xAssert(!(r&(1<<(3+16))));
+    LOW_LEVEL_PRINT("%x\n",r);
+    return r;
+}
+#ifdef USE_PB8_INSTEAD_OF_PB3
+    #define WR_DATA8(x) swapper(x)
+#else
+    #define WR_DATA8(cc)  ((((cc^0xFF)<<16) | (cc)) )
+#endif
 
 /**
  * 
@@ -77,8 +108,8 @@ static const uint8_t wakeOn[] = {
 
 void ln8bit9341::write8(uint8_t c)
 {
-    int cc=(int )c;
-    *_bop=  (((cc^0xFF)<<16) | (cc));
+    int cc=WR_DATA8((int )c);    
+    *_bop= cc;
     WR_STROBE;
 }
 /**
@@ -88,8 +119,23 @@ void ln8bit9341::write8(uint8_t c)
 uint8_t  ln8bit9341::read8()
 {  
   RD_ACTIVE;
-  lnDelayUs(10);
+  
+  lnDelayUs(10);  
+#ifdef USE_PB8_INSTEAD_OF_PB3  
+  LOW_LEVEL_PRINT("READ\n");
+  
+  
+  
+  uint16_t temp = lnReadPort(_dataPort);
+  LOW_LEVEL_PRINT("=%x ->",temp);
+  temp&= 0x1ff;
+  if(temp & (1<<8)) temp|=(1<<3);
+  else temp&=~(1<<3);
+  temp&=0xff;
+  LOW_LEVEL_PRINT(" =%x \n",temp);
+#else
   uint8_t temp = lnReadPort(_dataPort) &0xff;
+#endif  
   lnDelayUs(10);
   RD_IDLE;
   lnDelayUs(10);
@@ -129,14 +175,35 @@ void ln8bit9341::writeCommand(uint16_t c)
 //-------------------------------
 void ln8bit9341::setReadDir()
 {
-    for(int i=0;i<8;i++)
-        lnPinMode(PB0+i,lnINPUT_PULLDOWN);
+    
+        lnPinMode(PB0,lnINPUT_PULLDOWN);
+        lnPinMode(PB1,lnINPUT_PULLDOWN);
+        lnPinMode(PB2,lnINPUT_PULLDOWN);
+        lnPinMode(PB4,lnINPUT_PULLDOWN);
+        lnPinMode(PB5,lnINPUT_PULLDOWN);
+        lnPinMode(PB6,lnINPUT_PULLDOWN);
+        lnPinMode(PB7,lnINPUT_PULLDOWN);
+#ifdef USE_PB8_INSTEAD_OF_PB3        
+        lnPinMode(PB8,lnINPUT_PULLDOWN);
+#else
+        lnPinMode(PB3,lnINPUT_PULLDOWN);
+#endif
 }
 
 void ln8bit9341::setWriteDir()
 {
-    for(int i=0;i<8;i++)
-        lnPinMode(PB0+i,lnOUTPUT);
+        lnPinMode(PB0,lnOUTPUT);
+        lnPinMode(PB1,lnOUTPUT);
+        lnPinMode(PB2,lnOUTPUT);
+        lnPinMode(PB4,lnOUTPUT);
+        lnPinMode(PB5,lnOUTPUT);
+        lnPinMode(PB6,lnOUTPUT);
+        lnPinMode(PB7,lnOUTPUT);
+#ifdef USE_PB8_INSTEAD_OF_PB3                
+        lnPinMode(PB8,lnOUTPUT);
+#else
+        lnPinMode(PB3,lnOUTPUT);
+#endif
 }
 
 
@@ -165,7 +232,8 @@ uint32_t ln8bit9341::readRegister32(int r)
   val <<= 8;              
   val  |= read8();;       
   CS_IDLE;
-  setWriteDir();    
+  setWriteDir();   
+  LOW_LEVEL_PRINT("Reg: %x val=%x\n",r,val);
   return val;
 }
 
@@ -253,7 +321,10 @@ void ln8bit9341::init()
   setWriteDir();
   reset();
   baseInit();
+  
+
   sendSequence(sizeof(resetOff),resetOff);
+  
   sendSequence(sizeof(wakeOn),wakeOn);  
 }
 /**
@@ -273,9 +344,9 @@ void ln8bit9341::sendWord(int xbyte)
     int cc=(int )xbyte;
     int cl=cc&0xff;
     int ch=cc>>8;
-    *_bop=  (((ch^0xFF)<<16) | (ch));
+    *_bop= WR_DATA8(ch );
     WR_STROBE;
-    *_bop=  (((cl^0xFF)<<16) | (cl));
+    *_bop= WR_DATA8(cl );
     WR_STROBE;        
 }
 /**
@@ -289,7 +360,7 @@ void ln8bit9341::sendBytes(int nb, const uint8_t *data)
     while(data<tail)
     {
         int cc=(int )*data++;
-        *_bop=  (((cc^0xFF)<<16) | (cc));
+        *_bop=  WR_DATA8(cc) ;
         WR_STROBE;
     }
 }
@@ -304,11 +375,11 @@ void ln8bit9341::sendWords(int nb, const uint16_t *data)
     while(data<tail)
     {
         int cc=(int )*data++;
-        int cl=cc&0xff;
-        int ch=cc>>8;
-        *_bop=  (((ch^0xFF)<<16) | (ch));
+        int cl=WR_DATA8(cc&0xff);
+        int ch=WR_DATA8(cc>>8);
+        *_bop=  (ch);
         WR_STROBE;
-        *_bop=  (((cl^0xFF)<<16) | (cl));
+        *_bop=  (cl);
         WR_STROBE;        
     }
     
@@ -321,12 +392,12 @@ void ln8bit9341::sendWords(int nb, const uint16_t *data)
 void ln8bit9341::floodSameWords(int nb, const uint8_t data)
 {      
     register int cl=data;    
-    cl= (((cl^0xFF)<<16) | (cl));    
+    cl= WR_DATA8(cl);
     CS_ACTIVE;
     CD_COMMAND;
     sendWord(ILI9341_MEMORYWRITE);
     CD_DATA;
-    *_bop=  cl;
+    *_bop= ( cl );
     _ioWrite->pulsesLow(nb);
     CS_IDLE;
 }
@@ -368,8 +439,6 @@ void ln8bit9341::floodWords(int nb, const uint16_t data)
     register int cl=data&0xff;
     register int ch=data>>8;
     
-    cl= (((cl^0xFF)<<16) | (cl));
-    ch= (((ch^0xFF)<<16) | (ch));
     CS_ACTIVE;
     CD_COMMAND;
     sendWord(ILI9341_MEMORYWRITE);
@@ -476,12 +545,12 @@ void lnFast8bitIo::pulsesLow(int count)
  * @param hi
  * @param lo
  */
-void lnFast8bitIo::pulseData(int nb, int hi, int lo)
+void lnFast8bitIo::pulseData(int nb, int  hi, int lo)
 {
     
 #define WRP    *onoff=down;*onoff=up;
     
-    register uint32_t hh=hi,ll=lo,up=_onbit,down=_offbit;
+    register uint32_t hh=WR_DATA8(hi),ll=WR_DATA8(lo),up=_onbit,down=_offbit;
     volatile register uint32_t *bop=_bop,*onoff=_onoff;
     
     
@@ -489,7 +558,7 @@ void lnFast8bitIo::pulseData(int nb, int hi, int lo)
         int leftover=nb&15;
         for(int i=0;i<block;i++)
         {
-#define SINGD            *bop=  hh;      WRP;         *bop=  ll;            WRP;        
+#define SINGD            *bop=  (hh);      WRP;         *bop=  (ll);            WRP;        
 #define QUADD            SINGD;SINGD;SINGD;SINGD
              QUADD;
              QUADD;
@@ -517,7 +586,7 @@ void   lnFast8bitIo::push2Colors(int len, uint8_t *data, int fg, int bg)
     uint32_t blo=bg&0xff;
     volatile register uint32_t *bop=_bop,*onoff=_onoff;
     register uint32_t up=_onbit,down=_offbit;
-#define EXP(x) x=  (((x^0xFF)<<16) | (x));
+#define EXP(x) x=  WR_DATA8(x)
     EXP(fhi);
     EXP(flo);
     EXP(bhi);
@@ -528,11 +597,11 @@ void   lnFast8bitIo::push2Colors(int len, uint8_t *data, int fg, int bg)
     {
         if(*(data++))
         {
-              *bop=  fhi;      WRP;         *bop=  flo;            WRP;        
+              *bop=  (fhi);   WRP;    *bop=(flo);  WRP;        
               continue;
         } else
         {
-              *bop=  bhi;      WRP;         *bop=  blo;            WRP;    
+              *bop=  (bhi);   WRP;    *bop=( blo); WRP;    
         }
     }
 }
