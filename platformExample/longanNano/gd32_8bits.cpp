@@ -14,11 +14,14 @@
 #define LOW_LEVEL_PRINT(...) {}
 /*
  * Replace PB3 by PB8 and output BOP word
+ * STM32 direct 108M: Draw 30 chars 25 ms
+ * Risc32 PB8   108M: Draw 30 chars "This is a hello world program 123"   26 ms
+ * /!\ No need to optimize this further, it has little effect
+ * 
  */
 int swapper(int val)
 {
     int extra=0;
-    LOW_LEVEL_PRINT("Swapper : %x->",val);
     if(val & (1<<3))
     {
         extra=(1<<8);
@@ -29,12 +32,8 @@ int swapper(int val)
         extra=(1<<(8+16));
     }
     
-    uint32_t r= ((((val^0xFF)<<16) | (val)) );
-    r&=0xF700F7; // only change B0..B7 and NOT B3    
+    uint32_t r= ((((val^0xF7)<<16) | (val)) );    
     r|=extra;    
-    xAssert(!(r&(1<<3)));
-    xAssert(!(r&(1<<(3+16))));
-    LOW_LEVEL_PRINT("%x\n",r);
     return r;
 }
 #ifdef USE_PB8_INSTEAD_OF_PB3
@@ -113,7 +112,8 @@ void ln8bit9341::write8(uint8_t c)
     WR_STROBE;
 }
 /**
- * 
+ * This is not used much at all. Only a few times at the beginning
+ * No need to optimize
  * @return 
  */
 uint8_t  ln8bit9341::read8()
@@ -122,17 +122,11 @@ uint8_t  ln8bit9341::read8()
   
   lnDelayUs(10);  
 #ifdef USE_PB8_INSTEAD_OF_PB3  
-  LOW_LEVEL_PRINT("READ\n");
-  
-  
-  
   uint16_t temp = lnReadPort(_dataPort);
-  LOW_LEVEL_PRINT("=%x ->",temp);
   temp&= 0x1ff;
   if(temp & (1<<8)) temp|=(1<<3);
   else temp&=~(1<<3);
   temp&=0xff;
-  LOW_LEVEL_PRINT(" =%x \n",temp);
 #else
   uint8_t temp = lnReadPort(_dataPort) &0xff;
 #endif  
@@ -233,7 +227,6 @@ uint32_t ln8bit9341::readRegister32(int r)
   val  |= read8();;       
   CS_IDLE;
   setWriteDir();   
-  LOW_LEVEL_PRINT("Reg: %x val=%x\n",r,val);
   return val;
 }
 
@@ -286,6 +279,7 @@ void ln8bit9341::reset()
         xDelay(50);
         lnDigitalWrite(_pinReset,HIGH);	
     }
+    _chipId=readChipId();
 }
 /**
  * 
@@ -323,8 +317,7 @@ void ln8bit9341::init()
   baseInit();
   
 
-  sendSequence(sizeof(resetOff),resetOff);
-  
+  sendSequence(sizeof(resetOff),resetOff);  
   sendSequence(sizeof(wakeOn),wakeOn);  
 }
 /**
@@ -384,23 +377,7 @@ void ln8bit9341::sendWords(int nb, const uint16_t *data)
     }
     
 }
-/**
- * 
- * @param nb
- * @param data
- */
-void ln8bit9341::floodSameWords(int nb, const uint8_t data)
-{      
-    register int cl=data;    
-    cl= WR_DATA8(cl);
-    CS_ACTIVE;
-    CD_COMMAND;
-    sendWord(ILI9341_MEMORYWRITE);
-    CD_DATA;
-    *_bop= ( cl );
-    _ioWrite->pulsesLow(nb);
-    CS_IDLE;
-}
+
 /**
  * 
  */
@@ -419,7 +396,23 @@ void ln8bit9341::dataEnd()
      CD_COMMAND;
      CS_IDLE;
 }
-
+/**
+ * 
+ * @param nb
+ * @param data
+ */
+void ln8bit9341::floodSameWords(int nb, const uint8_t data)
+{      
+    register int cl=data;    
+    cl= WR_DATA8(cl);
+    CS_ACTIVE;
+    CD_COMMAND;
+    sendWord(ILI9341_MEMORYWRITE);
+    CD_DATA;
+    *_bop= ( cl );
+    _ioWrite->pulsesLow(nb);
+    CS_IDLE;
+}
 /**
 * 
 * @param nb
@@ -433,9 +426,11 @@ void ln8bit9341::dataEnd()
 */
 void ln8bit9341::floodWords(int nb, const uint16_t data)
 {      
-    
-    if((data&0xff)==(data>>8)) return floodSameWords(nb,data&0xff);
-    
+    if((data&0xff)==(data>>8))  
+    {
+        floodSameWords(nb,data&0xff);
+        return;
+    }   
     register int cl=data&0xff;
     register int ch=data>>8;
     
@@ -465,22 +460,31 @@ static const uint8_t rotMode[4]={0x8,0xc8,0x78,0xa8};
 void ln8bit9341::updateHwRotation(void)
 {
     uint8_t t;
-    switch(_rotation) 
+    switch(_chipId)
     {
-        case 1:
-          t = ILI9341_MADCTL_MX | ILI9341_MADCTL_MY | ILI9341_MADCTL_MV | ILI9341_MADCTL_RGB;
-          break;
-        case 2:
-          t = ILI9341_MADCTL_MX | ILI9341_MADCTL_RGB;
-          break;
-        case 3:
-          t = ILI9341_MADCTL_MV | ILI9341_MADCTL_RGB;
-          break;
-        case 0:
+        case 0x9341:       
+            switch(_rotation) 
+            {
+                case 1:        t = ILI9341_MADCTL_MX | ILI9341_MADCTL_MY | ILI9341_MADCTL_MV ;          break;
+                case 2:        t = ILI9341_MADCTL_MX ;                          break;
+                case 3:        t = ILI9341_MADCTL_MV ;                          break;
+                case 0:        default:t = ILI9341_MADCTL_MY ;                  break;
+           }
+           break;
+        case 0x7789:       
+            switch(_rotation) 
+            {
+                case 1:        t = ILI9341_MADCTL_MY | ILI9341_MADCTL_MV ;          break;
+                case 2:        t = 0 ;                                              break;
+                case 3:        t = ILI9341_MADCTL_MX | ILI9341_MADCTL_MV ;          break;
+                case 0:        default: t = ILI9341_MADCTL_MX | ILI9341_MADCTL_MY ; break;
+           }
+           break;
         default:
-         t = ILI9341_MADCTL_MY | ILI9341_MADCTL_RGB;
-         break;
-   }
+            xAssert(0);
+            break;
+    }
+    t|= ILI9341_MADCTL_RGB;
     CS_ACTIVE;
     writeCmdParam(ILI9341_MADCTL,1,&t);
     CS_IDLE;   
@@ -507,6 +511,8 @@ void ln8bit9341::setAddress(int x, int y, int w, int h)
     CS_IDLE;
 }
 
+//--- the time critical part follows
+//--- If you use another implementation, this where the speed is lost
 
 /**
  * 
@@ -515,16 +521,17 @@ void ln8bit9341::setAddress(int x, int y, int w, int h)
 void lnFast8bitIo::pulsesLow(int count)
 {
     register uint32_t on=_onbit,off=_offbit;
-    register volatile uint32_t *a=_onoff;
+    register volatile uint32_t *onoff=_onoff;
     
     int block=count>>4;
     int leftover=count&15;
 
-#define DO4 *a=off; *a=on;*a=off; *a=on;*a=off; *a=on;*a=off; *a=on;*a=off; *a=on;*a=off; *a=on;*a=off; *a=on;*a=off; *a=on;
+#define DO1 *onoff=off; *onoff=on;*onoff=off; *onoff=on; // 2 pulses to send 16 bits
+#define DO4 DO1;DO1;DO1;DO1; // 4 pixels
     
     for(int i=0;i<block;i++)
     {
-        DO4
+        DO4 // 16 pixels per round
         DO4
         DO4
         DO4
@@ -532,10 +539,7 @@ void lnFast8bitIo::pulsesLow(int count)
     
     for(int i=0;i<leftover;i++)
     {
-        *a=off;
-        *a=on;
-        *a=off;
-        *a=on;
+        DO1
     }    
 }   
 /**
@@ -563,8 +567,7 @@ void lnFast8bitIo::pulseData(int nb, int  hi, int lo)
              QUADD;
              QUADD;
              QUADD;
-             QUADD;
-             
+             QUADD;             
         }
         for(int i=0;i<leftover;i++)
         {        

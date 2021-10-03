@@ -80,8 +80,9 @@ class ln8bit9341 : public ili9341
                     
             lnFastIO     _ioRead, _ioCS, _ioDC;
             lnFast8bitIo *_ioWrite;
-            lnPin    _pinReset;
-            int     _dataPort;
-            uint32_t *_bop;
+            lnPin       _pinReset;
+            int         _dataPort;
+            uint32_t    *_bop;
+            uint32_t    _chipId;
 };
 // EOF
