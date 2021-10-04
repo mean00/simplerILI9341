@@ -24,6 +24,10 @@ public:
             virtual void push2Colors(uint8_t *data, int len, int fg, int bg)=0;
             virtual void dataEnd()=0;
             virtual void dataBegin()=0;
+            virtual void VLine(int x0, int y0, int h, int color)=0;
+            virtual void HLine(int x0, int y0, int w, int color)=0;
+            virtual void pushColors(int len, uint16_t *data)=0;
+
 //---------------------------------------------------------------    
                enum FontSize
                {
@@ -49,7 +53,8 @@ public:
                 virtual void init()=0;
                 
                 void fillScreen(int color); // 16 bits!
-                
+                void fillRoundRect(int x0, int y0, int w, int h,int radius, int color) {}
+
                 void square(int color, int x, int y, int w, int g);
                 void setRotation(int rotation);  // 0 1 2 3
                 void setCursor(int x, int y)

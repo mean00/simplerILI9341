@@ -498,10 +498,70 @@ void ln8bit9341::setAddress(int x, int y, int w, int h)
     writeRegister32(ILI9341_PAGEADDRSET, ((uint32_t)(b1<<16) | b2)); // HX8357D uses same registers!
     CS_IDLE;
 }
+/**
+ * 
+ * @param x0
+ * @param y0
+ * @param h
+ * @param color
+ */
+void ln8bit9341::VLine(int x0, int y0, int h, int color)
+{
+  setAddress(x0, y0, 1, h);
+  floodWords(h,color); 
+}
+/**
+ * 
+ * @param x0
+ * @param y0
+ * @param w
+ * @param color
+ */
+void ln8bit9341::HLine(int x0, int y0, int w, int color)
+{
+  setAddress(x0, y0, w, 1);
+  floodWords(w,color); 
+}
+/**
+ * 
+ * @param len
+ * @param data
+ */
+void ln8bit9341::pushColors(int len, uint16_t *data)
+{
+    dataBegin();
+    _ioWrite->sendBlock(len,data);    
+    dataEnd();
+}
 
 //--- the time critical part follows
 //--- If you use another implementation, this where the speed is lost
 
+/**
+ * 28 ms => 13 ms
+ * \brief This is a high speed data sending of the same 16 byte pattern
+ * @param count
+ * @param hi
+ * @param lo
+ */
+void lnFast8bitIo::sendBlock(int nb, uint16_t *data)
+{
+    
+#define WRP    *onoff=down;*onoff=up;
+    
+    register uint32_t up=_onbit,down=_offbit;
+    volatile register uint32_t *bop=_bop,*onoff=_onoff;
+    
+    for(int i=0;i<nb;i++)
+    {
+        int val=*data;
+        int d=*(data++);
+        int hi=WR_DATA8(d>>8);
+        int lo=WR_DATA8(d&0xff);
+        *bop=  hi;      WRP; 
+        *bop=  lo;      WRP;        
+    }
+}
 /**
  * 28 ms => 13 ms
  * \brief This is a high speed data sending of the same 16 byte pattern
@@ -551,7 +611,8 @@ void lnFast8bitIo::pulsesLow(int nb)
         int leftover=nb&15;
         for(int i=0;i<block;i++)
         {
-#define PULSE            WRP; WRP;        
+#define PULSE            WRP; WRP; 
+#undef QUADD
 #define QUADD            PULSE;PULSE;PULSE;PULSE
              QUADD;
              QUADD;
@@ -598,4 +659,7 @@ void   lnFast8bitIo::push2Colors(int len, uint8_t *data, int fg, int bg)
         }
     }
 }
+
+
+
 // EOF

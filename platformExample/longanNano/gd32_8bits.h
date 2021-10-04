@@ -33,6 +33,7 @@ class lnFast8bitIo: public lnFastIO
                 void pulsesLow(int count);
                 void pulseData(int count, int hi, int lo);
                 void push2Colors(int len, uint8_t *data,int fg, int bg);
+                void sendBlock(int nb, uint16_t *data);
                 
     protected:                
                 volatile uint32_t *_bop;
@@ -62,6 +63,9 @@ class ln8bit9341 : public ili9341
             virtual void push2Colors(uint8_t *data, int len, int fg, int bg);
             virtual void dataBegin();
             virtual void dataEnd();
+            virtual void VLine(int x0, int y0, int h, int color);
+            virtual void HLine(int x0, int y0, int w, int color);
+            virtual void pushColors(int len, uint16_t *data);
             
             
                     uint32_t readChipId();
