@@ -18,7 +18,7 @@ int ili9341::myDrawChar(int x, int y, unsigned char c,  int color, int bg,FontIn
     uint8_t *p= infos.font->bitmap+glyph->bitmapOffset;        
     int  w  = glyph->width;
     int  h  = glyph->height;    
-    uint8_t  column[_width];
+    
     
     debug(uint16_t oldbg=bg);
     debug(bg=YELLOW);
@@ -50,24 +50,24 @@ int ili9341::myDrawChar(int x, int y, unsigned char c,  int color, int bg,FontIn
     y+= glyph->yOffset;   // offset is <0 most of the time
     
     int left=glyph->xOffset;
-    int right=glyph->xAdvance-(w+left);
+    int right=(int)glyph->xAdvance-(w+left);
     if(right<0) right=0;
        
     int    finalColor;    
     int  bits = 0, bit = 0;
     setAddress(x,y, glyph->xAdvance, h);
     debug(bg=oldbg);
-    uint8_t  *col=column;
+    uint8_t  *col=_column;
     
     // Pre-fill & left /right
-    memset(column,0,left);
-    memset(column+left+w,0,right);
+    memset(col,0,left);
+    memset(col+left+w,0,right);
     // fill in body
     
     dataBegin();
     for( int line=h-1;line>=0;line--)
     {      
-        col=column+left;     
+        col=_column+left;     
         // mid
         for( int xcol=w-1;xcol>=0;xcol--)
         {
@@ -118,7 +118,7 @@ int ili9341::myDrawChar(int x, int y, unsigned char c,  int color, int bg,FontIn
             bit=bit>>1;
         }
         // 9ms here
-        push2Colors(column,glyph->xAdvance,color,bg);
+        push2Colors(_column,glyph->xAdvance,color,bg);
     }   
     dataEnd();
     return glyph->xAdvance;

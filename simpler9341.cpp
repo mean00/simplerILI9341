@@ -26,13 +26,16 @@ ili9341::ili9341(int width, int height)
     _height=_physicalHeight;
      _fg=0xffff;
      _bg=0;
+     if(width>height) _column=new uint8_t[width+1];
+     else _column=new uint8_t[height+1];
 }
 /**
  * 
  */
 ili9341::~ili9341()
 {
-
+    delete [] _column;
+    _column=NULL;
 }
 /*
  * 

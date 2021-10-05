@@ -72,6 +72,7 @@ protected:
                 int _PhysicalYoffset;
                 int _xOffset;
                 int _yOffset;
+                uint8_t  *_column;
 protected:                
                 void baseInit();
                 
