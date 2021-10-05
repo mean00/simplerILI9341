@@ -36,8 +36,11 @@ int ili9341::myDrawChar(int x, int y, unsigned char c,  int color, int bg,FontIn
     }
     
     // top & bottom
-    int top=infos.maxHeight+glyph->yOffset;
-    mySquare(x,y-infos.maxHeight,glyph->xAdvance,top,bg);
+    int top=infos.maxHeight+glyph->yOffset; 
+    mySquare(x,
+            y-infos.maxHeight,
+            glyph->xAdvance,
+            top,bg);
 
     int bottom=-glyph->yOffset-h;
     if(bottom>=-2)
