@@ -66,7 +66,7 @@ int ili9341::mySquare(int x, int y, int w, int xheight, uint16_t filler)
             return 0;
     }
     setAddress(x,y,w, xheight);
-    floodWords(filler,w*xheight);
+    floodWords(w*xheight,filler);
     return 0;
 }
 
