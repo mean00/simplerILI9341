@@ -18,8 +18,9 @@ int ili9341::myDrawChar(int x, int y, unsigned char c,  int color, int bg,FontIn
     uint8_t *p= infos.font->bitmap+glyph->bitmapOffset;        
     int  w  = glyph->width;
     int  h  = glyph->height;    
+    int  advv=glyph->xAdvance+1;
     
-    
+   
     debug(uint16_t oldbg=bg);
     debug(bg=YELLOW);
     debug(color=GREEN);
@@ -27,7 +28,7 @@ int ili9341::myDrawChar(int x, int y, unsigned char c,  int color, int bg,FontIn
     // Special case, space, it has yOffsset > 0
     if(infos.font->first+c==' ')
     {
-        int adv=glyph->xAdvance;
+        int adv=advv;
         int top=infos.maxHeight;
          mySquare(x,y-top,
                   adv, //Fix!
@@ -39,23 +40,23 @@ int ili9341::myDrawChar(int x, int y, unsigned char c,  int color, int bg,FontIn
     int top=infos.maxHeight+glyph->yOffset; 
     mySquare(x,
             y-infos.maxHeight,
-            glyph->xAdvance,
+            advv,
             top,bg);
 
     int bottom=-glyph->yOffset-h;
     if(bottom>=-2)
-        mySquare(x,y-bottom,glyph->xAdvance,bottom+2,bg);      
+        mySquare(x,y-bottom,advv,bottom+2,bg);      
     
 
     y+= glyph->yOffset;   // offset is <0 most of the time
     
     int left=glyph->xOffset;
-    int right=(int)glyph->xAdvance-(w+left);
+    int right=(int)advv-(w+left);
     if(right<0) right=0;
        
     int    finalColor;    
     int  bits = 0, bit = 0;
-    setAddress(x,y, glyph->xAdvance, h);
+    setAddress(x,y, advv, h);
     debug(bg=oldbg);
     uint8_t  *col=_column;
     
@@ -118,7 +119,7 @@ int ili9341::myDrawChar(int x, int y, unsigned char c,  int color, int bg,FontIn
             bit=bit>>1;
         }
         // 9ms here
-        push2Colors(_column,glyph->xAdvance,color,bg);
+        push2Colors(_column,advv,color,bg);
     }   
     dataEnd();
     return glyph->xAdvance;

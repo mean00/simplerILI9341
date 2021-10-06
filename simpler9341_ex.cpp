@@ -122,10 +122,9 @@ int ili9341::writeChar(char c)
     {
       cursor_x = 0;
       cursor_y +=   gfxFont->yAdvance;
-    }
-    //int ili9341::myDrawChar(int x, int y, unsigned char c,  int color, int bg,FontInfo &infos)
-    myDrawChar(cursor_x, cursor_y, c, _fg,_bg,*currentFont); 
-    cursor_x += glyph->xAdvance ;    
+    }    
+    
+    cursor_x += myDrawChar(cursor_x, cursor_y, c, _fg,_bg,*currentFont);    
     return 1;
 }
 // EOF
