@@ -28,6 +28,18 @@ ili9341::ili9341(int width, int height)
      _bg=0;
      if(width>height) _column=new uint8_t[width+1];
      else _column=new uint8_t[height+1];
+     // build the lookup table
+     uint8_t *t=(uint8_t *) _lookup;
+     memset(t,0,16*4);
+     for(int val=0;val<16;val++)
+     {
+         int number=val;
+         if(number&8) t[0]=1;
+         if(number&4) t[1]=1;
+         if(number&2) t[2]=1;
+         if(number&1) t[3]=1;
+         t+=4;
+     }     
 }
 /**
  * 

@@ -30,7 +30,8 @@ int ili9341::myDrawChar(int x, int y, unsigned char c,  int color, int bg,FontIn
     {
         int adv=advv;
         int top=infos.maxHeight;
-         mySquare(x,y-top,
+         mySquare(x,
+                  y-top,
                   adv, //Fix!
                   top+2,bg);
          return adv;
@@ -77,40 +78,14 @@ int ili9341::myDrawChar(int x, int y, unsigned char c,  int color, int bg,FontIn
                 bits= *p++;
                 if(xcol>=8) // speed up some special cases
                 {
-                    switch(bits)
-                    {
-                     
-                         case 0x0f:  
-                                    *col++=0; *col++=0;*col++=0; *col++=0;
-                                    *col++=1; *col++=1;*col++=1; *col++=1;
-                                    xcol-=7;
-                                    bit=0;
-                                    continue;
-                                    break;
-                        case 0xf0:  
-                                    *col++=1; *col++=1;*col++=1; *col++=1;
-                                    *col++=0; *col++=0;*col++=0; *col++=0;
-                                    xcol-=7;
-                                    bit=0;
-                                    continue;
-                                    break;                                    
-                        case 0xff:  
-                                    *col++=1; *col++=1;*col++=1; *col++=1;
-                                    *col++=1; *col++=1;*col++=1; *col++=1;
-                                    xcol-=7;
-                                    bit=0;
-                                    continue;
-                                    break;
-                        case 0x00: 
-                                    *col++=0;*col++=0;*col++=0;*col++=0;
-                                    *col++=0;*col++=0;*col++=0;*col++=0;
-                                    xcol-=7;
-                                    bit=0;
-                                    continue;
-                                    break;
-                        
-                        default:break;
-                    }
+                uint32_t *high=_lookup+(bits>>4);
+                uint32_t *low=_lookup+(bits&0xf);
+                memcpy(col,high,4);
+                memcpy(col+4,low,4);
+                xcol-=7;
+                bit=0;
+                col+=8;
+                continue;
                 }
                 bit = 0x80;
             }      

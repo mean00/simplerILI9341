@@ -111,8 +111,14 @@ int ili9341::writeChar(char c)
     
     GFXglyph *glyph = gfxFont->glyph + c-first;
     int w = glyph->width,   h = glyph->height;
+    
+    // also ' ' here
     if ((w <= 0) || (h <= 0)) 
     {
+        //
+        mySquare(cursor_x,cursor_y-currentFont->maxHeight, 
+                gfxFont->glyph->xAdvance,currentFont->maxHeight+glyph->yOffset,
+                _bg);
         cursor_x += glyph->xAdvance ;    
         return 1;
     }

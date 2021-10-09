@@ -110,6 +110,7 @@ protected:
 #define         ST7735_BUFFER_SIZE_WORD 256
                 uint16_t scrbuf[ST7735_BUFFER_SIZE_WORD];
                 int     cursor_x,cursor_y;
+                uint32_t _lookup[16];
 
 
 };
