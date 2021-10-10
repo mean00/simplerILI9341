@@ -77,6 +77,11 @@ protected:
                 void baseInit();
                 
 public: // freetype font
+                void    getTextColor(int &f,int &g)
+                {
+                    f=_fg;
+                    g=_bg;
+                }
                 void    setTextColor(int fg,int bg)
                 {
                     _fg=fg;

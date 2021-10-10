@@ -4,3 +4,9 @@ ADD_LIBRARY(simplerILI9341
             simpler9341_ex_ll.cpp 
             ${ILI9341_DRIVER})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+
+            
+IF("${LN_ARCH}" STREQUAL "RISCV")
+    MESSAGE(STATUS "ILI9341 : Using PB8 instead of PB3 for LCD")
+    TARGET_COMPILE_OPTIONS(simplerILI9341 PRIVATE "-DUSE_PB8_INSTEAD_OF_PB3")
+ENDIF()
