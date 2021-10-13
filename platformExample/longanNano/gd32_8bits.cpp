@@ -3,7 +3,11 @@
  *  (C) 2021 MEAN00 fixounet@free.fr
  *  See license file
  * 
- * This is a 8 bit parrallel mode for the DSO150
+ * This is a 8 bit parrallel mode for the ILI9341/ST7789 as present on the DSO150
+ * With the GD32vF103 there is a timing issue so it is slowed down a bit
+ * Not sure if the timing issue is due to the speed (running at 108 Mhz with max
+ * GPIO speed = 50 Mhz + speed of ILI ignals) or if it is due to fence issue
+ * 
  * 
  * 
  */
