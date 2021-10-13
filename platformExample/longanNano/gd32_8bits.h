@@ -18,6 +18,37 @@
 #pragma once
 #include "simpler9341.h"
 
+
+// If we pulse the 8 bits bus too fast we run into problems
+// too fast or  fence issue ?. Not sure
+// On the GD32VF103 2 nop works => white screen after a while
+// 1 nop : does not work
+// Fence : works => white screen after a while
+// fence.i: works => white screen after a while
+// fence +  fence.i: works => white screen after a while
+
+
+#if LN_ARCH == LN_ARCH_RISCV
+    #define ILI_NOP __asm("fence.i");//__asm("fence"); //__asm("nop");__asm("nop");
+#else
+    #if LN_ARCH == LN_ARCH_ARM
+        #define ILI_NOP 
+    #else
+        #error UNSUPPORTED ARCH
+    #endif
+#endif
+
+//
+class noplnFastIO : public  lnFastIO
+{
+public:
+        noplnFastIO(lnPin p) : lnFastIO(p)
+        {
+            
+        }
+    void pulseLowNop() __attribute__((always_inline)) { *_onoff=_offbit;ILI_NOP;*_onoff=_onbit;ILI_NOP;}
+};
+
 /**
  * 
  * @param bop
@@ -30,7 +61,8 @@ class lnFast8bitIo: public lnFastIO
                 {
                     _bop=bop;
                 }
-                void pulsesLow(int count);
+                void pulseLowNop() { *_onoff=_offbit;ILI_NOP;*_onoff=_onbit;ILI_NOP}
+                void pulsesLowNop(int count);
                 void pulseData(int count, int hi, int lo);
                 void push2Colors(int len, uint8_t *data,int fg, int bg);
                 void sendBlock(int nb, uint16_t *data);
@@ -80,8 +112,9 @@ class ln8bit9341 : public ili9341
                     void writeRegister32(int r,uint32_t  val);
                     void setReadDir();
                     void setWriteDir();
+                    uint16_t colorMap(const uint16_t d);
                     
-            lnFastIO     _ioRead, _ioCS, _ioDC;
+            noplnFastIO  _ioRead, _ioCS, _ioDC;
             lnFast8bitIo *_ioWrite;
             lnPin       _pinReset;
             int         _dataPort;

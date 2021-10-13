@@ -12,6 +12,21 @@
 
 #define FAKE_DELAY_COMMAND 0xff
 #define LOW_LEVEL_PRINT(...) {}
+
+#define IS_7789()  (_chipId== 0x7789)
+
+/**
+ * 
+ * @param d
+ * @return 
+ */
+uint16_t ln8bit9341::colorMap(const uint16_t d)
+{
+    if(!IS_7789()) return d;
+    uint32_t r=(d>>11),b=d&0x1f,g=(d>>5)&0x3f;
+    return r+(g<<5)+(b<<11);
+}
+
 /*
  * Replace PB3 by PB8 and output BOP word
  * STM32 direct 108M: Draw 30 chars 25 ms
@@ -97,7 +112,7 @@ static const uint8_t wakeOn[] = {
 #define RD_ACTIVE   {_ioRead.off();}
 #define RD_IDLE     {_ioRead.on();}
 
-#define WR_STROBE {_ioWrite->pulseLow();}
+#define WR_STROBE {_ioWrite->pulseLowNop();}
 #define CS_ACTIVE_CD_COMMAND {CS_ACTIVE;CD_COMMAND}
 
 
@@ -411,18 +426,20 @@ void ln8bit9341::dataEnd()
 void ln8bit9341::floodWords(int nb, const uint16_t data)
 {      
     
-    register int cl=data&0xff;
-    register int ch=data>>8;
+    uint16_t f=colorMap(data);
+    register int cl=f&0xff;
+    register int ch=f>>8;
+    
     
     CS_ACTIVE;
     CD_COMMAND;
     sendWord(ILI9341_MEMORYWRITE);
     CD_DATA;
-    if(1 && (data&0xff)==(data>>8))   // this does not work ?
+    if(1 && (f&0xff)==(f>>8))   // this does not work ?
     {
         uint32_t cl= WR_DATA8(cl&0xff);
         *_bop= ( cl );
-        _ioWrite->pulsesLow(nb);
+        _ioWrite->pulsesLowNop(nb);
         CS_IDLE;
         return;
     }   
@@ -547,7 +564,7 @@ void ln8bit9341::pushColors(int len, uint16_t *data)
 void lnFast8bitIo::sendBlock(int nb, uint16_t *data)
 {
     
-#define WRP    *onoff=down;*onoff=up;
+#define WRP    *onoff=down;ILI_NOP;*onoff=up;ILI_NOP;
     
     register uint32_t up=_onbit,down=_offbit;
     volatile register uint32_t *bop=_bop,*onoff=_onoff;
@@ -572,7 +589,7 @@ void lnFast8bitIo::sendBlock(int nb, uint16_t *data)
 void lnFast8bitIo::pulseData(int nb, int  hi, int lo)
 {
     
-#define WRP    *onoff=down;*onoff=up;
+
     
     register uint32_t hh=WR_DATA8(hi),ll=WR_DATA8(lo),up=_onbit,down=_offbit;
     volatile register uint32_t *bop=_bop,*onoff=_onoff;
@@ -598,10 +615,9 @@ void lnFast8bitIo::pulseData(int nb, int  hi, int lo)
  * 
  * @param count
  */
-void lnFast8bitIo::pulsesLow(int nb)
+void lnFast8bitIo::pulsesLowNop(int nb)
 {
       
-#define WRP    *onoff=down;*onoff=up;
     
     register uint32_t           up=_onbit,down=_offbit;
     volatile register uint32_t *onoff=_onoff;
