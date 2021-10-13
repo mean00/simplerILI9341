@@ -128,6 +128,7 @@ void ln8bit9341::write8(uint8_t c)
 {
     int cc=WR_DATA8((int )c);    
     *_bop= cc;
+    ILI_NOP;
     WR_STROBE;
 }
 /**

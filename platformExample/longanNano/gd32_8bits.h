@@ -18,26 +18,40 @@
 #pragma once
 #include "simpler9341.h"
 
+// There is some issues here
+// If the speed is above 96Mhz, the GD32f303 will white screen after a while
+// it is either the gpio speed (max 50 Mhz) or some LCD timing issue
+// adding a nop is enough to fix the issue
+// with the STM32 it should be fine due to the flash wait state
 
-// If we pulse the 8 bits bus too fast we run into problems
-// too fast or  fence issue ?. Not sure
-// On the GD32VF103 2 nop works => white screen after a while
-// 1 nop : does not work
-// Fence : works => white screen after a while
-// fence.i: works => white screen after a while
-// fence +  fence.i: works => white screen after a while
+// with the GD32VF103 it still white screens after a bit, even with a low speed
+
+#if 0
+#if LN_MCU_SPEED > 96000000
+    #define ILI_NOP __asm("nop");
+#else
+    #define ILI_NOP {}
+#endif
+#endif
 
 
 #if LN_ARCH == LN_ARCH_RISCV
-    #define ILI_NOP __asm("fence.i");//__asm("fence"); //__asm("nop");__asm("nop");
+    #if LN_MCU_SPEED > 96000000    
+            #define ILI_NOP__asm("fence.i"); __asm("nop"); //__asm("fence"); //__asm("nop");__asm("nop");
+    #else
+            #define ILI_NOP __asm("fence.i"); 
+    #endif
 #else
     #if LN_ARCH == LN_ARCH_ARM
-        #define ILI_NOP 
+        #if LN_MCU_SPEED > 96000000
+            #define ILI_NOP __asm("nop");
+        #else
+            #define ILI_NOP {}
+        #endif
     #else
         #error UNSUPPORTED ARCH
     #endif
 #endif
-
 //
 class noplnFastIO : public  lnFastIO
 {
