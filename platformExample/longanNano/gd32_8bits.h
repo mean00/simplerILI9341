@@ -26,14 +26,6 @@
 
 // with the GD32VF103 it still white screens after a bit, even with a low speed
 
-#if 0
-#if LN_MCU_SPEED > 96000000
-    #define ILI_NOP __asm("nop");
-#else
-    #define ILI_NOP {}
-#endif
-#endif
-
 
 #if LN_ARCH == LN_ARCH_RISCV
     #if LN_MCU_SPEED > 96000000    
