@@ -444,7 +444,6 @@ void ln8bit9341::floodWords(int nb, const uint16_t data)
     {
         uint32_t rpt= WR_DATA8(cl);
         *_bop= ( rpt );
-        ILI_NOP;
         _ioWrite->pulsesLowNop(nb);
         CS_IDLE;
         return;
