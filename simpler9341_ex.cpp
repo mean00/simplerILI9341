@@ -94,7 +94,7 @@ void  ili9341::setFontSize(FontSize size)
  * @param c
  * @return 
  */
-int ili9341::writeChar(char c) 
+int ili9341::writeChar(const char c) 
 {
 
     if (c == '\n') 

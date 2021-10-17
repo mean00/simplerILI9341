@@ -91,7 +91,7 @@ public: // freetype font
                 void    setFontSize(FontSize size);
                 void    setFontFamily(const GFXfont *small, const GFXfont *medium, const GFXfont *big);
                 void    print(int x,int y,const char *z);
-                int     writeChar(char c);
+                int     writeChar(const char c);
                 void    print(const char *data)
                 {
                     int s=strlen(data);

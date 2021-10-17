@@ -442,8 +442,9 @@ void ln8bit9341::floodWords(int nb, const uint16_t data)
     CD_DATA;
     if(1 && (f&0xff)==(f>>8))   // this does not work ?
     {
-        uint32_t cl= WR_DATA8(cl&0xff);
-        *_bop= ( cl );
+        uint32_t rpt= WR_DATA8(cl);
+        *_bop= ( rpt );
+        ILI_NOP;
         _ioWrite->pulsesLowNop(nb);
         CS_IDLE;
         return;
