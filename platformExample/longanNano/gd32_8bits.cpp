@@ -19,6 +19,21 @@
 
 #define IS_7789()  (_chipId== 0x7789)
 
+#if 0
+    bool lcdHasArbiter=false;
+    #define CHECK_ARBITER() checkA()
+
+void checkA()
+{
+    if(!lcdHasArbiter)
+        Logger("Wrong Arbiter\n");
+}
+#else
+    #define CHECK_ARBITER() 
+#endif
+
+
+
 /**
  * 
  * @param d
@@ -430,6 +445,7 @@ void ln8bit9341::dataEnd()
 */
 void ln8bit9341::floodWords(int nb, const uint16_t data)
 {      
+    CHECK_ARBITER();
     
     uint16_t f=colorMap(data);
     register int cl=f&0xff;
@@ -461,6 +477,7 @@ void ln8bit9341::floodWords(int nb, const uint16_t data)
  */
  void ln8bit9341::push2Colors(uint8_t *data, int len, int fg, int bg)
  {  
+     CHECK_ARBITER();
     _ioWrite->push2Colors(len,data,fg,bg);
  } 
 static const uint8_t rotMode[4]={0x8,0xc8,0x78,0xa8};
@@ -551,6 +568,7 @@ void ln8bit9341::HLine(int x0, int y0, int w, int color)
  */
 void ln8bit9341::pushColors(int len, uint16_t *data)
 {
+    CHECK_ARBITER();
     dataBegin();
     _ioWrite->sendBlock(len,data);    
     dataEnd();
