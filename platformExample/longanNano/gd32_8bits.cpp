@@ -19,7 +19,7 @@
 
 #define IS_7789()  (_chipId== 0x7789)
 
-#if 0
+#if 1
     bool lcdHasArbiter=false;
     #define CHECK_ARBITER() checkA()
 

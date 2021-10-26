@@ -98,6 +98,7 @@ public: // freetype font
                     for(int i=0;i<s;i++)
                         writeChar(data[i]);
                 }
+                void printUpTo(const char *data, int maxWidthInPixels);
                  void    print(int a)
                 {
                     char bf[10];

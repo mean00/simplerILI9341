@@ -1,4 +1,5 @@
 #include "simpler9341.h"
+#include "dso_colors.h"
 
 /**
  * \fn checkFont
@@ -81,14 +82,44 @@ void  ili9341::setFontSize(FontSize size)
 {
     switch(size)
     {
-        case SmallFont :  currentFont=fontInfo+0;break;
+        case SmallFont :    currentFont=fontInfo+0;break;
         default:
         case MediumFont :   currentFont=fontInfo+1;break;
-        case BigFont :   currentFont=fontInfo+2;break;
+        case BigFont :      currentFont=fontInfo+2;break;
     }    
     gfxFont=currentFont->font;
+}  
+/**
+ * 
+ * @param data
+ * @param maxWidthInPixels
+ */
+void ili9341::printUpTo(const char *data, int maxWidthInPixels)
+{
+    int lastPos=cursor_x+maxWidthInPixels;
+    int s=strlen(data);
+    for(int i=0;i<s;i++)
+    {
+        if(cursor_x>=lastPos) 
+            return;
+        writeChar(data[i]);
+    }
+    if(lastPos>cursor_x)
+    {
+        int w=lastPos-cursor_x;
+         while(w>0)
+         {
+            int rnd=w;
+            if(rnd>currentFont->maxWidth) rnd=currentFont->maxWidth;
+            
+            mySquare(cursor_x,cursor_y-currentFont->maxHeight,                  rnd, currentFont->maxHeight+2, 0*WHITE+1*_bg);
+            cursor_x+=rnd;
+            w=lastPos-cursor_x;
+            
+         }
+
+    }
 }
- 
 /**
  * 
  * @param c
