@@ -53,7 +53,7 @@ public:
                 virtual void init()=0;
                 
                 void fillScreen(int color); // 16 bits!
-                void fillRoundRect(int x0, int y0, int w, int h,int radius, int color) {}
+                void fillRoundRect(int x0, int y0, int w, int h,int radius, int color);
 
                 void square(int color, int x, int y, int w, int g);
                 void setRotation(int rotation);  // 0 1 2 3
