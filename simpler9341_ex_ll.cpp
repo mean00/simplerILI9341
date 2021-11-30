@@ -78,10 +78,20 @@ int ili9341::myDrawChar(int x, int y, unsigned char c,  int color, int bg,FontIn
                 bits= *p++;
                 if(xcol>=8) // speed up some special cases
                 {
-                uint32_t *high=_lookup+(bits>>4);
-                uint32_t *low=_lookup+(bits&0xf);
-                memcpy(col,high,4);
-                memcpy(col+4,low,4);
+                uint8_t *table8=(uint8_t *)_lookup;
+                uint8_t *high=table8+(bits>>4)*4;
+                uint8_t *low=table8+(bits&0xf)*4;                
+                col[0]=high[0];
+                col[1]=high[1];
+                col[2]=high[2];
+                col[3]=high[3];
+                col[4]=low[0];
+                col[5]=low[1];
+                col[6]=low[2];
+                col[7]=low[3];
+                                
+                //memcpy(col,high,4);
+                //memcpy(col+4,low,4);
                 xcol-=7;
                 bit=0;
                 col+=8;
