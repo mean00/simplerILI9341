@@ -28,11 +28,11 @@
 
 
 #if LN_ARCH == LN_ARCH_RISCV
-    #if LN_MCU_SPEED > 96000000    
-            #define ILI_NOP__asm("fence.i"); __asm("nop"); //__asm("fence"); //__asm("nop");__asm("nop");
-    #else
-            #define ILI_NOP __asm("fence.i"); 
-    #endif
+     #if LN_MCU_SPEED > 96000000
+            #define ILI_NOP __asm("nop");
+        #else
+            #define ILI_NOP {}
+     #endif
 #else
     #if LN_ARCH == LN_ARCH_ARM
         #if LN_MCU_SPEED > 96000000
