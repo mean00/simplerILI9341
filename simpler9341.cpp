@@ -108,17 +108,24 @@ void ili9341::square(int color, int x, int y, int w, int h)
     int f=w*h;
     floodWords(f,color);
 }
-void ili9341::fillRoundRect(int x0, int y0, int w, int h,int radius, int color)
+void ili9341::fillRoundRect(int x0, int y0, int w, int h,int radius, int outColor, int inColor)
 {
     int ll=radius*w;
     int hh=radius*h;
+      
       setAddress(x0,y0,w,radius);
-      floodWords(ll,color);
+      floodWords(ll,outColor);
       setAddress(x0,y0+h-radius,w,radius);
-      floodWords(ll,color);
+      floodWords(ll,outColor);
+      
       setAddress(x0,y0,radius,h);
-      floodWords(hh,color);
+      floodWords(hh,outColor);
       setAddress(x0+w-radius,y0,radius,h);
+      floodWords(hh,outColor);
+      
+      // interior now
+      setAddress(x0+radius,y0+radius, w-2*radius,h-2*radius);
+      floodWords( (w-2*radius)*(h-2*radius),inColor);
       
 }
 // EOF
