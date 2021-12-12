@@ -478,7 +478,7 @@ void ln8bit9341::floodWords(int nb, const uint16_t data)
  void ln8bit9341::push2Colors(uint8_t *data, int len, int fg, int bg)
  {  
      CHECK_ARBITER();
-    _ioWrite->push2Colors(len,data,fg,bg);
+    _ioWrite->push2Colors(len,data,colorMap(fg),colorMap(bg));
  } 
 static const uint8_t rotMode[4]={0x8,0xc8,0x78,0xa8};
 /**
