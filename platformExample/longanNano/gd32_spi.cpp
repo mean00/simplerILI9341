@@ -105,7 +105,8 @@ uint8_t  lnSpi9341::read8()
 void lnSpi9341::writeCmdParam(uint16_t cmd, int payload, const uint8_t * data)
 {
     CD_COMMAND;
-    sendWord(cmd);
+    //sendWord(cmd);
+    _spi->write16(cmd);
     if(payload)
     {
         CD_DATA;
@@ -213,10 +214,11 @@ void lnSpi9341::reset()
 void lnSpi9341::sendSequence(int size, const uint8_t *data)
 {
         const uint8_t *tail=data+size;
-        CS_ACTIVE;
+        
         
 	while (data < tail) 
         {
+            CS_ACTIVE;
             uint8_t cmd = data[0];
             uint8_t len = data[1];
             data+=2;
@@ -227,8 +229,9 @@ void lnSpi9341::sendSequence(int size, const uint8_t *data)
             }                 
             writeCmdParam(cmd, len, data);
             data += len;		
+            CS_IDLE;
 	}
-        CS_IDLE;
+        
 }
 
 /**
@@ -391,19 +394,22 @@ void lnSpi9341::dataEnd()
 */
 void lnSpi9341::floodWords(int nb, const uint16_t data)
 {      
-    CHECK_ARBITER();
-    
     uint16_t f=colorMap(data);
-    register int cl=f&0xff;
-    register int ch=f>>8;
+    // except for fill screen, it fits in one dma request
+    // no need to optimize much
+    while(nb)
+    {
+        CS_ACTIVE;
+        int chunk=nb;
+        if(chunk>65535) chunk=65535;
+        nb-=chunk;
+        CD_COMMAND;
+        sendWord(ILI9341_MEMORYWRITE);
+        CD_DATA;
+        _spi->dmaWrite16Repeat(chunk,data);
+        CS_IDLE;        
+    }
     
-    
-    CS_ACTIVE;
-    CD_COMMAND;
-    sendWord(ILI9341_MEMORYWRITE);
-    CD_DATA;
-    _spi->dmaWrite16Repeat(nb,data);
-    CS_IDLE;
 }
 /**
  * 
