@@ -5,6 +5,7 @@
 #pragma once
 #include "Arduino.h"
 #include "gfxfont.h"
+#include "simpler9341_color.h"
 
 /**
  */
