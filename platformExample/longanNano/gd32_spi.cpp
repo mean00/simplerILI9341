@@ -66,8 +66,8 @@ static const uint8_t wakeOn[] = {
 	0xB0, 1, 0x40,      //RGB Signal [40] RCM=2
 };
 
-#define CS_ACTIVE   {lnDigitalWrite(_pinCS,false);}
-#define CS_IDLE     {lnDigitalWrite(_pinCS,true);}
+#define CS_ACTIVE   {if(_pinCS!=-1) lnDigitalWrite(_pinCS,false);}
+#define CS_IDLE     {if(_pinCS!=-1) lnDigitalWrite(_pinCS,true);}
 
 #define CD_DATA     {lnDigitalWrite(_pinDC,true);}
 #define CD_COMMAND  {lnDigitalWrite(_pinDC,false);}
@@ -166,6 +166,7 @@ void lnSpi9341::writeRegister32(int r,uint32_t  val)
  */
 uint32_t lnSpi9341::readChipId()
 {  
+    return 0x9341;
   uint32_t regD3=readRegister32(0xd3)&0xffff ;
   uint32_t reg04=readRegister32(0x04)&0xffff ;
   
@@ -179,10 +180,15 @@ uint32_t lnSpi9341::readChipId()
  */
 void lnSpi9341::reset()
 {
-    lnDigitalWrite(_pinCS,true);
-    lnDigitalWrite(_pinDC,true);
-    lnPinMode(_pinCS,lnOUTPUT);
     lnPinMode(_pinDC,lnOUTPUT);
+    lnDigitalWrite(_pinDC,true);
+    if(_pinCS!=-1)
+    {
+        lnPinMode(_pinCS,lnOUTPUT);
+        lnDigitalWrite(_pinCS,true);
+    }
+    
+    
     CS_IDLE; 
     CD_DATA; 	
     

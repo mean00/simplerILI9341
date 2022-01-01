@@ -45,7 +45,7 @@ class lnSpi9341 : public ili9341
             virtual void dataEnd();
             virtual void VLine(int x0, int y0, int h, int color);
             virtual void HLine(int x0, int y0, int w, int color);
-            virtual void pushColors(int len, uint16_t *data);
+            virtual void pushColors(int len, uint16_t *data) {xAssert(0);}
             
             
                     uint32_t readChipId();
