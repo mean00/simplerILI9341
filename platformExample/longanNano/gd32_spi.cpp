@@ -1,12 +1,9 @@
 /*
  *  (C) Adafruit
- *  (C) 2021 MEAN00 fixounet@free.fr
+ *  (C) 2021/2022 MEAN00 fixounet@free.fr
  *  See license file
  * 
- * This is a 8 bit parrallel mode for the ILI9341/ST7789 as present on the DSO150
- * With the GD32vF103 there is a timing issue so it is slowed down a bit
- * Not sure if the timing issue is due to the speed (running at 108 Mhz with max
- * GPIO speed = 50 Mhz + speed of ILI ignals) or if it is due to fence issue
+ * This is a spi driver for the ILI9341/ST7789 
  * 
  * 
  * 
@@ -19,9 +16,14 @@
 #define CHECK_ARBITER() 
 #define FAKE_DELAY_COMMAND 0xff
 #define LOW_LEVEL_PRINT(...) {}
-
-#define colorMap(x) x
-
+/**
+ */
+uint16_t lnSpi9341::colorMap(const uint16_t d)
+{
+    if(!IS_7789()) return d;
+    uint32_t r=(d>>11),b=d&0x1f,g=(d>>5)&0x3f;
+    return r+(g<<5)+(b<<11);
+}
 
 /**
  * 
@@ -72,30 +74,13 @@ static const uint8_t wakeOn[] = {
 #define CD_DATA     {lnDigitalWrite(_pinDC,true);}
 #define CD_COMMAND  {lnDigitalWrite(_pinDC,false);}
 
-
-#define CS_ACTIVE_CD_COMMAND {CS_ACTIVE;CD_COMMAND}
-
-
-
-
-/*****************************************************************************/
-
+/**
+ * 
+ */
 void lnSpi9341::write8(uint8_t c)
 {
     _spi->write(c);
 }
-/**
- * This is not used much at all. Only a few times at the beginning
- * No need to optimize
- * @return 
- */
-uint8_t  lnSpi9341::read8()
-{  
-    //return _spi->read
-    return 0;
-  
-}
-
 /**
  * 
  * @param cmd
@@ -105,7 +90,6 @@ uint8_t  lnSpi9341::read8()
 void lnSpi9341::writeCmdParam(uint16_t cmd, int payload, const uint8_t * data)
 {
     CD_COMMAND;
-    //sendWord(cmd);
     _spi->write16(cmd);
     if(payload)
     {
@@ -130,25 +114,15 @@ void lnSpi9341::writeCommand(uint16_t c)
  */
 uint32_t lnSpi9341::readRegister32(int r)
 {
-  uint32_t val;
-  uint8_t x;
-
-  CS_ACTIVE;
-  
-  // try reading register #4
-  writeCommand(r);
+  CS_ACTIVE;  
+  CD_COMMAND;  
+  _spi->write16(r);
   CD_DATA;
+  uint32_t tx=0,rx=0;
   lnDelayUs(50);
-  val = read8();          
-  val <<= 8;              
-  val  |= read8();        
-  val <<= 8;              
-  val  |= read8();;       
-  val <<= 8;              
-  val  |= read8();;       
+  _spi->transfer(4,(uint8_t *)&tx,(uint8_t *)&rx);
   CS_IDLE;
-  
-  return val;
+  return rx;
 }
 
 /**
@@ -167,13 +141,13 @@ void lnSpi9341::writeRegister32(int r,uint32_t  val)
  */
 uint32_t lnSpi9341::readChipId()
 {  
-    return 0x9341;
   uint32_t regD3=readRegister32(0xd3)&0xffff ;
   uint32_t reg04=readRegister32(0x04)&0xffff ;
   
   if(regD3==0x9341) return 0x9341; // 9341 
   if(reg04==0x8552) return 0x7789; // is it really a 7789 ?
-  return 0; // unknown
+  Logger("Warning : Unknown LCD detected\n");
+  return 0x9341; // unknown
 }
 
 /**
@@ -188,12 +162,8 @@ void lnSpi9341::reset()
         lnPinMode(_pinCS,lnOUTPUT);
         lnDigitalWrite(_pinCS,true);
     }
-    
-    
     CS_IDLE; 
     CD_DATA; 	
-    
-
     if(_pinReset!=-1)
     {            
         lnPinMode(_pinReset,lnOUTPUT);    
@@ -213,25 +183,22 @@ void lnSpi9341::reset()
  */
 void lnSpi9341::sendSequence(int size, const uint8_t *data)
 {
-        const uint8_t *tail=data+size;
-        
-        
+    const uint8_t *tail=data+size;
 	while (data < tail) 
-        {
-            CS_ACTIVE;
-            uint8_t cmd = data[0];
-            uint8_t len = data[1];
-            data+=2;
-            if (cmd == FAKE_DELAY_COMMAND) 
-            {			
-                delay(len);
-                continue;
-            }                 
-            writeCmdParam(cmd, len, data);
-            data += len;		
-            CS_IDLE;
-	}
-        
+    {
+        CS_ACTIVE;
+        uint8_t cmd = data[0];
+        uint8_t len = data[1];
+        data+=2;
+        if (cmd == FAKE_DELAY_COMMAND) 
+        {			
+            delay(len);
+            continue;
+        }                 
+        writeCmdParam(cmd, len, data);
+        data += len;		
+        CS_IDLE;
+}        
 }
 
 /**
@@ -386,30 +353,20 @@ void lnSpi9341::dataEnd()
 * @param nb
 * @param data
  * 
- * GD32M4 : Simple = 33 ms, same = 28 ms
- * Quad16            26 ms  same = 21 ms
- * 
- * pulsesLow Simple  = 26 ms , same = 8 ms
- * 
+ *
 */
 void lnSpi9341::floodWords(int nb, const uint16_t data)
 {      
     uint16_t f=colorMap(data);
-    // except for fill screen, it fits in one dma request
-    // no need to optimize much
+    dataBegin();
     while(nb)
-    {
-        CS_ACTIVE;
+    {        
         int chunk=nb;
-        if(chunk>65535) chunk=65535;
-        nb-=chunk;
-        CD_COMMAND;
-        sendWord(ILI9341_MEMORYWRITE);
-        CD_DATA;
-        _spi->dmaWrite16Repeat(chunk,data);
-        CS_IDLE;        
+        if(chunk>65534) chunk=65534;
+        nb-=chunk;               
+        _spi->dmaWrite16Repeat(chunk,f);        
     }
-    
+    dataEnd();        
 }
 /**
  * 
@@ -421,9 +378,8 @@ void lnSpi9341::floodWords(int nb, const uint16_t data)
  */
  void lnSpi9341::push2Colors(uint8_t *data, int len, int fg, int bg)
  {  
-#warning FIXME: Max line hardcoded to 320
-    uint16_t colors[320];
-    uint16_t *p=colors;
+    
+    uint16_t *p=_buffer;
     xAssert(len<320);
     uint8_t *tail=len+data;
     while( data<tail)
@@ -437,9 +393,7 @@ void lnSpi9341::floodWords(int nb, const uint16_t data)
         }
         p++;
     }
-    _spi->dmaWrite16(len,colors);
+    _spi->dmaWrite16(len,_buffer);
 }
-
-
-
 // EOF
+

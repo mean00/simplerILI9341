@@ -55,13 +55,13 @@ class lnSpi9341 : public ili9341
                     void writeCommand(uint16_t c);
                     void sendSequence(int size, const uint8_t *data);
                     void write8(uint8_t c);
-                    uint8_t read8();
                     uint32_t readRegister32(int reg);
                     void writeRegister32(int r,uint32_t  val);
+                    uint16_t colorMap(const uint16_t d);
 
-
-            lnPin       _pinReset,_pinDC,_pinCS;
-            uint32_t    _chipId;
+            lnPin           _pinReset,_pinDC,_pinCS;
+            uint32_t        _chipId;
             hwlnSPIClass    *_spi;
+            uint16_t        _buffer[320];
 };
 // EOF
