@@ -25,10 +25,8 @@ public:
             virtual void push2Colors(uint8_t *data, int len, int fg, int bg)=0;
             virtual void dataEnd()=0;
             virtual void dataBegin()=0;
-            virtual void VLine(int x0, int y0, int h, int color)=0;
-            virtual void HLine(int x0, int y0, int w, int color)=0;
             virtual void pushColors(int len, uint16_t *data)=0;
-
+                    uint16_t colorMap(const uint16_t d);
 //---------------------------------------------------------------    
                enum FontSize
                {
@@ -46,7 +44,7 @@ public:
                FontInfo          *currentFont;
                const GFXfont     *gfxFont;
                int               _fg,_bg;
-
+               uint32_t          _chipId;
     
     
                          ili9341(int width, int height);
@@ -58,6 +56,9 @@ public:
 
                 void square(int color, int x, int y, int w, int g);
                 void setRotation(int rotation);  // 0 1 2 3
+                void VLine(int x0, int y0, int h, int color);
+                void HLine(int x0, int y0, int w, int color);
+
                 void setCursor(int x, int y)
                 {
                      cursor_x=x;

@@ -101,8 +101,6 @@ class ln8bit9341 : public ili9341
             virtual void push2Colors(uint8_t *data, int len, int fg, int bg);
             virtual void dataBegin();
             virtual void dataEnd();
-            virtual void VLine(int x0, int y0, int h, int color);
-            virtual void HLine(int x0, int y0, int w, int color);
             virtual void pushColors(int len, uint16_t *data);
             
             
@@ -118,13 +116,11 @@ class ln8bit9341 : public ili9341
                     void writeRegister32(int r,uint32_t  val);
                     void setReadDir();
                     void setWriteDir();
-                    uint16_t colorMap(const uint16_t d);
                     
             noplnFastIO  _ioRead, _ioCS, _ioDC;
             lnFast8bitIo *_ioWrite;
             lnPin       _pinReset;
             int         _dataPort;
             uint32_t    *_bop;
-            uint32_t    _chipId;
 };
 // EOF

@@ -128,4 +128,39 @@ void ili9341::fillRoundRect(int x0, int y0, int w, int h,int radius, int outColo
       floodWords( (w-2*radius)*(h-2*radius),inColor);
       
 }
+
+/**
+ * 
+ * @param x0
+ * @param y0
+ * @param h
+ * @param color
+ */
+void ili9341::VLine(int x0, int y0, int h, int color)
+{
+  setAddress(x0, y0, 1, h);
+  floodWords(h,color); 
+}
+/**
+ * 
+ * @param x0
+ * @param y0
+ * @param w
+ * @param color
+ */
+void ili9341::HLine(int x0, int y0, int w, int color)
+{
+  setAddress(x0, y0, w, 1);
+  floodWords(w,color); 
+}
+/**
+ */
+#define IS_7789()  (_chipId== 0x7789)
+uint16_t ili9341::colorMap(const uint16_t d)
+{
+    if(!IS_7789()) return d;
+    uint32_t r=(d>>11),b=d&0x1f,g=(d>>5)&0x3f;
+    return r+(g<<5)+(b<<11);
+}
+
 // EOF

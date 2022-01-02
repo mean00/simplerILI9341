@@ -43,8 +43,6 @@ class lnSpi9341 : public ili9341
             virtual void push2Colors(uint8_t *data, int len, int fg, int bg);
             virtual void dataBegin();
             virtual void dataEnd();
-            virtual void VLine(int x0, int y0, int h, int color);
-            virtual void HLine(int x0, int y0, int w, int color);
             virtual void pushColors(int len, uint16_t *data) {xAssert(0);}
             
             
@@ -56,11 +54,9 @@ class lnSpi9341 : public ili9341
                     void sendSequence(int size, const uint8_t *data);
                     void write8(uint8_t c);
                     uint32_t readRegister32(int reg);
-                    void writeRegister32(int r,uint32_t  val);
-                    uint16_t colorMap(const uint16_t d);
+                    void writeRegister32(int r,uint32_t  val);                    
 
             lnPin           _pinReset,_pinDC,_pinCS;
-            uint32_t        _chipId;
             hwlnSPIClass    *_spi;
             uint16_t        _buffer[320];
 };

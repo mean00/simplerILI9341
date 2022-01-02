@@ -12,18 +12,10 @@
 #include "simpler9341_priv.h"
 
 
-#define IS_7789()  (_chipId== 0x7789)
+
 #define CHECK_ARBITER() 
 #define FAKE_DELAY_COMMAND 0xff
 #define LOW_LEVEL_PRINT(...) {}
-/**
- */
-uint16_t lnSpi9341::colorMap(const uint16_t d)
-{
-    if(!IS_7789()) return d;
-    uint32_t r=(d>>11),b=d&0x1f,g=(d>>5)&0x3f;
-    return r+(g<<5)+(b<<11);
-}
 
 /**
  * 
@@ -277,30 +269,6 @@ void lnSpi9341::setAddress(int x, int y, int w, int h)
     writeRegister32(ILI9341_COLADDRSET,  ((uint32_t)(a1<<16) | a2));  // HX8357D uses same registers!
     writeRegister32(ILI9341_PAGEADDRSET, ((uint32_t)(b1<<16) | b2)); // HX8357D uses same registers!
     CS_IDLE;
-}
-/**
- * 
- * @param x0
- * @param y0
- * @param h
- * @param color
- */
-void lnSpi9341::VLine(int x0, int y0, int h, int color)
-{
-  setAddress(x0, y0, 1, h);
-  floodWords(h,color); 
-}
-/**
- * 
- * @param x0
- * @param y0
- * @param w
- * @param color
- */
-void lnSpi9341::HLine(int x0, int y0, int w, int color)
-{
-  setAddress(x0, y0, w, 1);
-  floodWords(w,color); 
 }
 
 /**
