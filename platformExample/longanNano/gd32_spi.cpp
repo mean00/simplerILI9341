@@ -25,7 +25,7 @@
  * @param pinDc
  * @param pinCS
  */
-lnSpi9341::lnSpi9341( int w, int h ,hwlnSPIClass *spi, int pinDC,int pinCS, int pinReset)   : ili9341(w,h)
+lnSpi9341::lnSpi9341( int w, int h ,hwlnSPIClass *spi, int pinDC,int pinCS, int pinReset)   : ili9341(w,h),_ioDC(pinDC),_ioCS(pinCS)
 {    
     _spi=spi;    
     _pinReset=pinReset;
@@ -59,13 +59,10 @@ static const uint8_t wakeOn[] = {
 	0x36, 1, 0x48,      //Memory Access
 	0xB0, 1, 0x40,      //RGB Signal [40] RCM=2
 };
-
-#define CS_ACTIVE   {if(_pinCS!=-1) lnDigitalWrite(_pinCS,false);}
-#define CS_IDLE     {if(_pinCS!=-1) lnDigitalWrite(_pinCS,true);}
-
-#define CD_DATA     {lnDigitalWrite(_pinDC,true);}
-#define CD_COMMAND  {lnDigitalWrite(_pinDC,false);}
-
+#define CS_ACTIVE   {if(_pinCS!=-1) _ioCS.off();}
+#define CS_IDLE     {if(_pinCS!=-1) _ioCS.on();}
+#define CD_DATA     {_ioDC.on();}
+#define CD_COMMAND  {_ioDC.off();}
 /**
  * 
  */
@@ -348,8 +345,10 @@ void lnSpi9341::floodWords(int nb, const uint16_t data)
  {  
     
     uint16_t *p=_buffer;
-    xAssert(len<320);
+    xAssert(len<ILI_BUFFER_SIZE);
     uint8_t *tail=len+data;
+    fg=colorMap(fg);
+    bg=colorMap(bg);
     while( data<tail)
     {
         if(*(data++))

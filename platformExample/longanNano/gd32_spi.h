@@ -57,7 +57,9 @@ class lnSpi9341 : public ili9341
                     void writeRegister32(int r,uint32_t  val);                    
 
             lnPin           _pinReset,_pinDC,_pinCS;
+            lnFastIO        _ioCS,_ioDC;
             hwlnSPIClass    *_spi;
-            uint16_t        _buffer[320];
+#define ILI_BUFFER_SIZE 320            
+            uint16_t        _buffer[ILI_BUFFER_SIZE];
 };
 // EOF
