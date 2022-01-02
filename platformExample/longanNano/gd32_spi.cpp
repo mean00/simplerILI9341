@@ -42,23 +42,6 @@ lnSpi9341::~lnSpi9341()
 
 }
 
-// borrowed from adafruit
-
-static const uint8_t resetOff[] = {
-	0x01, 0,            //Soft Reset
-	FAKE_DELAY_COMMAND, 150,  // .kbv will power up with ONLY reset, sleep out, display on
-	0x28, 0,            //Display Off
-	0x3A, 1, 0x55,      //Pixel read=565, write=565.
-};
-static const uint8_t wakeOn[] = {
-	0x11, 0,            //Sleep Out
-	FAKE_DELAY_COMMAND, 150,
-	0x29, 0,            //Display On
-	//additional settings
-	ILI9341_INVERTOFF, 0,			// invert off
-	0x36, 1, 0x48,      //Memory Access
-	0xB0, 1, 0x40,      //RGB Signal [40] RCM=2
-};
 #define CS_ACTIVE   {if(_pinCS!=-1) _ioCS.off();}
 #define CS_IDLE     {if(_pinCS!=-1) _ioCS.on();}
 #define CD_DATA     {_ioDC.on();}
@@ -170,10 +153,10 @@ void lnSpi9341::reset()
  * @param size
  * @param data
  */
-void lnSpi9341::sendSequence(int size, const uint8_t *data)
+void lnSpi9341::sendSequence( const uint8_t *data)
 {
-    const uint8_t *tail=data+size;
-	while (data < tail) 
+    
+	while (*data ) 
     {
         CS_ACTIVE;
         uint8_t cmd = data[0];
@@ -193,13 +176,13 @@ void lnSpi9341::sendSequence(int size, const uint8_t *data)
 /**
  * 
  */
-void lnSpi9341::init()
+void lnSpi9341::init(const uint8_t *init1, const uint8_t *init2)
 {   
   
   reset();
   baseInit();
-  sendSequence(sizeof(resetOff),resetOff);  
-  sendSequence(sizeof(wakeOn),wakeOn);  
+  sendSequence(init1); //sizeof(resetOff),resetOff);  
+  sendSequence(init2); //(wakeOn),wakeOn);  
 }
 /**
  * 

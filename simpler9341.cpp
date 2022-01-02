@@ -55,7 +55,13 @@ ili9341::~ili9341()
  */              
 void ili9341::fillScreen(int color) // 16 bits!
 {
-    square(color,0,0,_width,_height);
+    if(_height>200) // bug ? int color, int x, int y, int w, int h
+    {
+        square(color,0,0,_width,200);
+        square(color,0,200,_width,_height-200);
+    }
+    else
+        square(color,0,0,_width,_height);
 }
 /**
  * 
