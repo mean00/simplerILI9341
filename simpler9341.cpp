@@ -55,10 +55,12 @@ ili9341::~ili9341()
  */              
 void ili9341::fillScreen(int color) // 16 bits!
 {
-    if(_height>200) // bug ? int color, int x, int y, int w, int h
+    // ~ 180 is the max => 57600 ko, 176 is ok 56320
+    #define ONE_GO 178
+    if(_height>ONE_GO) // bug ? int color, int x, int y, int w, int h
     {
-        square(color,0,0,_width,200);
-        square(color,0,200,_width,_height-200);
+        square(color,0,0,_width,ONE_GO);
+        square(color,0,ONE_GO,_width,_height-ONE_GO);
     }
     else
         square(color,0,0,_width,_height);
