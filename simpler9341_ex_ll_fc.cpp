@@ -3,7 +3,6 @@ extern "C"
 {
     #include "heatshrink_decoder.h"
 }
-#endif
 /**
  * 
  * @param w
