@@ -10,6 +10,61 @@
  * @return 
  */
 #define debug(...) {}
+
+void ili9341::innerLoop1Nc(int w, int h, int left, int lineSize,int color, int bg,uint8_t *p)
+{
+    int  bits = 0, bit = 0;
+    uint8_t *col;
+    for( int line=h-1;line>=0;line--)
+    {      
+        col=_column+left;     
+        // mid
+        for( int xcol=w-1;xcol>=0;xcol--)
+        {
+            if(!bit) // reload ?
+            {
+                bits= *p++;
+                if(xcol>=8) // speed up some special cases
+                {
+                    uint8_t *table8=(uint8_t *)_lookup;
+                    uint8_t *high=table8+(bits>>4)*4;
+                    uint8_t *low=table8+(bits&0xf)*4;                
+                    col[0]=high[0];
+                    col[1]=high[1];
+                    col[2]=high[2];
+                    col[3]=high[3];
+                    col[4]=low[0];
+                    col[5]=low[1];
+                    col[6]=low[2];
+                    col[7]=low[3];
+
+                    //memcpy(col,high,4);
+                    //memcpy(col+4,low,4);
+                    xcol-=7;
+                    bit=0;
+                    col+=8;
+                    continue;
+                }
+                bit = 0x80;
+            }      
+                            
+            *col++=!!(bits & bit) ;  
+            bit=bit>>1;
+        }
+        // 9ms here
+        push2Colors(_column,lineSize,color,bg);
+    }   
+}
+/**
+ * 
+ * @param x
+ * @param y
+ * @param c
+ * @param color
+ * @param bg
+ * @param infos
+ * @return 
+ */
 int ili9341::myDrawChar(int x, int y, unsigned char c,  int color, int bg,FontInfo &infos)
 {
     c -= infos.font->first;
@@ -56,7 +111,7 @@ int ili9341::myDrawChar(int x, int y, unsigned char c,  int color, int bg,FontIn
     if(right<0) right=0;
        
     int    finalColor;    
-    int  bits = 0, bit = 0;
+    
     setAddress(x,y, advv, h);
     debug(bg=oldbg);
     uint8_t  *col=_column;
@@ -67,45 +122,7 @@ int ili9341::myDrawChar(int x, int y, unsigned char c,  int color, int bg,FontIn
     // fill in body
     
     dataBegin();
-    for( int line=h-1;line>=0;line--)
-    {      
-        col=_column+left;     
-        // mid
-        for( int xcol=w-1;xcol>=0;xcol--)
-        {
-            if(!bit) // reload ?
-            {
-                bits= *p++;
-                if(xcol>=8) // speed up some special cases
-                {
-                uint8_t *table8=(uint8_t *)_lookup;
-                uint8_t *high=table8+(bits>>4)*4;
-                uint8_t *low=table8+(bits&0xf)*4;                
-                col[0]=high[0];
-                col[1]=high[1];
-                col[2]=high[2];
-                col[3]=high[3];
-                col[4]=low[0];
-                col[5]=low[1];
-                col[6]=low[2];
-                col[7]=low[3];
-                                
-                //memcpy(col,high,4);
-                //memcpy(col+4,low,4);
-                xcol-=7;
-                bit=0;
-                col+=8;
-                continue;
-                }
-                bit = 0x80;
-            }      
-                            
-            *col++=!!(bits & bit) ;  
-            bit=bit>>1;
-        }
-        // 9ms here
-        push2Colors(_column,advv,color,bg);
-    }   
+    innerLoop1Nc(w,h,left,advv,color,bg,p);
     dataEnd();
     return glyph->xAdvance;
 }

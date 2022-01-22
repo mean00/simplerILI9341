@@ -4,7 +4,7 @@
  */
 #pragma once
 #include "Arduino.h"
-#include "gfxfont.h"
+#include "pfxfont.h"
 #include "simpler9341_color.h"
 
 #define FAKE_DELAY_COMMAND 0xff
@@ -115,6 +115,7 @@ public: // freetype font
                 
 protected:
                 int     mySquare(int x, int y, int w, int xheight, uint16_t filler);
+                void    innerLoop1Nc(int w, int h, int left,int advance, int fg,int bg,uint8_t *p);
                 
 #define         ST7735_BUFFER_SIZE_WORD 256
                 uint16_t scrbuf[ST7735_BUFFER_SIZE_WORD];
