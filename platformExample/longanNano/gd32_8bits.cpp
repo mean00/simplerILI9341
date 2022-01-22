@@ -293,12 +293,11 @@ void ln8bit9341::reset()
  * @param size
  * @param data
  */
-void ln8bit9341::sendSequence(int size, const uint8_t *data)
+void ln8bit9341::sendSequence( const uint8_t *data)
 {
-        const uint8_t *tail=data+size;
         CS_ACTIVE;
         
-	while (data < tail) 
+	while (*data ) 
         {
             uint8_t cmd = data[0];
             uint8_t len = data[1];
@@ -317,15 +316,15 @@ void ln8bit9341::sendSequence(int size, const uint8_t *data)
 /**
  * 
  */
-void ln8bit9341::init()
+void ln8bit9341::init(const uint8_t *init1, const uint8_t *init2)
 {   
   setWriteDir();
   reset();
   baseInit();
   
 
-  sendSequence(sizeof(resetOff),resetOff);  
-  sendSequence(sizeof(wakeOn),wakeOn);  
+  sendSequence(init1);
+  sendSequence(init2);
 }
 /**
  * 

@@ -1,8 +1,10 @@
 #include "simpler9341.h"
+#ifdef ENABLE_FONT_COMPRESSION 
 extern "C"
 {
     #include "heatshrink_decoder.h"
 }
+#endif
 /**
  * 
  * @param x
@@ -72,6 +74,7 @@ void ili9341::innerLoop1Nc(int w, int h, int left, int lineSize,int color, int b
  */
 void ili9341::innerLoop1C(int w, int h, int left, int lineSize,int color, int bg,uint8_t *p)
 {
+#ifdef ENABLE_FONT_COMPRESSION 
     // Initialize heatshrink...
     heatshrink_decoder *hsd = heatshrink_decoder_alloc(64,8,4); // same as flatconvert!
     uint8_t decompBuffer[64];
@@ -138,6 +141,10 @@ void ili9341::innerLoop1C(int w, int h, int left, int lineSize,int color, int bg
         push2Colors(_column,lineSize,color,bg);
     }  
     heatshrink_decoder_free(hsd);
+#else
+    Logger("Font compression not activated\n");
+    xAssert(0);
+#endif
 }
 
 /**

@@ -90,7 +90,7 @@ class ln8bit9341 : public ili9341
     public:
                         ln8bit9341(int w, int h , int port,  int pinDc, int pinCS, int pinWrite, int pinRead, int pinReset);
             virtual      ~ln8bit9341();
-            virtual void init();
+            virtual void init(const uint8_t *init1, const uint8_t *init2);
             virtual void sendByte(int byte); // 8 bytes
             virtual void sendWord(int byte); // 16 bytes
             virtual void sendBytes(int nb, const uint8_t *data); // 8 bits
@@ -109,7 +109,7 @@ class ln8bit9341 : public ili9341
                     void reset();
                     void writeCmdParam(uint16_t cmd, int payload, const uint8_t * data);
                     void writeCommand(uint16_t c);
-                    void sendSequence(int size, const uint8_t *data);
+                    void sendSequence(const uint8_t *data);
                     void write8(uint8_t c);
                     uint8_t read8();
                     uint32_t readRegister32(int reg);
