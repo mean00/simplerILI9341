@@ -34,9 +34,6 @@ void ili9341::innerLoop2NC(int w, int h, int left, int lineSize,int fg, int bg,u
     int low=RR(1,3)+GG(1,3)+BB(1,3);
     int hi=RR(3,1)+GG(3,1)+BB(3,1);
     
-    low=0x1f<<11;
-    hi=0x1f;
-    
     const uint16_t colorGrad[4]={bg,low,hi,fg};        
     
     uint16_t *col;
@@ -50,13 +47,16 @@ void ili9341::innerLoop2NC(int w, int h, int left, int lineSize,int fg, int bg,u
     for(int i=0;i<right;i++)
             *col++=bg;
     
-    int  bits = 0, rank = 0;        
-    for( int line=h-1;line>=0;line--)
+    int  bits = 0, rank = -1;        
+    uint16_t *start;
+    start=(uint16_t *)_column;
+    start+=left;
+
+    for( int line=0;line<h;line++)
     {      
-        col=(uint16_t *)_column;
-        col+=left;
+        col=start;
         // mid
-        for( int xcol=w-1;xcol>=0;xcol--)
+        for( int xcol=0;xcol<w;xcol++)
         {
             if(rank<0) // reload ?
             {
