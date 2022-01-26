@@ -5,10 +5,10 @@ SET(HS_SRCS ${HS}/heatshrink_decoder.c)
 OPTION(SIMPLER_ILI9341_FONT_COMPRESSION OFF)
 
 IF(SIMPLER_ILI9341_FONT_COMPRESSION)
-   SET(FC simpler9341_ex_ll_fc.cpp  simpler9341_ex_ll_2fc.cpp)
+   SET(FC simpler9341_ex_ll_1fc.cpp  simpler9341_ex_ll_2fc.cpp)
    MESSAGE(STATUS "Font compression support enabled")
 ELSE(SIMPLER_ILI9341_FONT_COMPRESSION)
-   SET(FC simpler9341_ex_ll_nofc.cpp   simpler9341_ex_ll_2nofc.cpp)
+   SET(FC simpler9341_ex_ll_1nofc.cpp   simpler9341_ex_ll_2nofc.cpp)
    MESSAGE(STATUS "Font compression support disabled")
 ENDIF(SIMPLER_ILI9341_FONT_COMPRESSION)
 
@@ -17,6 +17,7 @@ ADD_LIBRARY(simplerILI9341
             simpler9341_ex.cpp 
             simpler9341_ex_ll.cpp  
             simpler9341_initCommand.cpp
+            simpler9341_ex_ll_1bpp.cpp
             simpler9341_ex_ll_2bpp.cpp
             ${FC}         
             ${ILI9341_DRIVER})
