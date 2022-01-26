@@ -23,7 +23,7 @@ void ili9341::innerLoop1Nc(int w, int h, int left, int lineSize,int color, int b
     uint8_t *col;
     for( int line=h-1;line>=0;line--)
     {      
-        col=_column+left;     
+        col=_column+left*2;     
         // mid
         for( int xcol=w-1;xcol>=0;xcol--)
         {
@@ -121,11 +121,19 @@ int ili9341::myDrawChar(int x, int y, unsigned char c,  int color, int bg,FontIn
     
     setAddress(x,y, advv, h);
     debug(bg=oldbg);
-    uint8_t  *col=_column;
+    
     
     // Pre-fill & left /right
-    memset(col,0,left);
-    memset(col+left+w,0,right);
+    uint16_t *col;
+    
+    col=(uint16_t *)_column;
+    for(int i=0;i<left;i++)
+            *col++=bg;
+        
+    col+=w;
+
+    for(int i=0;i<right;i++)
+            *col++=bg;
     // fill in body
     
     dataBegin();
