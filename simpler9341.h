@@ -115,7 +115,7 @@ public: // freetype font
                 
 protected:
                 int     mySquare(int x, int y, int w, int xheight, uint16_t filler);
-                void    innerLoop1Nc(int w, int h, int left,int advance, int fg,int bg,uint8_t *p);
+                void    innerLoop1NC(int w, int h, int left,int advance, int fg,int bg,uint8_t *p);
                 void    innerLoop1C(int w, int h, int left,int advance, int fg,int bg,uint8_t *p);
                 void    innerLoop2C(int w, int h, int left,int advance, int fg,int bg,uint8_t *p);
                 void    innerLoop2NC(int w, int h, int left,int advance, int fg,int bg,uint8_t *p);

@@ -21,7 +21,7 @@
  * @param infos
  * @return 
  */
-int ili9341::myDrawChar(int x, int y, unsigned char c,  int color, int bg,FontInfo &infos)
+int ili9341::myDrawChar(int x, int y, unsigned char c,  int fg, int bg,FontInfo &infos)
 {
     c -= infos.font->first;
     GFXglyph *glyph  = infos.font->glyph+c;
@@ -34,7 +34,10 @@ int ili9341::myDrawChar(int x, int y, unsigned char c,  int color, int bg,FontIn
    
     debug(uint16_t oldbg=bg);
     debug(bg=YELLOW);
-    debug(color=GREEN);
+    debug(fg=GREEN);
+    
+    fg=colorMap(fg);
+    bg=colorMap(bg);
     
     // Special case, space, it has yOffsset > 0
     if(infos.font->first+c==' ')
@@ -66,7 +69,7 @@ int ili9341::myDrawChar(int x, int y, unsigned char c,  int color, int bg,FontIn
     int right=(int)advv-(w+left);
     if(right<0) right=0;
        
-    int    finalColor;    
+     
     
     setAddress(x,y, advv, h);
     debug(bg=oldbg);
@@ -90,15 +93,15 @@ int ili9341::myDrawChar(int x, int y, unsigned char c,  int color, int bg,FontIn
     {
         case 1:
             if(infos.font->shrinked)
-                innerLoop1C(w,h,left,advv,color,bg,p);
+                innerLoop1C(w,h,left,advv,fg,bg,p);
             else
-                innerLoop1Nc(w,h,left,advv,color,bg,p);
+                innerLoop1NC(w,h,left,advv,fg,bg,p);
             break;
         case 2:
             if(infos.font->shrinked)
-                innerLoop2C(w,h,left,advv,color,bg,p);
+                innerLoop2C(w,h,left,advv,fg,bg,p);
             else
-                innerLoop2NC(w,h,left,advv,color,bg,p);
+                innerLoop2NC(w,h,left,advv,fg,bg,p);
             break;
                  
         default:
