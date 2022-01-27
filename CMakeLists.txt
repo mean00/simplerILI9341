@@ -3,6 +3,14 @@ INCLUDE_DIRECTORIES( ${HS})
 SET(HS_SRCS ${HS}/heatshrink_decoder.c)
 
 OPTION(SIMPLER_ILI9341_FONT_COMPRESSION OFF)
+OPTION(SIMPLER_ILI9341_2BPP_SUPPORT     OFF)
+
+
+IF(SIMPLER_ILI9341_2BPP_SUPPORT)
+    SET(SRC_2BPP simpler9341_ex_ll_2bpp.cpp)
+ELSE()
+    SET(SRC_2BPP simpler9341_ex_ll_2bpp_stubs.cpp)
+ENDIF()
 
 IF(SIMPLER_ILI9341_FONT_COMPRESSION)
     ADD_DEFINITIONS("-DILI_ENABLE_COMPRESSION")
@@ -14,8 +22,7 @@ ADD_LIBRARY(simplerILI9341
             simpler9341_ex_ll.cpp  
             simpler9341_initCommand.cpp
             simpler9341_ex_ll_1bpp.cpp
-            simpler9341_ex_ll_2bpp.cpp
-            ${FC}         
+            ${SRC_2BPP}     
             ${ILI9341_DRIVER})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
