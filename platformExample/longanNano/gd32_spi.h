@@ -39,8 +39,7 @@ class lnSpi9341 : public ili9341
             virtual void sendWords(int nb, const uint16_t *data); // 16 bits
             virtual void floodWords(int nb, const uint16_t data); // 16 bits
             virtual void updateHwRotation();
-            virtual void setAddress(int x, int y, int w, int h);
-            virtual void push2Colors(uint8_t *data, int len, int fg, int bg);
+            virtual void setAddress(int x, int y, int w, int h);            
             virtual void dataBegin();
             virtual void dataEnd();
             virtual void pushColors(int len, uint16_t *data) {xAssert(0);}

@@ -316,34 +316,5 @@ void lnSpi9341::floodWords(int nb, const uint16_t data)
     }
     dataEnd();        
 }
-/**
- * 
- * @param data
- * @param len
- * @param first
- * @param fg
- * @param bg
- */
- void lnSpi9341::push2Colors(uint8_t *data, int len, int fg, int bg)
- {  
-    
-    uint16_t *p=_buffer;
-    xAssert(len<ILI_BUFFER_SIZE);
-    uint8_t *tail=len+data;
-    fg=colorMap(fg);
-    bg=colorMap(bg);
-    while( data<tail)
-    {
-        if(*(data++))
-        {
-            *p=fg;
-        } else
-        {
-            *p=bg;
-        }
-        p++;
-    }
-    _spi->dmaWrite16(len,_buffer);
-}
 // EOF
 

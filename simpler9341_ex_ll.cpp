@@ -78,7 +78,7 @@ int ili9341::myDrawChar(int x, int y, unsigned char c,  int fg, int bg,FontInfo 
     // Pre-fill & left /right
     uint16_t *col;
     
-    col=(uint16_t *)_column;
+    col=(uint16_t *)scrbuf;
     for(int i=0;i<left;i++)
             *col++=bg;
         

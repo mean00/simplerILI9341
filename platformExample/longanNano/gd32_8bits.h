@@ -69,8 +69,7 @@ class lnFast8bitIo: public lnFastIO
                 }
                 void pulseLowNop() { *_onoff=_offbit;ILI_NOP;*_onoff=_onbit;ILI_NOP}
                 void pulsesLowNop(int count);
-                void pulseData(int count, int hi, int lo);
-                void push2Colors(int len, uint8_t *data,int fg, int bg);
+                void pulseData(int count, int hi, int lo);                
                 void sendBlock(int nb, uint16_t *data);
                 
     protected:                
@@ -97,8 +96,7 @@ class ln8bit9341 : public ili9341
             virtual void sendWords(int nb, const uint16_t *data); // 16 bits
             virtual void floodWords(int nb, const uint16_t data); // 16 bits
             virtual void updateHwRotation();
-            virtual void setAddress(int x, int y, int w, int h);
-            virtual void push2Colors(uint8_t *data, int len, int fg, int bg);
+            virtual void setAddress(int x, int y, int w, int h);            
             virtual void dataBegin();
             virtual void dataEnd();
             virtual void pushColors(int len, uint16_t *data);

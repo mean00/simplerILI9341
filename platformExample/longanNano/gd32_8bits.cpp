@@ -438,18 +438,7 @@ void ln8bit9341::floodWords(int nb, const uint16_t data)
     CS_IDLE;
 }
 /**
- * 
- * @param data
- * @param len
- * @param first
- * @param fg
- * @param bg
  */
- void ln8bit9341::push2Colors(uint8_t *data, int len, int fg, int bg)
- {  
-     CHECK_ARBITER();
-    _ioWrite->push2Colors(len,data,colorMap(fg),colorMap(bg));
- } 
 static const uint8_t rotMode[4]={0x8,0xc8,0x78,0xa8};
 /**
  * 
@@ -609,42 +598,6 @@ void lnFast8bitIo::pulsesLowNop(int nb)
             PULSE
         }    
 }   
-
-/**
- * 
- * @param len
- * @param data
- * @param fg
- * @param bg
- */
-void   lnFast8bitIo::push2Colors(int len, uint8_t *data, int fg, int bg)
-{
-    uint32_t fhi=fg>>8;
-    uint32_t flo=fg&0xff;
-    uint32_t bhi=bg>>8;
-    uint32_t blo=bg&0xff;
-    volatile register uint32_t *bop=_bop,*onoff=_onoff;
-    register uint32_t up=_onbit,down=_offbit;
-#define EXP(x) x=  WR_DATA8(x)
-    EXP(fhi);
-    EXP(flo);
-    EXP(bhi);
-    EXP(blo);
-    
-    uint8_t *tail=len+data;
-    while( data<tail)
-    {
-        if(*(data++))
-        {
-              *bop=  (fhi);   WRP;    *bop=(flo);  WRP;        
-              continue;
-        } else
-        {
-              *bop=  (bhi);   WRP;    *bop=( blo); WRP;    
-        }
-    }
-}
-
 
 
 // EOF

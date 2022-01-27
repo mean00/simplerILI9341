@@ -35,11 +35,9 @@ void ili9341::ILI_TEMPLATE_NAME(int w, int h, int left, int lineSize,int fg, int
 #endif    
     
     const uint16_t colorGrad[4]={(uint16_t)bg,(uint16_t)low,(uint16_t)hi,(uint16_t)fg};
-    
-    
     int  bits = 0, rank = -1;        
     uint16_t *start;
-    start=(uint16_t *)_column;
+    start=(uint16_t *)scrbuf;
     start+=left;
     uint16_t *col;
     for( int line=0;line<h;line++)
@@ -58,7 +56,7 @@ void ili9341::ILI_TEMPLATE_NAME(int w, int h, int left, int lineSize,int fg, int
             
             *col++=colorGrad[pix];
         }
-        sendWords(lineSize,(uint16_t *)_column);
+        sendWords(lineSize,(uint16_t *)scrbuf);
     }   
 }
 
