@@ -110,6 +110,8 @@ public: // freetype font
                 }
                 void    putPixel(int x,int y, int color);
                 void    drawRLEBitmap(int widthInPixel, int height, int wx, int wy, int fgcolor, int bgcolor, const uint8_t *data);
+                void    drawHSBitmap(int widthInPixel, int height, int wx, int wy, int fgcolor, int bgcolor, const uint8_t *data);
+                
 
 protected:
                 int     mySquare(int x, int y, int w, int xheight, uint16_t filler);

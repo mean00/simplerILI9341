@@ -298,7 +298,7 @@ void lnSpi9341::sendWords(int nb, const uint16_t *data)
         _spi->dmaWrite16(nb,data);    
         return;
     }
-    if(_cacheUsed+nb*2>_cacheSize)
+    if(_cacheUsed+nb*2>_cacheSize || nb>_cacheSize/2)
     {
         flushCache();
         _spi->dmaWrite16(nb,data);    
