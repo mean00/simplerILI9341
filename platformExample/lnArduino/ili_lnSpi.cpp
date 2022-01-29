@@ -8,7 +8,7 @@
  * 
  * 
  */
-#include "gd32_spi.h"
+#include "ili_lnSpi.h"
 #include "simpler9341_priv.h"
 
 

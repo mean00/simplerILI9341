@@ -7,7 +7,7 @@
 #include "simpler9341_priv.h"
 
 /**
- * 
+ *
  * @param width
  * @param height
  * @param pinDc
@@ -24,20 +24,19 @@ ili9341::ili9341(int width, int height)
     _rotation=0;
     _width=_physicalWidth;
     _height=_physicalHeight;
-     _fg=0xffff;
-     _bg=0;
-
+    _fg=0xffff;
+    _bg=0;
 }
 /**
- * 
+ *
  */
 ili9341::~ili9341()
 {
 }
 /*
- * 
+ *
  * @param color
- */              
+ */
 void ili9341::fillScreen(int color) // 16 bits!
 {
     // ~ 180 is the max => 57600 ko, 176 is ok 56320
@@ -51,7 +50,7 @@ void ili9341::fillScreen(int color) // 16 bits!
         square(color,0,0,_width,_height);
 }
 /**
- * 
+ *
  * @param rotation
  */
 void ili9341::setRotation(int rotation)
@@ -64,14 +63,14 @@ void ili9341::setRotation(int rotation)
                 _xOffset=_PhysicalXoffset;
                 _yOffset=_PhysicalYoffset;
                 _width=_physicalWidth;
-                _height=_physicalHeight;                
+                _height=_physicalHeight;
                 break;
         case 1:
-        case 3:	
+        case 3:
                 _xOffset=_PhysicalYoffset;
                 _yOffset=_PhysicalXoffset;
                 _width=_physicalHeight;
-                _height=_physicalWidth;                
+                _height=_physicalWidth;
                 break;
         default : xAssert(0);
                 break;
@@ -79,16 +78,16 @@ void ili9341::setRotation(int rotation)
     updateHwRotation();
 }
 /**
- * 
+ *
  */
 void ili9341::baseInit()
 {
-  
+
 }
 
 
 /**
- * 
+ *
  * @param color
  * @param x
  * @param y
@@ -105,25 +104,25 @@ void ili9341::fillRoundRect(int x0, int y0, int w, int h,int radius, int outColo
 {
     int ll=radius*w;
     int hh=radius*h;
-      
+
       setAddress(x0,y0,w,radius);
       floodWords(ll,outColor);
       setAddress(x0,y0+h-radius,w,radius);
       floodWords(ll,outColor);
-      
+
       setAddress(x0,y0,radius,h);
       floodWords(hh,outColor);
       setAddress(x0+w-radius,y0,radius,h);
       floodWords(hh,outColor);
-      
+
       // interior now
       setAddress(x0+radius,y0+radius, w-2*radius,h-2*radius);
       floodWords( (w-2*radius)*(h-2*radius),inColor);
-      
+
 }
 
 /**
- * 
+ *
  * @param x0
  * @param y0
  * @param h
@@ -132,10 +131,10 @@ void ili9341::fillRoundRect(int x0, int y0, int w, int h,int radius, int outColo
 void ili9341::VLine(int x0, int y0, int h, int color)
 {
   setAddress(x0, y0, 1, h);
-  floodWords(h,color); 
+  floodWords(h,color);
 }
 /**
- * 
+ *
  * @param x0
  * @param y0
  * @param w
@@ -144,7 +143,7 @@ void ili9341::VLine(int x0, int y0, int h, int color)
 void ili9341::HLine(int x0, int y0, int w, int color)
 {
   setAddress(x0, y0, w, 1);
-  floodWords(w,color); 
+  floodWords(w,color);
 }
 /**
  */

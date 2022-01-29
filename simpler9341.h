@@ -10,12 +10,12 @@
 #define FAKE_DELAY_COMMAND 0xff
 /**
  */
-class ili9341 
+class ili9341
 {
 public:
 //             this is the part you have to reimplment for your setup
-//              in the derived class            
-//---------------------------------------------------------------    
+//              in the derived class
+//---------------------------------------------------------------
             virtual void sendByte(int byte)=0; // 8 bytes
             virtual void sendWord(int byte)=0; // 16 bytes
             virtual void sendBytes(int nb, const uint8_t *data)=0; // 8 bits
@@ -27,7 +27,7 @@ public:
             virtual void dataBegin()=0;
             virtual void pushColors(int len, uint16_t *data)=0;
                 uint16_t colorMap(const uint16_t d);
-//---------------------------------------------------------------    
+//---------------------------------------------------------------
                enum FontSize
                {
                    SmallFont,MediumFont,BigFont
@@ -35,22 +35,22 @@ public:
                class FontInfo
                {
                public:
-                 int               maxHeight;          
+                 int               maxHeight;
                  int               maxWidth;
-                 const GFXfont    *font;        
-               };  
+                 const GFXfont    *font;
+               };
                FontInfo          fontInfo[3];
 
                FontInfo          *currentFont;
                const GFXfont     *gfxFont;
                int               _fg,_bg;
                uint32_t          _chipId;
-    
-    
+
+
                          ili9341(int width, int height);
                 virtual ~ili9341();
                 virtual void init(const uint8_t *init1, const uint8_t *init2)=0;
-                
+
                 void fillScreen(int color); // 16 bits!
                 void fillRoundRect(int x0, int y0, int w, int h,int radius, int outColor,int inColor);
 
@@ -73,10 +73,10 @@ protected:
                 int _PhysicalXoffset;
                 int _PhysicalYoffset;
                 int _xOffset;
-                int _yOffset;                
-protected:                
+                int _yOffset;
+protected:
                 void baseInit();
-                
+
 public: // freetype font
                 void    getTextColor(int &f,int &g)
                 {
@@ -110,17 +110,17 @@ public: // freetype font
                 }
                 void    putPixel(int x,int y, int color);
                 void    drawRLEBitmap(int widthInPixel, int height, int wx, int wy, int fgcolor, int bgcolor, const uint8_t *data);
-                
+
 protected:
                 int     mySquare(int x, int y, int w, int xheight, uint16_t filler);
                 void    innerLoop1NC(int w, int h, int left,int advance, int fg,int bg,uint8_t *p);
                 void    innerLoop1C(int w, int h, int left,int advance, int fg,int bg,uint8_t *p);
                 void    innerLoop2C(int w, int h, int left,int advance, int fg,int bg,uint8_t *p);
                 void    innerLoop2NC(int w, int h, int left,int advance, int fg,int bg,uint8_t *p);
-                
+
 #define         ST7735_BUFFER_SIZE_WORD 256
                 uint16_t scrbuf[ST7735_BUFFER_SIZE_WORD];
-                int     cursor_x,cursor_y;                
+                int     cursor_x,cursor_y;
 
 };
 

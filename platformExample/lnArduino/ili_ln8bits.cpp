@@ -11,7 +11,7 @@
  * 
  * 
  */
-#include "gd32_8bits.h"
+#include "ili_ln8bits.h"
 #include "simpler9341_priv.h"
 
 
