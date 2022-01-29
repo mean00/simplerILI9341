@@ -29,19 +29,19 @@
 #include "simpler9341_ex_ll_1bpp_template.h"
 
 void ili9341::drawHSBitmap(int widthInPixel, int height, int wx, int wy, int fgcolor, int bgcolor, const uint8_t *data)
-{    
+{
     iliHS hs(data);
     int nbPixel=widthInPixel*height;
     int pixel=0;
     setAddress(wx, wy,  widthInPixel, height);
     int mask=0;
-    int cur;   
+    int cur;
     uint16_t *o=_scrbuf;
     int ready=0;
-   
+
     uint16_t color;
     dataBegin();
-    while(pixel<nbPixel)        
+    while(pixel<nbPixel)
     {
         // load next
         cur= hs.next();
@@ -68,13 +68,19 @@ void ili9341::drawHSBitmap(int widthInPixel, int height, int wx, int wy, int fgc
     if(ready)
         sendWords(ready,_scrbuf);
     dataEnd();
-    
+
 }
 #else
 void ili9341::innerLoop1C(int w, int h, int left, int lineSize, int color,
                           int bg, uint8_t *p) {
   Logger("Font compression not activated\n");
   xAssert(0);
+}
+
+void ili9341::drawHSBitmap(int widthInPixel, int height, int wx, int wy, int fgcolor, int bgcolor, const uint8_t *data)
+{
+    Logger("compression not activated\n");
+    xAssert(0);
 }
 #endif
 
