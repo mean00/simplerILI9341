@@ -33,13 +33,31 @@ lnSpi9341::lnSpi9341( int w, int h ,hwlnSPIClass *spi, int pinDC,int pinCS, int 
     _pinCS=pinCS;
     _PhysicalXoffset=0;
     _PhysicalYoffset=0;
+    _cache=NULL;
+    _cacheUsed=0;
+    _cacheSize=0;
+
 }
+/**
+ */
+void lnSpi9341::enableCache(int cacheSizeInWords)
+{
+    _cacheUsed=0;
+    _cacheSize=cacheSizeInWords;
+    _cache=new uint16_t[_cacheSize];
+}
+
+
 /**
  * 
  */
 lnSpi9341::~lnSpi9341()
 {
-
+    if(_cache)
+    {
+        delete [] _cache;
+        _cache=NULL;
+    }
 }
 
 #define CS_ACTIVE   {if(_pinCS!=-1) _ioCS.off();}
@@ -275,9 +293,31 @@ void lnSpi9341::sendBytes(int nb, const uint8_t *data)
  */
 void lnSpi9341::sendWords(int nb, const uint16_t *data)
 {
-    _spi->dmaWrite16(nb,data);    
+    if(!_cache)     
+    {
+        _spi->dmaWrite16(nb,data);    
+        return;
+    }
+    if(_cacheUsed+nb*2>_cacheSize)
+    {
+        flushCache();
+        _spi->dmaWrite16(nb,data);    
+    }
+    else
+    {
+        memcpy(_cache+_cacheUsed,data,nb*2);
+        _cacheUsed+=nb;                
+    }
 }
-
+/**
+ */
+void lnSpi9341::flushCache()
+{
+    xAssert(_cache);
+    if(!_cacheUsed) return;
+    _spi->dmaWrite16(_cacheUsed,_cache);    
+    _cacheUsed=0;
+}
 /**
  * 
  */
@@ -293,6 +333,10 @@ void lnSpi9341::dataBegin()
  */
 void lnSpi9341::dataEnd()
 {
+    if(_cache && _cacheUsed)
+    {
+        flushCache();
+    }
      CD_COMMAND;
      CS_IDLE;
 }

@@ -18,7 +18,7 @@ void ili9341::ILI_TEMPLATE_NAME(int w, int h, int left, int lineSize,int fg, int
         
     
     ILI_TEMPLATE_PROLOG;
-    uint16_t *start=(uint16_t *)scrbuf;
+    uint16_t *start=(uint16_t *)_scrbuf;
     start+=left;
     for( int line=h-1;line>=0;line--)
     {      
@@ -41,7 +41,7 @@ void ili9341::ILI_TEMPLATE_NAME(int w, int h, int left, int lineSize,int fg, int
             }
             mask>>=1;
         }
-        sendWords(lineSize,(uint16_t *)scrbuf);
+        sendWords(lineSize,(uint16_t *)_scrbuf);
     }   
 }
 

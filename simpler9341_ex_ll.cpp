@@ -78,7 +78,7 @@ int ili9341::myDrawChar(int x, int y, unsigned char c,  int fg, int bg,FontInfo 
     // Pre-fill & left /right
     uint16_t *col;
     
-    col=(uint16_t *)scrbuf;
+    col=(uint16_t *)_scrbuf;
     for(int i=0;i<left;i++)
             *col++=bg;
         
@@ -132,7 +132,7 @@ void ili9341::drawRLEBitmap(int widthInPixel, int height, int wx, int wy, int fg
     setAddress(wx, wy,  widthInPixel, height);
     int mask=0;
     int cur;   
-    uint16_t *o=scrbuf;
+    uint16_t *o=_scrbuf;
     int ready=0;
     int repeat;
     uint16_t color;
@@ -166,15 +166,15 @@ void ili9341::drawRLEBitmap(int widthInPixel, int height, int wx, int wy, int fg
             }
             if(ready>(ST7735_BUFFER_SIZE_WORD-16))
             { // Flush
-              sendWords(ready,scrbuf);
+              sendWords(ready,_scrbuf);
               ready=0;
-              o=scrbuf;
+              o=_scrbuf;
             }
         }
         pixel+=repeat*8;
     }
     if(ready)
-        sendWords(ready,scrbuf);
+        sendWords(ready,_scrbuf);
     dataEnd();
     
 }

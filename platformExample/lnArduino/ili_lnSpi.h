@@ -32,6 +32,7 @@ class lnSpi9341 : public ili9341
     public:
                         lnSpi9341(int w, int h , hwlnSPIClass *spi,  int pinDc, int pinCS, int pinReset=-1);
             virtual      ~lnSpi9341();
+                    void enableCache(int cacheSizeInWords);
             virtual void init(const uint8_t *init1, const uint8_t *init2);
             virtual void sendByte(int byte); // 8 bytes
             virtual void sendWord(int byte); // 16 bytes
@@ -54,11 +55,14 @@ class lnSpi9341 : public ili9341
                     void write8(uint8_t c);
                     uint32_t readRegister32(int reg);
                     void writeRegister32(int r,uint32_t  val);                    
-
+                    void flushCache();
             lnPin           _pinReset,_pinDC,_pinCS;
             lnFastIO        _ioCS,_ioDC;
             hwlnSPIClass    *_spi;
 #define ILI_BUFFER_SIZE 320            
             uint16_t        _buffer[ILI_BUFFER_SIZE];
+            uint16_t        *_cache;
+            int             _cacheUsed;
+            int             _cacheSize;
 };
 // EOF

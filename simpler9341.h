@@ -19,7 +19,7 @@ public:
             virtual void sendByte(int byte)=0; // 8 bytes
             virtual void sendWord(int byte)=0; // 16 bytes
             virtual void sendBytes(int nb, const uint8_t *data)=0; // 8 bits
-            virtual void sendWords(int nb, const uint16_t *data)=0; // 16 bits
+            virtual void sendWords(int nb, const uint16_t *data)=0; // 16 bits, that one must be inside dataBegin() dataEnd()
             virtual void updateHwRotation()=0;
             virtual void floodWords(int nb, const uint16_t data)=0; // 16 bits            
             virtual void setAddress(int x, int y, int w, int h)=0;
@@ -119,7 +119,7 @@ protected:
                 void    innerLoop2NC(int w, int h, int left,int advance, int fg,int bg,uint8_t *p);
 
 #define         ST7735_BUFFER_SIZE_WORD 256
-                uint16_t scrbuf[ST7735_BUFFER_SIZE_WORD];
+                uint16_t _scrbuf[ST7735_BUFFER_SIZE_WORD];
                 int     cursor_x,cursor_y;
 
 };
