@@ -80,7 +80,7 @@ void ili9341::innerLoop1C(int w, int h, int left, int lineSize, int color,
 void ili9341::drawHSBitmap(int widthInPixel, int height, int wx, int wy, int fgcolor, int bgcolor, const uint8_t *data)
 {
     Logger("compression not activated\n");
-    xAssert(0);
+    
 }
 #endif
 
