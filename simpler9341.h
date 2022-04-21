@@ -121,7 +121,7 @@ protected:
                 void    innerLoop2NC(int w, int h, int left,int advance, int fg,int bg,uint8_t *p);
 
 #define         ST7735_BUFFER_SIZE_WORD 256
-                uint16_t _scrbuf[ST7735_BUFFER_SIZE_WORD];
+                uint16_t *_scrbuf;
                 int     cursor_x,cursor_y;
 
 };

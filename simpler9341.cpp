@@ -26,12 +26,15 @@ ili9341::ili9341(int width, int height)
     _height=_physicalHeight;
     _fg=0xffff;
     _bg=0;
+    _scrbuf=new uint16_t [ST7735_BUFFER_SIZE_WORD];
 }
 /**
  *
  */
 ili9341::~ili9341()
 {
+    delete [] _scrbuf;
+    _scrbuf=NULL;
 }
 /*
  *
