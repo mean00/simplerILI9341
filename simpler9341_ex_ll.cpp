@@ -89,6 +89,14 @@ int ili9341::myDrawChar(int x, int y, unsigned char c,  int fg, int bg,FontInfo 
     // fill in body
     
     dataBegin();
+
+// dont draw out of screen 
+    if(y+h>=_height)
+    {
+        h=_height-y;
+        if(h<0) h=0;
+    }
+
     switch(infos.font->bpp)
     {
         case 1:
