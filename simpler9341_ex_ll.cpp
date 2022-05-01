@@ -36,8 +36,7 @@ int ili9341::myDrawChar(int x, int y, unsigned char c,  int fg, int bg,FontInfo 
     debug(bg=YELLOW);
     debug(fg=GREEN);
     
-    fg=colorMap(fg);
-    bg=colorMap(bg);
+  
     
     // Special case, space, it has yOffsset > 0
     if(infos.font->first+c==' ')
@@ -62,6 +61,8 @@ int ili9341::myDrawChar(int x, int y, unsigned char c,  int fg, int bg,FontInfo 
     if(bottom>=-2)
         mySquare(x,y-bottom,advv,bottom+2,bg);      
     
+    fg=colorMap(fg);
+    bg=colorMap(bg);
 
     y+= glyph->yOffset;   // offset is <0 most of the time
     
