@@ -3,6 +3,11 @@
  */
 #pragma once
 
+#define ILI_WAIT(x) FAKE_DELAY_COMMAND, x
+#define ILI_CMD(x) x,0
+#define ILI_CMD2(x,y) x,1,y
+#define ILI_CMD3(x,y,z) x,2,y,z
+#define ILI_CMD4(x,y,z,t) x,3,y,z,t
 
 // Register names
 #define ILI9341_SOFTRESET          0x01
@@ -17,16 +22,16 @@
 #define ILI9341_COLADDRSET         0x2A
 #define ILI9341_PAGEADDRSET        0x2B
 #define ILI9341_MEMORYWRITE        0x2C
+#define ILI9341_MEMCONTROL         0x36
+#define ILI9341_MADCTL			   0x36
 #define ILI9341_PIXELFORMAT        0x3A
 #define ILI9341_FRAMECONTROL       0xB1
 #define ILI9341_DISPLAYFUNC        0xB6
 #define ILI9341_ENTRYMODE          0xB7
 #define ILI9341_POWERCONTROL1      0xC0
 #define ILI9341_POWERCONTROL2      0xC1
-#define ILI9341_VCOMCONTROL1      0xC5
-#define ILI9341_VCOMCONTROL2      0xC7
-#define ILI9341_MEMCONTROL      0x36
-#define ILI9341_MADCTL			0x36
+#define ILI9341_VCOMCONTROL1       0xC5
+#define ILI9341_VCOMCONTROL2       0xC7
 
 #define ILI9341_MADCTL_MY  0x80
 #define ILI9341_MADCTL_MX  0x40

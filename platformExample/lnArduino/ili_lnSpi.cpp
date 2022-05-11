@@ -31,11 +31,12 @@ lnSpi9341::lnSpi9341( int w, int h ,hwlnSPIClass *spi, int pinDC,int pinCS, int 
     _pinReset=pinReset;
     _pinDC=pinDC;
     _pinCS=pinCS;
-    _PhysicalXoffset=0;
-    _PhysicalYoffset=0;
+    _PhysicalYoffset=0; //(320-240)/2;
+    _PhysicalXoffset=(320-240)/2;;
     _cache=NULL;
     _cacheUsed=0;
     _cacheSize=0;
+    _3wire=false;
 
 }
 /**
@@ -46,7 +47,13 @@ void lnSpi9341::enableCache(int cacheSizeInWords)
     _cacheSize=cacheSizeInWords;
     _cache=new uint16_t[_cacheSize];
 }
-
+/**
+ * 
+ */
+void lnSpi9341::enable3WireMode()
+{
+    _3wire=true;
+}
 
 /**
  * 
@@ -80,11 +87,13 @@ void lnSpi9341::write8(uint8_t c)
 void lnSpi9341::writeCmdParam(uint16_t cmd, int payload, const uint8_t * data)
 {
     CD_COMMAND;
-    _spi->write16(cmd);
+    _spi->write(cmd);
     if(payload)
     {
         CD_DATA;
-        _spi->dmaWrite(payload,data);
+        for(int i=0;i<payload;i++)
+            _spi->write(data[i]);
+        //_spi->dmaWrite(payload,data);
     }    
 }
 /**
@@ -104,15 +113,25 @@ void lnSpi9341::writeCommand(uint16_t c)
  */
 uint32_t lnSpi9341::readRegister32(int r)
 {
-  CS_ACTIVE;  
-  CD_COMMAND;  
-  _spi->write16(r);
-  CD_DATA;
-  uint32_t tx=0,rx=0;
-  lnDelayUs(50);
-  _spi->transfer(4,(uint8_t *)&tx,(uint8_t *)&rx);
-  CS_IDLE;
-  return rx;
+    uint32_t tx=0,rx2;  
+    uint8_t rx[4];
+    {
+        CS_ACTIVE;  
+        CD_COMMAND;  
+        _spi->write(r);
+        lnDelayUs(50);
+        CD_DATA;        
+        lnDelayUs(50);
+        if(_3wire)
+            _spi->read1wire( 4,rx);
+        else
+            _spi->transfer(4,(uint8_t *)&tx,rx);
+        // revert
+        rx2=rx[3]+(rx[2]<<8)+(rx[1]<<16)+(rx[0]<<24);
+        CS_IDLE;
+        Logger("Reading register32 0x%x => %x\n",r,rx2);
+    }
+    return rx2;
 }
 
 /**
@@ -131,11 +150,23 @@ void lnSpi9341::writeRegister32(int r,uint32_t  val)
  */
 uint32_t lnSpi9341::readChipId()
 {  
-  uint32_t regD3=readRegister32(0xd3)&0xffff ;
-  uint32_t reg04=readRegister32(0x04)&0xffff ;
+  uint32_t regD3=readRegister32(0xd3);
+  uint32_t reg04=readRegister32(0x04);
+  uint32_t reg09=readRegister32(0x09);
+  uint32_t reg0c=readRegister32(0x0f);
   
-  if(regD3==0x9341) return 0x9341; // 9341 
-  if(reg04==0x8552) return 0x7789; // is it really a 7789 ?
+  if(regD3==0x9341) 
+  {
+    Logger("ILI 9341 detected\n");
+    return 0x9341; // 9341 
+  }
+  reg04>>=8;
+  reg04&=0xffff;
+  if(reg04 ==0x8552) 
+  {
+    Logger("ST7789 detected\n");
+    return 0x7789; // is it really a 7789 ?
+  }
   Logger("Warning : Unknown LCD detected\n");
   return 0x9341; // unknown
 }
@@ -176,7 +207,7 @@ void lnSpi9341::sendSequence( const uint8_t *data)
     
 	while (*data ) 
     {
-        CS_ACTIVE;
+        
         uint8_t cmd = data[0];
         uint8_t len = data[1];
         data+=2;
@@ -184,7 +215,8 @@ void lnSpi9341::sendSequence( const uint8_t *data)
         {			
             delay(len);
             continue;
-        }                 
+        }        
+        CS_ACTIVE;         
         writeCmdParam(cmd, len, data);
         data += len;		
         CS_IDLE;
@@ -200,7 +232,8 @@ void lnSpi9341::init(const uint8_t *init1, const uint8_t *init2)
   reset();
   baseInit();
   sendSequence(init1); //sizeof(resetOff),resetOff);  
-  sendSequence(init2); //(wakeOn),wakeOn);  
+  if(init2)
+    sendSequence(init2); //(wakeOn),wakeOn);  
 }
 /**
  * 
@@ -295,13 +328,17 @@ void lnSpi9341::sendWords(int nb, const uint16_t *data)
 {
     if(!_cache)     
     {
-        _spi->dmaWrite16(nb,data);    
+        //_spi->dmaWrite16(nb,data);   
+        for(int i=0;i<nb;i++) 
+            _spi->write16(data[i]);    
         return;
     }
     if(_cacheUsed+nb*2>_cacheSize || nb>_cacheSize/2)
     {
         flushCache();
-        _spi->dmaWrite16(nb,data);    
+        //_spi->dmaWrite16(nb,data);    
+        for(int i=0;i<nb;i++) 
+            _spi->write16(data[i]);  
     }
     else
     {
@@ -315,7 +352,11 @@ void lnSpi9341::flushCache()
 {
     xAssert(_cache);
     if(!_cacheUsed) return;
-    _spi->dmaWrite16(_cacheUsed,_cache);    
+
+
+    //_spi->dmaWrite16(_cacheUsed,_cache);    
+     for(int i=0;i<_cacheUsed;i++) 
+            _spi->write16(_cache[i]);  
     _cacheUsed=0;
 }
 /**
@@ -356,7 +397,9 @@ void lnSpi9341::floodWords(int nb, const uint16_t data)
         int chunk=nb;
         if(chunk>65534) chunk=65534;
         nb-=chunk;               
-        _spi->dmaWrite16Repeat(chunk,f);        
+        //_spi->dmaWrite16Repeat(chunk,f);        
+         for(int i=0;i<chunk;i++) 
+            _spi->write16(f);  
     }
     dataEnd();        
 }

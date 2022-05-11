@@ -33,6 +33,7 @@ class lnSpi9341 : public ili9341
                         lnSpi9341(int w, int h , hwlnSPIClass *spi,  int pinDc, int pinCS, int pinReset=-1);
             virtual      ~lnSpi9341();
                     void enableCache(int cacheSizeInWords);
+                    void enable3WireMode(); // call this if you have only CLK/SDA i.e. not MOSI AND MISO, MISO is used for both tx & rx
             virtual void init(const uint8_t *init1, const uint8_t *init2);
             virtual void sendByte(int byte); // 8 bytes
             virtual void sendWord(int byte); // 16 bytes
@@ -64,5 +65,6 @@ class lnSpi9341 : public ili9341
             uint16_t        *_cache;
             int             _cacheUsed;
             int             _cacheSize;
+            bool            _3wire;
 };
 // EOF
