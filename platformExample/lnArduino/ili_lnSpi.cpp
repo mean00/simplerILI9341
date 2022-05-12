@@ -36,8 +36,8 @@ lnSpi9341::lnSpi9341( int w, int h ,hwlnSPIClass *spi, int pinDC,int pinCS, int 
     _pinReset=pinReset;
     _pinDC=pinDC;
     _pinCS=pinCS;
-    _PhysicalYoffset=20; //(-w)/2; //(320-240)/2;
-    _PhysicalXoffset=0; //(320-h)/2;;
+    _PhysicalYoffset=(320-h)/2; // (320-280)=40/2=20 ?
+    _PhysicalXoffset=(240-w)/2; //  (240-240)/2=0 ?
     _cache=NULL;
     _cacheUsed=0;
     _cacheSize=0;
@@ -207,7 +207,21 @@ void lnSpi9341::reset()
  */
 void lnSpi9341::sendSequence( const uint8_t *data)
 {
-    
+#if 0
+    int cmd=0xaa;
+    uint8_t xdata=0x55;
+    while(1)
+    {
+        CS_ACTIVE;         
+        CD_COMMAND;
+        _spi->write(cmd);
+        CD_DATA;
+        //_spi->write(0x55);
+        _spi->dmaWrite(1,&xdata);
+        CS_IDLE;
+        lnDelay(1) ;
+    }
+#endif
 	while (*data ) 
     {
         
@@ -385,18 +399,23 @@ void lnSpi9341::dataEnd()
  * 
  *
 */
+#define ONE_CHUNK (65534)
 void lnSpi9341::floodWords(int nb, const uint16_t data)
 {      
-    uint16_t f=colorMap(data);
-    dataBegin();
+    uint16_t f=colorMap(data);    
     while(nb)
     {        
         int chunk=nb;
-        if(chunk>65534) chunk=65534;
-        nb-=chunk;               
-        simpleWrite16R(chunk,f);        
+        if(chunk>ONE_CHUNK) chunk=ONE_CHUNK;
+        nb-=chunk;            
+        dataBegin();   
+        //simpleWrite16R(chunk,f);   
+
+        _spi->write16Repeat(chunk,f);             
+        //_spi->dmaWrite16Repeat(chunk,f);
+        dataEnd();      
     }
-    dataEnd();        
+      
 }
 // EOF
 

@@ -86,7 +86,7 @@ void ili9341::setRotation(int rotation)
  */
 void ili9341::baseInit()
 {
-
+    
 }
 
 
