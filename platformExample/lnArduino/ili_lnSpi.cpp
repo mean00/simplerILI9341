@@ -11,6 +11,11 @@
 #include "ili_lnSpi.h"
 #include "simpler9341_priv.h"
 
+// for very small transfer it is more expensive to setup the DMA
+// than to send the actual data, so do something very simple
+#define simpleWrite16(size,data)   {for(int i=0;i<size;i++)      _spi->write16(data[i]);}
+#define simpleWrite8(size,data)    {for(int i=0;i<size;i++)      _spi->write(data[i]);}
+#define simpleWrite16R(size,data) {for(int i=0;i<size;i++)       _spi->write16(data);}
 
 
 #define CHECK_ARBITER() 
@@ -31,8 +36,8 @@ lnSpi9341::lnSpi9341( int w, int h ,hwlnSPIClass *spi, int pinDC,int pinCS, int 
     _pinReset=pinReset;
     _pinDC=pinDC;
     _pinCS=pinCS;
-    _PhysicalYoffset=0; //(320-240)/2;
-    _PhysicalXoffset=(320-240)/2;;
+    _PhysicalYoffset=20; //(-w)/2; //(320-240)/2;
+    _PhysicalXoffset=0; //(320-h)/2;;
     _cache=NULL;
     _cacheUsed=0;
     _cacheSize=0;
@@ -91,9 +96,7 @@ void lnSpi9341::writeCmdParam(uint16_t cmd, int payload, const uint8_t * data)
     if(payload)
     {
         CD_DATA;
-        for(int i=0;i<payload;i++)
-            _spi->write(data[i]);
-        //_spi->dmaWrite(payload,data);
+        simpleWrite8(payload,data);
     }    
 }
 /**
@@ -328,17 +331,13 @@ void lnSpi9341::sendWords(int nb, const uint16_t *data)
 {
     if(!_cache)     
     {
-        //_spi->dmaWrite16(nb,data);   
-        for(int i=0;i<nb;i++) 
-            _spi->write16(data[i]);    
+        simpleWrite16(nb,data);
         return;
     }
     if(_cacheUsed+nb*2>_cacheSize || nb>_cacheSize/2)
     {
         flushCache();
-        //_spi->dmaWrite16(nb,data);    
-        for(int i=0;i<nb;i++) 
-            _spi->write16(data[i]);  
+        simpleWrite16(nb,data);
     }
     else
     {
@@ -354,9 +353,7 @@ void lnSpi9341::flushCache()
     if(!_cacheUsed) return;
 
 
-    //_spi->dmaWrite16(_cacheUsed,_cache);    
-     for(int i=0;i<_cacheUsed;i++) 
-            _spi->write16(_cache[i]);  
+    simpleWrite16(_cacheUsed,_cache);    
     _cacheUsed=0;
 }
 /**
@@ -366,7 +363,7 @@ void lnSpi9341::dataBegin()
 {
     CS_ACTIVE;
     CD_COMMAND;
-    sendWord(ILI9341_MEMORYWRITE);
+    _spi->write(ILI9341_MEMORYWRITE);
     CD_DATA;
 }
 /**
@@ -397,9 +394,7 @@ void lnSpi9341::floodWords(int nb, const uint16_t data)
         int chunk=nb;
         if(chunk>65534) chunk=65534;
         nb-=chunk;               
-        //_spi->dmaWrite16Repeat(chunk,f);        
-         for(int i=0;i<chunk;i++) 
-            _spi->write16(f);  
+        simpleWrite16R(chunk,f);        
     }
     dataEnd();        
 }
