@@ -49,7 +49,7 @@ void setup()
     //
     spi=new hwlnSPIClass(0,-1);    
     spi->begin();
-    lnSPISettings transaction(100*1000, SPI_MSBFIRST, SPI_MODE0,-1);
+    lnSPISettings transaction(36*1000*1000, SPI_MSBFIRST, SPI_MODE0,-1);
     spi->beginTransaction(transaction);
     
     ili=new lnSpi9341( 240, 280,
@@ -60,26 +60,33 @@ void setup()
     ili->enable3WireMode();
     ili->init(st7789v2_ada,NULL); 
     ili->setRotation(1);
-    ili->fillScreen(0x0);    
+    ili->fillScreen(0xffff);    
     lnPinMode(LN_SYSTEM_LED,lnOUTPUT);
    }
 /**
  * 
  */
+#define T 80
+#define K(x) 60*x
+void square()
+{
+    ili->square(0,K(0),K(0),T,T);
+    ili->square(0x1f,K(1),K(1),T,T);
+    ili->square(0x3f<<5,K(2),K(2),T,T);
+    ili->square(0x1f<<11,K(3),K(3),T,T);
+}
+
 void loop()
 {
-    
+#define FILL_SCREEN(color)     xDelay(0*100);      ili->fillScreen(color); square();
     while(1)
     {
-        lnDigitalWrite(LN_SYSTEM_LED,0);
-        xDelay(100);
-        ili->fillScreen(0x00);
-        lnDigitalWrite(LN_SYSTEM_LED,1);
-        xDelay(100);        
-        ili->fillScreen(0x1f);
-        Logger("*\n");
-        xDelay(100);
-        ili->fillScreen(0xffff);
+        lnDigitalToggle(LN_SYSTEM_LED);
+        FILL_SCREEN(0x0000);
+
+        FILL_SCREEN(0x001f);
+        FILL_SCREEN(0x3f<<5);
+        FILL_SCREEN(0x1f<<11);
     }
 }
 //
