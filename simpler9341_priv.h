@@ -40,3 +40,39 @@
 #define ILI9341_MADCTL_RGB 0x00
 #define ILI9341_MADCTL_BGR 0x08
 #define ILI9341_MADCTL_MH  0x04
+
+
+
+/**
+* \brief list of DMA transfer to perform
+* @param nb
+* @param data
+ * 
+ *
+*/
+class lnSpi9341;
+class lnLinkedTranfer
+{
+public:
+    
+        lnLinkedTranfer(lnSpi9341 *me)
+        {
+            ili=me;
+            nbStep=0;
+            currentStep=0;
+        }
+        void add(int nb, const uint16_t *c)
+        {
+            size[nbStep]=nb;
+            data[nbStep]=c;
+            nbStep++;
+            xAssert(nbStep<4)
+
+        }
+        int nbStep;
+        int currentStep;
+        int size[4];
+        const uint16_t  *data[4];
+        lnSpi9341 *ili;
+
+};

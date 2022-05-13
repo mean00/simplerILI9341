@@ -152,8 +152,7 @@ void lnSpi9341::writeRegister32(int r,uint32_t  val)
  * 
  */
 uint32_t lnSpi9341::readChipId()
-{  
-    return 0x7789; 
+{      
   uint32_t regD3=readRegister32(0xd3);
   uint32_t reg04=readRegister32(0x04);
   uint32_t reg09=readRegister32(0x09);
@@ -337,6 +336,7 @@ void lnSpi9341::sendBytes(int nb, const uint8_t *data)
 {
     xAssert(0);
 }
+
 /**
  * 
  * @param nb
@@ -360,17 +360,7 @@ void lnSpi9341::sendWords(int nb, const uint16_t *data)
         _cacheUsed+=nb;                
     }
 }
-/**
- */
-void lnSpi9341::flushCache()
-{
-    xAssert(_cache);
-    if(!_cacheUsed) return;
 
-
-    simpleWrite16(_cacheUsed,_cache);    
-    _cacheUsed=0;
-}
 /**
  * 
  */
@@ -393,38 +383,6 @@ void lnSpi9341::dataEnd()
      CD_COMMAND;
      CS_IDLE;
 }
-/**
-* 
-* @param nb
-* @param data
- * 
- *
-*/
-class lnLinkedTranfer
-{
-public:
-    
-        lnLinkedTranfer(lnSpi9341 *me)
-        {
-            ili=me;
-            nbStep=0;
-            currentStep=0;
-        }
-        void add(int nb, const uint16_t *c)
-        {
-            size[nbStep]=nb;
-            data[nbStep]=c;
-            nbStep++;
-            xAssert(nbStep<4)
-
-        }
-        int nbStep;
-        int currentStep;
-        int size[4];
-        const uint16_t  *data[4];
-        lnSpi9341 *ili;
-
-};
 
 #define ONE_CHUNK ((1<<16)-2)
 /**
@@ -455,8 +413,16 @@ void lnSpi9341::nextFlood(lnLinkedTranfer *t)
  * 
  */
 void lnSpi9341::floodWords(int nb, const uint16_t data)
-{      
-    _dupeColor=colorMap(data);  
+{   
+    _dupeColor=colorMap(data);     
+    if(nb<100) // small transfer, dont bother doing something fancy
+    {
+        dataBegin();
+        _spi->write16Repeat(nb,data);
+        dataEnd();
+        return;
+    }
+    
     _dupeCmd=ILI9341_MEMORYWRITE;
     lnLinkedTranfer transfer(this);
 
@@ -469,30 +435,31 @@ void lnSpi9341::floodWords(int nb, const uint16_t data)
     }
     
     CD_COMMAND;
-    lnDelay(20); // wait 20 us, we have an extra clk tick somewhere here
+    lnDelay(10); // wait a few  us, we have an extra clk tick somewhere here, make sure it happens while CS is off
     CS_ACTIVE;
-    _spi->asyncDmaWrite16(1, &_dupeCmd, lnIliAsyncCB,&transfer,true);
-    
+    _spi->asyncDmaWrite16(1, &_dupeCmd, lnIliAsyncCB,&transfer,true);    
     _spi->waitForAsyncDmaDone();
     _spi->finishAsyncDma();
     CS_IDLE;
     CD_COMMAND;
-
-#if 0
-    while(nb)
-    {        
-        int chunk=nb;
-        if(chunk>ONE_CHUNK) chunk=ONE_CHUNK;
-        nb-=chunk;            
-        dataBegin();   
-        //simpleWrite16R(chunk,f);   
-
-        _spi->write16Repeat(chunk,f);             
-        //_spi->dmaWrite16Repeat(chunk,f);
-        dataEnd();      
-    }
-#endif    
-      
 }
+
+/**
+ */
+void lnSpi9341::flushCache()
+{
+    xAssert(_cache);
+    if(!_cacheUsed) return;
+
+    if(_cacheUsed<64)
+    {
+        simpleWrite16(_cacheUsed,_cache);    
+    }else
+    {
+        simpleWrite16(_cacheUsed,_cache);    
+    }
+    _cacheUsed=0;
+}
+
 // EOF
 
