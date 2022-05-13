@@ -88,6 +88,7 @@ public: // freetype font
                     _fg=fg;
                     _bg=bg;
                 }
+                uint32_t getChipId() {return _chipId;}
                 int     myDrawChar(int x, int y, unsigned char c,  int color, int bg,FontInfo &infos);
                 void    setFontSize(FontSize size);
                 void    setFontFamily(const GFXfont *small, const GFXfont *medium, const GFXfont *big);
