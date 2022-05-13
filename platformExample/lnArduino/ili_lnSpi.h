@@ -19,6 +19,8 @@
 #include "lnSPI.h"
 #include "simpler9341.h"
 
+class lnLinkedTranfer;
+
 /**
  * 
  * @param w
@@ -63,8 +65,13 @@ class lnSpi9341 : public ili9341
 #define ILI_BUFFER_SIZE 320            
             uint16_t        _buffer[ILI_BUFFER_SIZE];
             uint16_t        *_cache;
+            uint16_t         _dupeColor;
+            uint16_t         _dupeCmd;
             int             _cacheUsed;
             int             _cacheSize;
             bool            _3wire;
+
+public:
+            void             nextFlood(lnLinkedTranfer *);
 };
 // EOF

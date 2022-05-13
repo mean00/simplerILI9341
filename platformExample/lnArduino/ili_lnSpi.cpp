@@ -153,6 +153,7 @@ void lnSpi9341::writeRegister32(int r,uint32_t  val)
  */
 uint32_t lnSpi9341::readChipId()
 {  
+    return 0x7789; 
   uint32_t regD3=readRegister32(0xd3);
   uint32_t reg04=readRegister32(0x04);
   uint32_t reg09=readRegister32(0x09);
@@ -399,10 +400,85 @@ void lnSpi9341::dataEnd()
  * 
  *
 */
-#define ONE_CHUNK (65534)
+class lnLinkedTranfer
+{
+public:
+    
+        lnLinkedTranfer(lnSpi9341 *me)
+        {
+            ili=me;
+            nbStep=0;
+            currentStep=0;
+        }
+        void add(int nb, const uint16_t *c)
+        {
+            size[nbStep]=nb;
+            data[nbStep]=c;
+            nbStep++;
+            xAssert(nbStep<4)
+
+        }
+        int nbStep;
+        int currentStep;
+        int size[4];
+        const uint16_t  *data[4];
+        lnSpi9341 *ili;
+
+};
+
+#define ONE_CHUNK ((1<<16)-2)
+/**
+ * 
+ */
+void lnIliAsyncCB(void *cookie)
+{
+    lnLinkedTranfer *t=(lnLinkedTranfer *)cookie;
+    t->ili->nextFlood(t);
+}
+/**
+ * 
+ * 
+ */
+void lnSpi9341::nextFlood(lnLinkedTranfer *t)
+{
+    if(t->currentStep==t->nbStep)
+    {
+        _spi->finishAsyncDma();
+        return;
+    }
+    _spi->waitForCompletion();
+    CD_DATA;
+    int dex=t->currentStep++;
+    _spi->nextDmaWrite16(t->size[dex], t->data[dex], lnIliAsyncCB,t,true);
+}
+/**
+ * 
+ */
 void lnSpi9341::floodWords(int nb, const uint16_t data)
 {      
-    uint16_t f=colorMap(data);    
+    _dupeColor=colorMap(data);  
+    _dupeCmd=ILI9341_MEMORYWRITE;
+    lnLinkedTranfer transfer(this);
+
+    while(nb)
+    {        
+        int chunk=nb;
+        if(chunk>ONE_CHUNK) chunk=ONE_CHUNK;
+        nb-=chunk;  
+        transfer.add(chunk,&_dupeColor);
+    }
+    
+    CD_COMMAND;
+    lnDelay(20); // wait 20 us, we have an extra clk tick somewhere here
+    CS_ACTIVE;
+    _spi->asyncDmaWrite16(1, &_dupeCmd, lnIliAsyncCB,&transfer,true);
+    
+    _spi->waitForAsyncDmaDone();
+    _spi->finishAsyncDma();
+    CS_IDLE;
+    CD_COMMAND;
+
+#if 0
     while(nb)
     {        
         int chunk=nb;
@@ -415,6 +491,7 @@ void lnSpi9341::floodWords(int nb, const uint16_t data)
         //_spi->dmaWrite16Repeat(chunk,f);
         dataEnd();      
     }
+#endif    
       
 }
 // EOF
