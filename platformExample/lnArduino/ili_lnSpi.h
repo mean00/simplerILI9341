@@ -59,6 +59,7 @@ class lnSpi9341 : public ili9341
                     uint32_t readRegister32(int reg);
                     void writeRegister32(int r,uint32_t  val);                    
                     void flushCache();
+                    void sendDataToScreen(int nb, const uint16_t *data);
             lnPin           _pinReset,_pinDC,_pinCS;
             lnFastIO        _ioCS,_ioDC;
             hwlnSPIClass    *_spi;

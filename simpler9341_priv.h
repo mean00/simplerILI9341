@@ -55,11 +55,12 @@ class lnLinkedTranfer
 {
 public:
     
-        lnLinkedTranfer(lnSpi9341 *me)
+        lnLinkedTranfer(lnSpi9341 *me,bool rep)
         {
             ili=me;
             nbStep=0;
             currentStep=0;
+            repeat=rep;
         }
         void add(int nb, const uint16_t *c)
         {
@@ -72,6 +73,7 @@ public:
         int nbStep;
         int currentStep;
         int size[4];
+        bool repeat;
         const uint16_t  *data[4];
         lnSpi9341 *ili;
 

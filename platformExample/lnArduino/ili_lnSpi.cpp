@@ -22,6 +22,16 @@
 #define FAKE_DELAY_COMMAND 0xff
 #define LOW_LEVEL_PRINT(...) {}
 
+#define ONE_CHUNK ((1<<16)-2)
+
+/**
+ * 
+ */
+void lnIliAsyncCB(void *cookie)
+{
+    lnLinkedTranfer *t=(lnLinkedTranfer *)cookie;
+    t->ili->nextFlood(t);
+}
 /**
  * 
  * @param w
@@ -83,6 +93,40 @@ void lnSpi9341::write8(uint8_t c)
 {
     _spi->write(c);
 }
+/**
+ * 
+ */
+void lnSpi9341::sendDataToScreen(int nb, const uint16_t *data)
+{
+    if(nb<64)
+    {
+      simpleWrite16(nb,data);
+      return;
+    }
+
+     _dupeCmd=ILI9341_MEMORYWRITE;
+    lnLinkedTranfer transfer(this,false);
+
+    while(nb)
+    {        
+        int chunk=nb;
+        if(chunk>ONE_CHUNK) chunk=ONE_CHUNK;
+        nb-=chunk;  
+        transfer.add(nb,data);
+        data+=nb;
+    }
+    
+    CD_COMMAND;
+    lnDelay(10); // wait a few  us, we have an extra clk tick somewhere here, make sure it happens while CS is off
+    CS_ACTIVE;
+    _spi->asyncDmaWrite16(1, &_dupeCmd, lnIliAsyncCB,&transfer,transfer.repeat);    
+    _spi->waitForAsyncDmaDone();
+    _spi->finishAsyncDma();
+    CS_IDLE;
+    CD_COMMAND;
+
+}
+
 /**
  * 
  * @param cmd
@@ -346,13 +390,13 @@ void lnSpi9341::sendWords(int nb, const uint16_t *data)
 {
     if(!_cache)     
     {
-        simpleWrite16(nb,data);
+        sendDataToScreen(nb,data);
         return;
     }
     if(_cacheUsed+nb*2>_cacheSize || nb>_cacheSize/2)
     {
         flushCache();
-        simpleWrite16(nb,data);
+        sendDataToScreen(nb,data);
     }
     else
     {
@@ -384,15 +428,7 @@ void lnSpi9341::dataEnd()
      CS_IDLE;
 }
 
-#define ONE_CHUNK ((1<<16)-2)
-/**
- * 
- */
-void lnIliAsyncCB(void *cookie)
-{
-    lnLinkedTranfer *t=(lnLinkedTranfer *)cookie;
-    t->ili->nextFlood(t);
-}
+
 /**
  * 
  * 
@@ -407,7 +443,7 @@ void lnSpi9341::nextFlood(lnLinkedTranfer *t)
     _spi->waitForCompletion();
     CD_DATA;
     int dex=t->currentStep++;
-    _spi->nextDmaWrite16(t->size[dex], t->data[dex], lnIliAsyncCB,t,true);
+    _spi->nextDmaWrite16(t->size[dex], t->data[dex], lnIliAsyncCB,t,t->repeat);
 }
 /**
  * 
@@ -424,7 +460,7 @@ void lnSpi9341::floodWords(int nb, const uint16_t data)
     }
     
     _dupeCmd=ILI9341_MEMORYWRITE;
-    lnLinkedTranfer transfer(this);
+    lnLinkedTranfer transfer(this,true);
 
     while(nb)
     {        
@@ -437,7 +473,7 @@ void lnSpi9341::floodWords(int nb, const uint16_t data)
     CD_COMMAND;
     lnDelay(10); // wait a few  us, we have an extra clk tick somewhere here, make sure it happens while CS is off
     CS_ACTIVE;
-    _spi->asyncDmaWrite16(1, &_dupeCmd, lnIliAsyncCB,&transfer,true);    
+    _spi->asyncDmaWrite16(1, &_dupeCmd, lnIliAsyncCB,&transfer,transfer.repeat);    
     _spi->waitForAsyncDmaDone();
     _spi->finishAsyncDma();
     CS_IDLE;
@@ -451,13 +487,7 @@ void lnSpi9341::flushCache()
     xAssert(_cache);
     if(!_cacheUsed) return;
 
-    if(_cacheUsed<64)
-    {
-        simpleWrite16(_cacheUsed,_cache);    
-    }else
-    {
-        simpleWrite16(_cacheUsed,_cache);    
-    }
+    sendDataToScreen(_cacheUsed,_cache);    
     _cacheUsed=0;
 }
 
