@@ -230,21 +230,6 @@ void lnSpi9341::reset()
  */
 void lnSpi9341::sendSequence( const uint8_t *data)
 {
-#if 0
-    int cmd=0xaa;
-    uint8_t xdata=0x55;
-    while(1)
-    {
-        CS_ACTIVE;         
-        CD_COMMAND;
-        _spi->write(cmd);
-        CD_DATA;
-        //_spi->write(0x55);
-        _spi->dmaWrite(1,&xdata);
-        CS_IDLE;
-        lnDelay(1) ;
-    }
-#endif
 	while (*data ) 
     {
         
@@ -262,7 +247,7 @@ void lnSpi9341::sendSequence( const uint8_t *data)
         data += len;		
         CS_IDLE;
         _spi->endWriteTransaction();
-}        
+    }        
 }
 
 /**
@@ -286,7 +271,6 @@ void lnSpi9341::sendByte(int c)
     write8(c);
 }
 
-static const uint8_t rotMode[4]={0x8,0xc8,0x78,0xa8};
 /**
  * 
  */
@@ -335,12 +319,12 @@ void lnSpi9341::updateHwRotation(void)
  */
 void lnSpi9341::setAddress(int x, int y, int w, int h)
 {
-    int a1,a2,b1,b2;
-    _spi->beginWriteTransaction(8);
+    int a1,a2,b1,b2;    
     a1=x+_xOffset;
     a2=a1+w-1;
     b1=y+_yOffset;
     b2=b1+h-1;
+    _spi->beginWriteTransaction(8);
     CS_ACTIVE;    
     writeRegister32(ILI9341_COLADDRSET,  ((uint32_t)(a1<<16) | a2));  // HX8357D uses same registers!
     writeRegister32(ILI9341_PAGEADDRSET, ((uint32_t)(b1<<16) | b2)); // HX8357D uses same registers!
