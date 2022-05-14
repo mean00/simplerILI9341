@@ -143,7 +143,7 @@ uint32_t lnSpi9341::readRegister32(int r)
     uint8_t rx[4];
     {
         CS_ACTIVE;  
-        _spi->beginWriteTransaction(8);
+        _spi->beginSession(8);
         CD_COMMAND;  
         _spi->write(r);        
         CD_DATA;        
@@ -153,7 +153,7 @@ uint32_t lnSpi9341::readRegister32(int r)
             _spi->transfer(4,(uint8_t *)&tx,rx);
         // revert
         rx2=rx[3]+(rx[2]<<8)+(rx[1]<<16)+(rx[0]<<24);
-        _spi->endWriteTransaction();
+        _spi->endSession();
         CS_IDLE;
         Logger("Reading register32 0x%x => %x\n",r,rx2);
     }
@@ -241,12 +241,12 @@ void lnSpi9341::sendSequence( const uint8_t *data)
             delay(len);
             continue;
         }        
-        _spi->beginWriteTransaction(8);
+        _spi->beginSession(8);
         CS_ACTIVE;                 
         writeCmdParam(cmd, len, data);
         data += len;		
         CS_IDLE;
-        _spi->endWriteTransaction();
+        _spi->endSession();
     }        
 }
 
@@ -302,11 +302,11 @@ void lnSpi9341::updateHwRotation(void)
             break;
     }
     t|= ILI9341_MADCTL_RGB;
-    _spi->beginWriteTransaction(8);
+    _spi->beginSession(8);
     CS_ACTIVE;
     writeCmdParam(ILI9341_MADCTL,1,&t);
     CS_IDLE;   
-    _spi->endWriteTransaction();
+    _spi->endSession();
 }
 
 
@@ -324,12 +324,12 @@ void lnSpi9341::setAddress(int x, int y, int w, int h)
     a2=a1+w-1;
     b1=y+_yOffset;
     b2=b1+h-1;
-    _spi->beginWriteTransaction(8);
+    _spi->beginSession(8);
     CS_ACTIVE;    
     writeRegister32(ILI9341_COLADDRSET,  ((uint32_t)(a1<<16) | a2));  // HX8357D uses same registers!
     writeRegister32(ILI9341_PAGEADDRSET, ((uint32_t)(b1<<16) | b2)); // HX8357D uses same registers!
     CS_IDLE;
-    _spi->endWriteTransaction();
+    _spi->endSession();
 }
 
 /**
@@ -379,7 +379,7 @@ void lnSpi9341::sendWords(int nb, const uint16_t *data)
  */
 void lnSpi9341::dataBegin()
 {
-    _spi->beginWriteTransaction(16);
+    _spi->beginSession(16);
     CS_ACTIVE;
     CD_COMMAND;
     _spi->write(ILI9341_MEMORYWRITE);
@@ -396,7 +396,7 @@ void lnSpi9341::dataEnd()
     }
      CD_COMMAND;
      CS_IDLE;
-    _spi->endWriteTransaction();
+    _spi->endSession();
 }
 
 
@@ -445,12 +445,12 @@ void lnSpi9341::floodWords(int nb, const uint16_t data)
     // Important!
     lnDelay(2); // wait a few  us, we have an extra clk tick somewhere here, make sure it happens while CS is off
     CS_ACTIVE;
-    _spi->beginWriteTransaction(16);
+    _spi->beginSession(16);
     _spi->asyncDmaWrite16(1, &_dupeCmd, lnIliAsyncCB,&transfer,transfer.repeat);    
     _spi->waitForAsyncDmaDone();
     _spi->finishAsyncDma();
     CS_IDLE;
-    _spi->endWriteTransaction();
+    _spi->endSession();
     CD_COMMAND;
 }
 

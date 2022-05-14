@@ -83,7 +83,7 @@ public: // freetype font
                     f=_fg;
                     g=_bg;
                 }
-                void    setTextColor(int fg,int bg)
+                void   setTextColor (int fg,int bg)
                 {
                     _fg=fg;
                     _bg=bg;
