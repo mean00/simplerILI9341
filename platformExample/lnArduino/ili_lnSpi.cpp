@@ -98,7 +98,7 @@ void lnSpi9341::write8(uint8_t c)
  */
 void lnSpi9341::sendDataToScreen(int nb, const uint16_t *data)
 {
-    if(1) // nb<64)
+    if(nb<64)
     {
       simpleWrite16(nb,data);
       return;
