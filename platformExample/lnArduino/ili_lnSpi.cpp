@@ -13,9 +13,9 @@
 
 // for very small transfer it is more expensive to setup the DMA
 // than to send the actual data, so do something very simple
-#define simpleWrite16(size,data)   {for(int i=0;i<size;i++)      _spi->write16(data[i]);}
-#define simpleWrite8(size,data)    {for(int i=0;i<size;i++)      _spi->write(data[i]);}
-#define simpleWrite16R(size,data) {for(int i=0;i<size;i++)       _spi->write16(data);}
+#define simpleWrite16(size,data)    _spi->write16(size,data)
+#define simpleWrite8(size,data)     _spi->write(size,data)
+#define simpleWrite16R(size,data)   _spi->write16(size,data,true)
 
 
 #define CHECK_ARBITER() 
@@ -98,33 +98,12 @@ void lnSpi9341::write8(uint8_t c)
  */
 void lnSpi9341::sendDataToScreen(int nb, const uint16_t *data)
 {
-    if(nb<64)
+    if(1) // nb<64)
     {
       simpleWrite16(nb,data);
       return;
     }
-
-     _dupeCmd=ILI9341_MEMORYWRITE;
-    lnLinkedTranfer transfer(this,false);
-
-    while(nb)
-    {        
-        int chunk=nb;
-        if(chunk>ONE_CHUNK) chunk=ONE_CHUNK;
-        nb-=chunk;  
-        transfer.add(nb,data);
-        data+=nb;
-    }
-    
-    CD_COMMAND;
-    lnDelay(10); // wait a few  us, we have an extra clk tick somewhere here, make sure it happens while CS is off
-    CS_ACTIVE;
-    _spi->asyncDmaWrite16(1, &_dupeCmd, lnIliAsyncCB,&transfer,transfer.repeat);    
-    _spi->waitForAsyncDmaDone();
-    _spi->finishAsyncDma();
-    CS_IDLE;
-    CD_COMMAND;
-
+    _spi->dmaWrite16(nb,data);
 }
 
 /**
@@ -164,17 +143,17 @@ uint32_t lnSpi9341::readRegister32(int r)
     uint8_t rx[4];
     {
         CS_ACTIVE;  
+        _spi->beginWriteTransaction(8);
         CD_COMMAND;  
-        _spi->write(r);
-        lnDelayUs(50);
+        _spi->write(r);        
         CD_DATA;        
-        lnDelayUs(50);
         if(_3wire)
             _spi->read1wire( 4,rx);
         else
             _spi->transfer(4,(uint8_t *)&tx,rx);
         // revert
         rx2=rx[3]+(rx[2]<<8)+(rx[1]<<16)+(rx[0]<<24);
+        _spi->endWriteTransaction();
         CS_IDLE;
         Logger("Reading register32 0x%x => %x\n",r,rx2);
     }
@@ -277,10 +256,12 @@ void lnSpi9341::sendSequence( const uint8_t *data)
             delay(len);
             continue;
         }        
-        CS_ACTIVE;         
+        _spi->beginWriteTransaction(8);
+        CS_ACTIVE;                 
         writeCmdParam(cmd, len, data);
         data += len;		
         CS_IDLE;
+        _spi->endWriteTransaction();
 }        
 }
 
@@ -337,9 +318,11 @@ void lnSpi9341::updateHwRotation(void)
             break;
     }
     t|= ILI9341_MADCTL_RGB;
+    _spi->beginWriteTransaction(8);
     CS_ACTIVE;
     writeCmdParam(ILI9341_MADCTL,1,&t);
     CS_IDLE;   
+    _spi->endWriteTransaction();
 }
 
 
@@ -353,6 +336,7 @@ void lnSpi9341::updateHwRotation(void)
 void lnSpi9341::setAddress(int x, int y, int w, int h)
 {
     int a1,a2,b1,b2;
+    _spi->beginWriteTransaction(8);
     a1=x+_xOffset;
     a2=a1+w-1;
     b1=y+_yOffset;
@@ -361,6 +345,7 @@ void lnSpi9341::setAddress(int x, int y, int w, int h)
     writeRegister32(ILI9341_COLADDRSET,  ((uint32_t)(a1<<16) | a2));  // HX8357D uses same registers!
     writeRegister32(ILI9341_PAGEADDRSET, ((uint32_t)(b1<<16) | b2)); // HX8357D uses same registers!
     CS_IDLE;
+    _spi->endWriteTransaction();
 }
 
 /**
@@ -410,6 +395,7 @@ void lnSpi9341::sendWords(int nb, const uint16_t *data)
  */
 void lnSpi9341::dataBegin()
 {
+    _spi->beginWriteTransaction(16);
     CS_ACTIVE;
     CD_COMMAND;
     _spi->write(ILI9341_MEMORYWRITE);
@@ -426,6 +412,7 @@ void lnSpi9341::dataEnd()
     }
      CD_COMMAND;
      CS_IDLE;
+    _spi->endWriteTransaction();
 }
 
 
@@ -471,12 +458,15 @@ void lnSpi9341::floodWords(int nb, const uint16_t data)
     }
     
     CD_COMMAND;
-    lnDelay(10); // wait a few  us, we have an extra clk tick somewhere here, make sure it happens while CS is off
+    // Important!
+    lnDelay(2); // wait a few  us, we have an extra clk tick somewhere here, make sure it happens while CS is off
     CS_ACTIVE;
+    _spi->beginWriteTransaction(16);
     _spi->asyncDmaWrite16(1, &_dupeCmd, lnIliAsyncCB,&transfer,transfer.repeat);    
     _spi->waitForAsyncDmaDone();
     _spi->finishAsyncDma();
     CS_IDLE;
+    _spi->endWriteTransaction();
     CD_COMMAND;
 }
 
