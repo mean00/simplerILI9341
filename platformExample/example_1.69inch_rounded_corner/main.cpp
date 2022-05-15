@@ -8,7 +8,7 @@
 #include "lnArduino.h"
 #include "ili_lnSpi.h"
 #include "simpler9341_priv.h"
-
+#include "opensans20.h"
 lnSpi9341          *ili;
 hwlnSPIClass *spi;
 
@@ -47,20 +47,26 @@ void setup()
      // arbitrer must be created with screen already set up
     // ili must be first
     //
+#define FAST 1
     spi=new hwlnSPIClass(0,-1);    
+    lnSPISettings transaction(FAST*36*1000*1000+(1-FAST)*10*1000, SPI_MSBFIRST, SPI_MODE0,-1);
     spi->begin();
-    lnSPISettings transaction(36*1000*1000, SPI_MSBFIRST, SPI_MODE0,-1);
-    spi->beginTransaction(transaction);
+    
     
     ili=new lnSpi9341( 240, 280,
                                     spi,        
                                     PB7,       // DC/RS
                                     PB8,       // CS 
                                     PB6);  // Reset
+    spi->beginTransaction(transaction);
     ili->enable3WireMode();
     ili->init(st7789v2_ada,NULL); 
-    ili->setRotation(1);
-    ili->fillScreen(0xffff);    
+    ili->forceChipId(0x7789);
+    ili->setRotation(3);
+    ili->fillScreen(0xffff);   
+#define FONT OpenSans_Regular28pt7b    
+    ili->setFontFamily(&FONT,&FONT,&FONT) ;
+    ili->setFontSize(ili9341::SmallFont);
     lnPinMode(LN_SYSTEM_LED,lnOUTPUT);
    }
 /**
@@ -68,25 +74,56 @@ void setup()
  */
 #define T 80
 #define K(x) 60*x
-void square()
+
+static uint16_t colors[4]=
 {
-    ili->square(0,K(0),K(0),T,T);
-    ili->square(0x1f,K(1),K(1),T,T);
-    ili->square(0x3f<<5,K(2),K(2),T,T);
-    ili->square(0x1f<<11,K(3),K(3),T,T);
+    0,0x1f,0x3f<<5,0x1f<<11
+};
+
+#define FOO(x)  ili->square(colors[x],K(x),K(x),T,T);
+
+
+void zsquare()
+{    
+    #define SQ(x) ili->square(colors[x],K(x),K(x),T,T);
+    SQ(0);
+    SQ(1);
+    SQ(2);
+    SQ(3);
+   
+
+    for(int x=20;x<120;x+=40)
+    {
+        ili->fillRoundRect( 120-x,120-x,2*x,2*x,5,0x1f,0xffff);
+    }
+     ili->setTextColor(0,0xffff);
+    ili->print(36,80,"ABCD");
+    ili->setTextColor(colors[1],colors[2]);
+    ili->print(36,160,"1234");
+     ili->setTextColor(colors[3],colors[0]);
+    ili->print(36,120,"abc57");
+
+}
+
+
+int cur=0;
+void foo()
+{
+    ili->fillScreen(colors[cur]);
+    uint16_t next=(cur+1)&0x3;
+    ili->square(colors[next],2,240-38,36,36);
+
+    zsquare();
+    cur=(cur+1)&3;
 }
 
 void loop()
 {
-#define FILL_SCREEN(color)     xDelay(0*100);      ili->fillScreen(color); square();
+
     while(1)
     {
         lnDigitalToggle(LN_SYSTEM_LED);
-        FILL_SCREEN(0x0000);
-
-        FILL_SCREEN(0x001f);
-        FILL_SCREEN(0x3f<<5);
-        FILL_SCREEN(0x1f<<11);
+        foo();
     }
 }
 //

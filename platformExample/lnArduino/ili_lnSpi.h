@@ -46,6 +46,7 @@ class lnSpi9341 : public ili9341
             virtual void setAddress(int x, int y, int w, int h);            
             virtual void dataBegin();
             virtual void dataEnd();
+                    
             virtual void pushColors(int len, uint16_t *data) {xAssert(0);}
             
             

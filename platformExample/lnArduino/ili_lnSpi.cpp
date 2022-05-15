@@ -147,6 +147,7 @@ uint32_t lnSpi9341::readRegister32(int r)
         CD_COMMAND;  
         _spi->write(r);        
         CD_DATA;        
+        lnDelayUs(5);
         if(_3wire)
             _spi->read1wire( 4,rx);
         else
@@ -178,8 +179,6 @@ uint32_t lnSpi9341::readChipId()
 {      
   uint32_t regD3=readRegister32(0xd3);
   uint32_t reg04=readRegister32(0x04);
-  uint32_t reg09=readRegister32(0x09);
-  uint32_t reg0c=readRegister32(0x0f);
   
   if(regD3==0x9341) 
   {

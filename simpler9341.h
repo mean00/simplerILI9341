@@ -9,6 +9,10 @@
 
 #define FAKE_DELAY_COMMAND 0xff
 /**
+ *  ChipID:
+ *          0x7789 : ST7789
+ *          0x9341 : ILI9341
+ * 
  */
 class ili9341
 {
@@ -50,6 +54,7 @@ public:
                          ili9341(int width, int height);
                 virtual ~ili9341();
                 virtual void init(const uint8_t *init1, const uint8_t *init2)=0;
+                void forceChipId(int chipID) {_chipId=chipID;}
 
                 void fillScreen(int color); // 16 bits!
                 void fillRoundRect(int x0, int y0, int w, int h,int radius, int outColor,int inColor);
