@@ -63,7 +63,7 @@ void setup()
     ili->init(st7789v2_ada,NULL); 
     ili->forceChipId(0x7789);
     ili->setRotation(3);
-    ili->fillScreen(0xffff);   
+    ili->fillScreen(WHITE);   
 #define FONT OpenSans_Regular28pt7b    
     ili->setFontFamily(&FONT,&FONT,&FONT) ;
     ili->setFontSize(ili9341::SmallFont);
@@ -77,7 +77,7 @@ void setup()
 
 static uint16_t colors[4]=
 {
-    0,0x1f,0x3f<<5,0x1f<<11
+    0,BLUE,GREEN,RED
 };
 
 #define FOO(x)  ili->square(colors[x],K(x),K(x),T,T);
@@ -94,9 +94,9 @@ void zsquare()
 
     for(int x=20;x<120;x+=40)
     {
-        ili->fillRoundRect( 120-x,120-x,2*x,2*x,5,0x1f,0xffff);
+        ili->fillRoundRect( 120-x,120-x,2*x,2*x,5,BLUE,WHITE);
     }
-     ili->setTextColor(0,0xffff);
+     ili->setTextColor(0,WHITE);
     ili->print(36,80,"ABCD");
     ili->setTextColor(colors[1],colors[2]);
     ili->print(36,160,"1234");

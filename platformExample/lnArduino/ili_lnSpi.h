@@ -51,8 +51,7 @@ class lnSpi9341 : public ili9341
             
             
                     uint32_t readChipId();
-    protected:
-                    uint16_t colorMap(const uint16_t d);
+    protected:                    
                     void reset();
                     void writeCmdParam(uint16_t cmd, int payload, const uint8_t * data);
                     void writeCommand(uint16_t c);

@@ -30,7 +30,7 @@ public:
             virtual void dataEnd()=0;
             virtual void dataBegin()=0;
             virtual void pushColors(int len, uint16_t *data)=0;
-            virtual uint16_t colorMap(const uint16_t d);
+             
 //---------------------------------------------------------------
                enum FontSize
                {
@@ -125,7 +125,7 @@ protected:
                 void    innerLoop1C(int w, int h, int left,int advance, int fg,int bg,uint8_t *p);
                 void    innerLoop2C(int w, int h, int left,int advance, int fg,int bg,uint8_t *p);
                 void    innerLoop2NC(int w, int h, int left,int advance, int fg,int bg,uint8_t *p);
-
+                uint16_t colorMap(const uint16_t d);
 #define         ST7735_BUFFER_SIZE_WORD 256
                 uint16_t *_scrbuf;
                 int     cursor_x,cursor_y;

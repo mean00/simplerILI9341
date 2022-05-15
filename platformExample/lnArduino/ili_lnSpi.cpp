@@ -464,13 +464,5 @@ void lnSpi9341::flushCache()
     sendDataToScreen(_cacheUsed,_cache);    
     _cacheUsed=0;
 }
-/**
- */
-uint16_t lnSpi9341::colorMap(const uint16_t d)
-{    
-    uint32_t r=(d>>11),b=d&0x1f,g=(d>>5)&0x3f;
-    return r+(g<<5)+(b<<11);
-}
-
 // EOF
 
