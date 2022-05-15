@@ -30,7 +30,7 @@ public:
             virtual void dataEnd()=0;
             virtual void dataBegin()=0;
             virtual void pushColors(int len, uint16_t *data)=0;
-                uint16_t colorMap(const uint16_t d);
+            virtual uint16_t colorMap(const uint16_t d);
 //---------------------------------------------------------------
                enum FontSize
                {
