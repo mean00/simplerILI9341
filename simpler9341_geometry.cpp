@@ -145,7 +145,6 @@ void ili9341::disc(int color, int x, int y, int radius)
             {
                 xx--;
                 E-=8*xx;
-                    
             }
             yy++;
             E+=8*yy+4;
