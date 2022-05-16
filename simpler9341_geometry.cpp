@@ -166,14 +166,14 @@ void ili9341::invertedDiscCorner(int color, int x, int y, int radius,int corner)
     int xx=radius;
     while(yy<=xx)
     {
-        if(corner & 1)
+        if(corner & 2)
         {
             setAddress(x+xx,y-yy+radius-1,radius,1);
             floodWords(radius-xx,f);
             setAddress(x+yy,y-xx+radius-1,radius,1);
             floodWords(radius-yy,f);
         }
-        if(corner & 2)
+        if(corner & 1)
         {
             setAddress(x,radius+y-yy,radius,1);
             floodWords(radius-xx,f);
