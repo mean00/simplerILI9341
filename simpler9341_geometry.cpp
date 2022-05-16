@@ -76,4 +76,80 @@ void ili9341::drawLine(int x0, int y0, int x1, int y1, int color)
         val&=(1<<11)-1;
     }    
 }
+/**
+ */
+void ili9341::circle(int color, int x, int y, int radius)
+{
+// https://bariweiss.substack.com/p/hollywoods-new-rules?s=r
+    int f=colorMap(color);
+    int E=5-4*radius;
+    int yy=0;
+    int xx=radius;
+    while(yy<xx)
+    {
+            if(E>0)
+            {
+                xx--;
+                E-=8*xx;
+                    
+            }
+            yy++;
+            E+=8*yy+4;
+            // Use simple symetry
+            setAddress(x+xx,y+yy,1,1);
+            floodWords(1,f);
+            setAddress(x-xx,y+yy,1,1);
+            floodWords(1,f);
+            setAddress(x-xx,y-yy,1,1);
+            floodWords(1,f);
+            setAddress(x+xx,y-yy,1,1);
+            floodWords(1,f);
+            // Use 45 degrees symetrie, swapping x & y
+            setAddress(x+yy,y+xx,1,1);
+            floodWords(1,f);
+            setAddress(x-yy,y+xx,1,1);
+            floodWords(1,f);
+            setAddress(x-yy,y-xx,1,1);
+            floodWords(1,f);
+            setAddress(x+yy,y-xx,1,1);
+            floodWords(1,f);
+
+    }
+}
+/**
+ * 
+ */
+void ili9341::disc(int color, int x, int y, int radius)
+{
+// https://bariweiss.substack.com/p/hollywoods-new-rules?s=r
+    int f=colorMap(color);
+    int E=5-4*radius;
+    int yy=0;
+    int xx=radius;
+    while(yy<=xx)
+    {
+
+            setAddress(x+xx-2*xx,y+yy,2*xx,1);
+            floodWords(2*xx,f);
+
+            setAddress(x+xx-2*xx,y-yy,2*xx,1);
+            floodWords(2*xx,f);       
+
+            setAddress(x+yy-2*yy,y+xx,2*yy,1);
+            floodWords(2*yy,f);
+
+            setAddress(x+yy-2*yy,y-xx,2*yy,1);
+            floodWords(2*yy,f);       
+
+            if(E>0)
+            {
+                xx--;
+                E-=8*xx;
+                    
+            }
+            yy++;
+            E+=8*yy+4;
+
+    }
+}
 // EOF
