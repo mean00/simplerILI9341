@@ -66,6 +66,7 @@ public:
                 void drawLine(int x0, int y0, int x1, int y1, int color);
                 void circle(int color, int x, int y, int radius);
                 void disc(int color, int x, int y, int radius); // same as circle but filled
+                void invertedDiscCorner(int color, int x, int y, int radius,int corner); // draw 1/4 of corner 1=> top left, 2 top right, 4 bottom left 8 bottom right
                 void setCursor(int x, int y)
                 {
                      cursor_x=x;

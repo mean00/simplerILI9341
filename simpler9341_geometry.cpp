@@ -116,6 +116,8 @@ void ili9341::circle(int color, int x, int y, int radius)
 
     }
 }
+
+
 /**
  * 
  */
@@ -149,6 +151,57 @@ void ili9341::disc(int color, int x, int y, int radius)
             yy++;
             E+=8*yy+4;
 
+    }
+}
+
+/**
+ * 
+ */
+void ili9341::invertedDiscCorner(int color, int x, int y, int radius,int corner)
+{
+// https://bariweiss.substack.com/p/hollywoods-new-rules?s=r
+    int f=colorMap(color);
+    int E=5-4*radius;
+    int yy=0;
+    int xx=radius;
+    while(yy<=xx)
+    {
+        if(corner & 1)
+        {
+            setAddress(x+xx,y-yy+radius-1,radius,1);
+            floodWords(radius-xx,f);
+            setAddress(x+yy,y-xx+radius-1,radius,1);
+            floodWords(radius-yy,f);
+        }
+        if(corner & 2)
+        {
+            setAddress(x,radius+y-yy,radius,1);
+            floodWords(radius-xx,f);
+            setAddress(x,radius+y-xx,radius,1);
+            floodWords(radius-yy,f);            
+        }        
+#define OFS 1        
+        if(corner & 4)
+        {
+            setAddress(x,y+yy-OFS,radius,1);
+            floodWords(radius-xx,f);
+            setAddress(x,y+xx-OFS,radius,1);
+            floodWords(radius-yy,f);            
+        }        
+        if(corner & 8)
+        {
+            setAddress(x+xx,y+yy-OFS,radius,1);
+            floodWords(radius-xx,f);
+            setAddress(x+yy,y+xx-OFS,radius,1);
+            floodWords(radius-yy,f);
+        }
+        if(E>0)
+        {
+            xx--;
+            E-=8*xx;
+        }
+        yy++;
+        E+=8*yy+4;
     }
 }
 // EOF
