@@ -63,7 +63,7 @@ public:
                 void setRotation(int rotation);  // 0 1 2 3
                 void VLine(int x0, int y0, int h, int color);
                 void HLine(int x0, int y0, int w, int color);
-
+                void drawLine(int x0, int y0, int x1, int y1, int color);
                 void setCursor(int x, int y)
                 {
                      cursor_x=x;

@@ -22,6 +22,7 @@ ADD_LIBRARY(simplerILI9341
             simpler9341_ex_ll.cpp  
             simpler9341_initCommand.cpp
             simpler9341_ex_ll_1bpp.cpp
+            simpler9341_geometry.cpp
             ${SRC_2BPP}     
             ${ILI9341_DRIVER})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
