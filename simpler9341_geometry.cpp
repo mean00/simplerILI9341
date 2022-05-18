@@ -76,6 +76,18 @@ void ili9341::drawLine(int x0, int y0, int x1, int y1, int color)
         val&=(1<<11)-1;
     }    
 }
+
+#define CIRCLE_ADVANCE(xx,yy,E) { \
+        if(E>0)\
+        {\
+                xx--;\
+                E-=8*xx;\
+                    \
+        }\
+        yy++;\
+        E+=8*yy+4;\
+    }
+
 /**
  */
 void ili9341::circle(int color, int x, int y, int radius)
@@ -87,14 +99,7 @@ void ili9341::circle(int color, int x, int y, int radius)
     int xx=radius;
     while(yy<xx)
     {
-            if(E>0)
-            {
-                xx--;
-                E-=8*xx;
-                    
-            }
-            yy++;
-            E+=8*yy+4;
+            CIRCLE_ADVANCE(xx,yy,E)
             // Use simple symetry
             setAddress(x+xx,y+yy,1,1);
             floodWords(1,f);
@@ -104,7 +109,7 @@ void ili9341::circle(int color, int x, int y, int radius)
             floodWords(1,f);
             setAddress(x+xx,y-yy,1,1);
             floodWords(1,f);
-            // Use 45 degrees symetrie, swapping x & y
+            // Use 45 degrees symetry, swapping x & y
             setAddress(x+yy,y+xx,1,1);
             floodWords(1,f);
             setAddress(x-yy,y+xx,1,1);
@@ -143,14 +148,7 @@ void ili9341::disc(int color, int x, int y, int radius)
             setAddress(x+yy-2*yy,y-xx,2*yy,1);
             floodWords(2*yy,f);       
 
-            if(E>0)
-            {
-                xx--;
-                E-=8*xx;
-            }
-            yy++;
-            E+=8*yy+4;
-
+            CIRCLE_ADVANCE(xx,yy,E)
     }
 }
 
@@ -195,6 +193,19 @@ void ili9341::invertedDiscCorner(int color, int x, int y, int radius,int corner)
             setAddress(x+yy,y+xx-OFS,radius,1);
             floodWords(radius-yy,f);
         }
+        CIRCLE_ADVANCE(xx,yy,E)
+    }
+}
+/**
+ * 
+ */
+int  ili9341::quarterDisc(int mx, int radius,int preload, uint16_t *out)
+{
+    int E=5-4*radius;
+    int yy=0;
+    int xx=radius;
+    for(int i=0;i<preload;i++)
+    {
         if(E>0)
         {
             xx--;
@@ -203,5 +214,56 @@ void ili9341::invertedDiscCorner(int color, int x, int y, int radius,int corner)
         yy++;
         E+=8*yy+4;
     }
+    int nb=0;
+    for(int i=preload;i<radius;i++)
+    {
+        out[nb++]=xx;
+        if(nb>=mx) return nb;
+        if(E>0)
+        {
+            xx--;
+            E-=8*xx;
+        }
+        yy++;
+        E+=8*yy+4;
+    }
+    return nb;
 }
+
+/**
+ * \brief this is slightly incorrect, we done deal with swapping xx & yy correctly
+ */
+void ili9341::fillRoundRect(int x0, int y0, int w, int h,int radius, int outColor, int inColor)
+{
+    // Radial part
+    int preload=0;
+#define PRELOAD 16    
+    uint16_t offset[PRELOAD];
+    int sizes[3];
+    const uint16_t colors[3]={(uint16_t)colorMap(outColor),(uint16_t)colorMap(inColor),(uint16_t)colorMap(outColor)};
+    int n=0;
+    do
+    {
+        n=ili9341::quarterDisc(PRELOAD,   radius, preload, offset);        
+        for(int i=0;i<n;i++)
+        {            
+            int yoffset=radius-preload-1-i;
+            int k=radius-offset[i];
+            sizes[2]=sizes[0]=k;
+            sizes[1]=w-2*k;            
+            // top half        
+            setAddress(x0,y0+yoffset, w,h);        
+            multiFloodWords(3, sizes,colors);
+            // bottom half
+            setAddress(x0,y0+h-yoffset-1, w,h);
+            multiFloodWords(3, sizes,colors);    
+        }
+        preload+=n;
+    }while(n);
+
+    // interior now
+    setAddress(x0,y0+radius, w,h-2*radius);
+    floodWords( w*(h-2*radius),inColor);
+}
+
 // EOF

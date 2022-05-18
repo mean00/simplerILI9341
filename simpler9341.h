@@ -30,6 +30,13 @@ public:
             virtual void dataEnd()=0;
             virtual void dataBegin()=0;
             virtual void pushColors(int len, uint16_t *data)=0;
+            virtual void multiFloodWords(int n, int *size, const uint16_t *colors)
+            {
+                for(int i=0;i<n;i++)
+                {
+                    floodWords(size[i],colors[i]);
+                }
+            }
              
 //---------------------------------------------------------------
                enum FontSize
@@ -67,6 +74,7 @@ public:
                 void circle(int color, int x, int y, int radius);
                 void disc(int color, int x, int y, int radius); // same as circle but filled
                 void invertedDiscCorner(int color, int x, int y, int radius,int corner); // draw 1/4 of corner 1=> top left, 2 top right, 4 bottom left 8 bottom right
+                int  quarterDisc(int mx, int radius,int preload, uint16_t *out); // calculate at most mx disc offset starting from preload
                 void setCursor(int x, int y)
                 {
                      cursor_x=x;
@@ -129,7 +137,7 @@ protected:
                 void    innerLoop2C(int w, int h, int left,int advance, int fg,int bg,uint8_t *p);
                 void    innerLoop2NC(int w, int h, int left,int advance, int fg,int bg,uint8_t *p);
                 uint16_t colorMap(const uint16_t d);
-#define         ST7735_BUFFER_SIZE_WORD 256
+#define         ST7735_BUFFER_SIZE_WORD 320
                 uint16_t *_scrbuf;
                 int     cursor_x,cursor_y;
 

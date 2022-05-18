@@ -447,8 +447,7 @@ void lnSpi9341::floodWords(int nb, const uint16_t data)
     CS_ACTIVE;
     _spi->beginSession(16);
     _spi->asyncDmaWrite16(1, &_dupeCmd, lnIliAsyncCB,&transfer,transfer.repeat);    
-    _spi->waitForAsyncDmaDone();
-    _spi->finishAsyncDma();
+    _spi->waitForAsyncDmaDone();    
     CS_IDLE;
     _spi->endSession();
     CD_COMMAND;
@@ -464,5 +463,30 @@ void lnSpi9341::flushCache()
     sendDataToScreen(_cacheUsed,_cache);    
     _cacheUsed=0;
 }
+/**
+ * 
+ */
+void lnSpi9341::multiFloodWords(int n, int *size, const uint16_t *colors)
+{
+    _dupeCmd=ILI9341_MEMORYWRITE;
+    lnLinkedTranfer transfer(this,true);
+    for(int i=0; i<n; i++)
+    {
+        if(size[i])
+            transfer.add(size[i],colors+i);
+    }
+    CD_COMMAND;
+    // Important!
+    lnDelay(2); // wait a few  us, we have an extra clk tick somewhere here, make sure it happens while CS is off
+    CS_ACTIVE;
+    _spi->beginSession(16);
+    _spi->asyncDmaWrite16(1, &_dupeCmd, lnIliAsyncCB,&transfer,transfer.repeat);    
+    _spi->waitForAsyncDmaDone();
+    CS_IDLE;
+    _spi->endSession();
+    CD_COMMAND;
+}
+
+
 // EOF
 
