@@ -204,6 +204,7 @@ int  ili9341::quarterDisc(int mx, int radius,int preload, uint16_t *out)
     int E=5-4*radius;
     int yy=0;
     int xx=radius;
+    if(preload*2>=radius) return 0;
     for(int i=0;i<preload;i++)
     {
         if(E>0)
@@ -218,6 +219,7 @@ int  ili9341::quarterDisc(int mx, int radius,int preload, uint16_t *out)
     for(int i=preload;i<radius;i++)
     {
         out[nb++]=xx;
+        if(nb*2>=radius) return nb;
         if(nb>=mx) return nb;
         if(E>0)
         {
@@ -235,31 +237,34 @@ int  ili9341::quarterDisc(int mx, int radius,int preload, uint16_t *out)
  */
 void ili9341::fillRoundRect(int x0, int y0, int w, int h,int radius, int outColor, int inColor)
 {
-    // Radial part
-    int preload=0;
-#define PRELOAD 16    
-    uint16_t offset[PRELOAD];
-    int sizes[3];
+    int sizes[6];
     const uint16_t colors[3]={(uint16_t)colorMap(outColor),(uint16_t)colorMap(inColor),(uint16_t)colorMap(outColor)};
-    int n=0;
-    do
+    
+  
+    int E=5-4*radius;
+    int yy=0;
+    int xx=radius;
+    while(yy<=xx)
     {
-        n=ili9341::quarterDisc(PRELOAD,   radius, preload, offset);        
-        for(int i=0;i<n;i++)
-        {            
-            int yoffset=radius-preload-1-i;
-            int k=radius-offset[i];
-            sizes[2]=sizes[0]=k;
-            sizes[1]=w-2*k;            
-            // top half        
-            setAddress(x0,y0+yoffset, w,h);        
-            multiFloodWords(3, sizes,colors);
-            // bottom half
-            setAddress(x0,y0+h-yoffset-1, w,h);
-            multiFloodWords(3, sizes,colors);    
-        }
-        preload+=n;
-    }while(n);
+            sizes[2]=sizes[0]=radius-xx;
+            sizes[1]=w-2*sizes[0];  
+
+            setAddress(x0,radius+y0-yy,w,1);
+            multiFloodWords(3,sizes,colors);
+            setAddress(x0,y0+h-(radius-yy)-1,w,1);
+            multiFloodWords(3,sizes,colors);
+
+
+            sizes[2]=sizes[0]=radius-yy;
+            sizes[1]=w-2*sizes[0]; 
+
+            setAddress(x0,radius+y0-xx,w,1);
+            multiFloodWords(3,sizes,colors);
+            setAddress(x0,y0+h-(radius-xx)-1,w,1);
+            multiFloodWords(3,sizes,colors);
+        
+            CIRCLE_ADVANCE(xx,yy,E)
+    }
 
     // interior now
     setAddress(x0,y0+radius, w,h-2*radius);
