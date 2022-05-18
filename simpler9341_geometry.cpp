@@ -244,6 +244,9 @@ void ili9341::fillRoundRect(int x0, int y0, int w, int h,int radius, int outColo
     int E=5-4*radius;
     int yy=0;
     int xx=radius;
+
+    int lastLine=-1;
+    int lastValue=-1;
     while(yy<=xx)
     {
             sizes[2]=sizes[0]=radius-xx;
@@ -254,15 +257,19 @@ void ili9341::fillRoundRect(int x0, int y0, int w, int h,int radius, int outColo
             setAddress(x0,y0+h-(radius-yy)-1,w,1);
             multiFloodWords(3,sizes,colors);
 
-
-            sizes[2]=sizes[0]=radius-yy;
-            sizes[1]=w-2*sizes[0]; 
-
-            setAddress(x0,radius+y0-xx,w,1);
-            multiFloodWords(3,sizes,colors);
-            setAddress(x0,y0+h-(radius-xx)-1,w,1);
-            multiFloodWords(3,sizes,colors);
-        
+            // XY symetry
+            int line=xx;
+            if(line!=lastLine && lastLine!=-1)
+            {
+                sizes[2]=sizes[0]=lastValue;
+                sizes[1]=w-2*sizes[0]; 
+                setAddress(x0,radius+y0-lastLine,w,1);
+                multiFloodWords(3,sizes,colors);
+                setAddress(x0,y0+h-(radius-lastLine)-1,w,1);
+                multiFloodWords(3,sizes,colors);                
+            }
+            lastLine=line;
+            lastValue=radius-yy;
             CIRCLE_ADVANCE(xx,yy,E)
     }
 
