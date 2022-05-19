@@ -108,6 +108,7 @@ public: // freetype font
                 int     myDrawChar(int x, int y, unsigned char c,  int color, int bg,FontInfo &infos);
                 void    setFontSize(FontSize size);
                 void    setFontFamily(const GFXfont *small, const GFXfont *medium, const GFXfont *big);
+                int     stringLength(const char *z); // lengh in pixel of the string
                 void    print(int x,int y,const char *z);
                 int     writeChar(const char c);
                 void    print(const char *data)
@@ -131,6 +132,7 @@ public: // freetype font
                 
 
 protected:
+                int     charLength(const char c);
                 int     mySquare(int x, int y, int w, int xheight, uint16_t filler);
                 void    innerLoop1NC(int w, int h, int left,int advance, int fg,int bg,uint8_t *p);
                 void    innerLoop1C(int w, int h, int left,int advance, int fg,int bg,uint8_t *p);
@@ -140,7 +142,8 @@ protected:
 #define         ST7735_BUFFER_SIZE_WORD 320
                 uint16_t *_scrbuf;
                 int     cursor_x,cursor_y;
-
+public:
+                void centeredButton(int x, int y, int w, int h, const char *text, int fontColor,int buttonColor,int bgColor);
 };
 
 

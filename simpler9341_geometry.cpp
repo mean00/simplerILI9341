@@ -244,7 +244,6 @@ void ili9341::fillRoundRect(int x0, int y0, int w, int h,int radius, int outColo
     int E=5-4*radius;
     int yy=0;
     int xx=radius;
-
     int lastLine=-1;
     int lastValue=-1;
     while(yy<=xx)

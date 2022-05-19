@@ -21,7 +21,20 @@ static void checkFont(const GFXfont *font, ili9341::FontInfo *info)
     info->maxWidth=mW;    
     info->font=font;
 }
-
+/**
+ * 
+ */
+int  ili9341::stringLength(const char *z)
+{
+   int width=0;
+   while(*z)
+   {
+       width+=charLength(*z++);
+   }
+   return width;
+}
+/**
+ */
 void  ili9341::print(int x, int y,const char *z)
 {
     cursor_x=x;
@@ -120,6 +133,23 @@ void ili9341::printUpTo(const char *data, int maxWidthInPixels)
 
     }
 }
+/**
+ * 
+ */
+int ili9341::charLength(const char c)
+{
+    if( (c == '\n') || (c=='\r') )
+    {
+        return 0;
+    } 
+    uint8_t first = gfxFont->first;
+    if ((c < first) || (c > gfxFont->last)) 
+        return 0;
+    
+    GFXglyph *glyph = gfxFont->glyph + c-first;
+    return glyph->xAdvance ;
+}
+
 /**
  * 
  * @param c
