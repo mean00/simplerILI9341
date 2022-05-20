@@ -243,38 +243,34 @@ void ili9341::fillRoundRect(int x0, int y0, int w, int h,int radius, int outColo
   
     int E=5-4*radius;
     int yy=0;
-    int xx=radius;
-    int lastLine=-1;
-    int lastValue=-1;
+    int xx=radius-1;
+    int last=-1;
+
+#define LINE(dest)     {setAddress(x0,y0+dest,w,1); multiFloodWords(3,sizes,colors);}
     while(yy<=xx)
     {
-            sizes[2]=sizes[0]=radius-xx;
-            sizes[1]=w-2*sizes[0];  
+        sizes[2]=sizes[0]=radius-xx;
+        sizes[1]=w-2*sizes[0];  
 
-            setAddress(x0,radius+y0-yy,w,1);
-            multiFloodWords(3,sizes,colors);
-            setAddress(x0,y0+h-(radius-yy)-1,w,1);
-            multiFloodWords(3,sizes,colors);
+        int invy=radius-yy-1;
+        LINE(invy);            
+        LINE(h-invy-1);            
 
-            // XY symetry
-            int line=xx;
-            if(line!=lastLine && lastLine!=-1)
-            {
-                sizes[2]=sizes[0]=lastValue;
-                sizes[1]=w-2*sizes[0]; 
-                setAddress(x0,radius+y0-lastLine,w,1);
-                multiFloodWords(3,sizes,colors);
-                setAddress(x0,y0+h-(radius-lastLine)-1,w,1);
-                multiFloodWords(3,sizes,colors);                
-            }
-            lastLine=line;
-            lastValue=radius-yy;
-            CIRCLE_ADVANCE(xx,yy,E)
+        sizes[2]=sizes[0]=radius-yy;
+        sizes[1]=w-2*sizes[0]; 
+        int invx=radius-xx-1;
+        if(invx!=last)
+        {
+            LINE(invx);
+            LINE(h-invx-1);
+        }
+        last=invx;
+        CIRCLE_ADVANCE(xx,yy,E)
     }
 
     // interior now
     setAddress(x0,y0+radius, w,h-2*radius);
-    floodWords( w*(h-2*radius),inColor);
+    floodWords( w*(h+2-2*radius),inColor);
 }
 
 // EOF

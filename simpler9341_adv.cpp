@@ -19,5 +19,5 @@ void ili9341::centeredButton(int x, int y, int w, int h, const char *text, int f
     int left=(w-textW)/2;
     if(left<0) left=0;
     setTextColor(fontColor,buttonColor);
-    print(x+left,y+(h/2),text);
+    print(x+left,y+((h*3)/4),text);
 }
