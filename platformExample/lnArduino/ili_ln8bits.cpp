@@ -438,6 +438,40 @@ void ln8bit9341::floodWords(int nb, const uint16_t data)
     CS_IDLE;
 }
 /**
+ * 
+ */
+void ln8bit9341::multiFloodWords(int n, int *size, const uint16_t *colors)
+{   
+    CHECK_ARBITER();
+    CS_ACTIVE;
+    CD_COMMAND;
+    sendWord(ILI9341_MEMORYWRITE);
+    CD_DATA;    
+    for(int i=0;i<n;i++)
+    {
+        uint16_t f=colorMap(colors[i]);
+        int nb=size[i];
+        register int cl=f&0xff;
+        register int ch=f>>8;
+        
+        if(1 && (f&0xff)==(f>>8))   // this does not work ?
+        {
+            uint32_t rpt= WR_DATA8(cl);
+            *_bop= ( rpt );
+            _ioWrite->pulsesLowNop(nb);
+        }   
+        else
+        {
+            _ioWrite->pulseData(nb,ch,cl);
+        }
+
+    }
+    CS_IDLE;
+
+
+}
+
+/**
  */
 static const uint8_t rotMode[4]={0x8,0xc8,0x78,0xa8};
 /**

@@ -100,6 +100,7 @@ class ln8bit9341 : public ili9341
             virtual void dataBegin();
             virtual void dataEnd();
             virtual void pushColors(int len, uint16_t *data);
+            virtual void multiFloodWords(int n, int *size, const uint16_t *colors);
             
             
                     uint32_t readChipId();
