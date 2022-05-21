@@ -238,7 +238,7 @@ int  ili9341::quarterDisc(int mx, int radius,int preload, uint16_t *out)
 void ili9341::fillRoundRect(int x0, int y0, int w, int h,int radius, int outColor, int inColor)
 {
     int sizes[6];
-    const uint16_t colors[3]={(uint16_t)colorMap(outColor),(uint16_t)colorMap(inColor),(uint16_t)colorMap(outColor)};
+    const uint16_t colors[3]={(uint16_t) (outColor),(uint16_t) (inColor),(uint16_t) (outColor)};
     
   
     int E=5-4*radius;
