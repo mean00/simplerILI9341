@@ -425,7 +425,7 @@ void lnSpi9341::floodWords(int nb, const uint16_t data)
     if(nb<100) // small transfer, dont bother doing something fancy
     {
         dataBegin();
-        _spi->write16Repeat(nb,data);
+        _spi->write16Repeat(nb,_dupeColor);
         dataEnd();
         return;
     }
@@ -469,11 +469,14 @@ void lnSpi9341::flushCache()
 void lnSpi9341::multiFloodWords(int n, int *size, const uint16_t *colors)
 {
     _dupeCmd=ILI9341_MEMORYWRITE;
+    uint16_t swappedColors[n];
+    
     lnLinkedTranfer transfer(this,true);
     for(int i=0; i<n; i++)
     {
+        swappedColors[i]=colorMap(colors[i]);
         if(size[i])
-            transfer.add(size[i],colors+i);
+            transfer.add(size[i],swappedColors+i);
     }
     CD_COMMAND;
     // Important!
