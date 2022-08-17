@@ -98,12 +98,14 @@ void lnSpi9341::write8(uint8_t c)
  */
 void lnSpi9341::sendDataToScreen(int nb, const uint16_t *data)
 {
-    if(1 || nb<64)
+    if(0 || nb<128)
     {
       simpleWrite16(nb,data);
       return;
     }
+    _spi->endSession();
     _spi->dmaWrite16(nb,data);
+    _spi->beginSession(16);
 }
 
 /**
