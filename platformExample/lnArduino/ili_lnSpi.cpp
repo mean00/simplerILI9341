@@ -40,7 +40,7 @@ void lnIliAsyncCB(void *cookie)
  * @param pinDc
  * @param pinCS
  */
-lnSpi9341::lnSpi9341( int w, int h ,hwlnSPIClass *spi, int pinDC,int pinCS, int pinReset)   : ili9341(w,h),_ioDC(pinDC),_ioCS(pinCS)
+lnSpi9341::lnSpi9341( int w, int h ,hwlnSPIClass *spi, lnPin pinDC,lnPin pinCS, lnPin pinReset)   : ili9341(w,h),_ioDC(pinDC),_ioCS(pinCS)
 {    
     _spi=spi;    
     _pinReset=pinReset;
