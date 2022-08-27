@@ -87,7 +87,7 @@ class lnFast8bitIo: public lnFastIO
 class ln8bit9341 : public ili9341
 {
     public:
-                        ln8bit9341(int w, int h , int port,  int pinDc, int pinCS, int pinWrite, int pinRead, int pinReset);
+                        ln8bit9341(int w, int h , int port,  lnPin pinDc, lnPin pinCS, lnPin pinWrite, lnPin pinRead, lnPin pinReset);
             virtual      ~ln8bit9341();
             virtual void init(const uint8_t *init1, const uint8_t *init2);
             virtual void sendByte(int byte); // 8 bytes

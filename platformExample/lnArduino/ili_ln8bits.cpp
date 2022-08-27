@@ -72,7 +72,7 @@ int swapper(int val)
  * @param pinDc
  * @param pinCS
  */
-ln8bit9341::ln8bit9341( int w, int h ,int port, int pinDC,int pinCS, int pinWrite, int pinRead, int pinReset)   : ili9341(w,h),_ioRead(pinRead),_ioCS(pinCS),_ioDC(pinDC)
+ln8bit9341::ln8bit9341( int w, int h ,int port, lnPin pinDC,lnPin pinCS, lnPin pinWrite, lnPin pinRead, lnPin pinReset)   : ili9341(w,h),_ioRead(pinRead),_ioCS(pinCS),_ioDC(pinDC)
 {    
     _dataPort=port;    
     _pinReset=pinReset;
