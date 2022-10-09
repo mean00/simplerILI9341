@@ -10,15 +10,15 @@ use crate::access::Ili9341Access;
 const ST7735_BUFFER_SIZE_WORD : usize = 320;
 //
 //https://stackoverflow.com/questions/59232877/how-to-allocate-structs-on-the-heap-without-taking-up-space-on-the-stack-in-stab
-pub fn unsafe_box_allocate<T>() -> Box<T> 
+
+pub fn unsafe_box_allocate<T>() ->  *mut T
 {
-    let instance: Box<T>;
+    
     let layout = Layout::new::<T>();
     unsafe {           
-        let ptr = alloc(layout) as *mut T;     
-        instance = Box::from_raw(ptr);
+        let ptr = alloc(layout) as *mut T;             
+        ptr
     }
-    instance
 }
 //-----------
 pub fn unsafe_array_alloc<T>(count : usize ) -> *mut T 
@@ -54,7 +54,7 @@ struct Ili9341 <'a>
 impl <'a>Ili9341<'a>
 {
     //-------------------------------------------------------------------------------
-    fn _init(&'a mut self,w: usize, h:usize, access: &'a mut dyn Ili9341Access)
+    fn _init(&'a mut self,w: usize, h:usize, access: &'a mut dyn Ili9341Access) 
     {
         self.physical_width     = w;
         self.physical_height    = h;
@@ -67,19 +67,24 @@ impl <'a>Ili9341<'a>
         self.y_offset         = 0;        
         self.src_buf         = unsafe_array_alloc(ST7735_BUFFER_SIZE_WORD);
         self.access = access;
+        
     }
     //-------------------------------------------------------------------------------
-    fn new (w: usize, h:usize, access: &'a mut dyn Ili9341Access) -> Option<Box<Ili9341>>
+    fn new (w: usize, h:usize, access: &'a mut dyn Ili9341Access) -> &mut Ili9341
     {
-        let mut allocated :  Box<Ili9341>   = unsafe_box_allocate();
-        allocated._init(w,h,access);        
-        //Some(allocated)
-        None
+        // there is probably a better way to do this
+        // we dont want to use the stack (even temporarily) as it will overflow
+        unsafe {
+            let  allocated :  *mut Ili9341   = unsafe_box_allocate();
+            (*allocated)._init(w,h,access);        
+        // We normally never free this, so a mem leak is a not a big deal            
+            return &mut (*allocated);
+        }
     }
     //-------------------------------------------------------------------------------
     fn fill_screen(&mut self, color : u16 ) 
     {
-        const ONE_GO: usize = 320; 
+        const ONE_GO: usize = 320; // If we DMA too much, we may overflow, it should be elsewhere...
         if self.height > ONE_GO // bug ? int color, int x, int y, int w, int h
         {
             self.square(color,0,0,self.width,ONE_GO);
