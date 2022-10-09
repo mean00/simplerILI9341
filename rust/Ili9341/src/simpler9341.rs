@@ -121,8 +121,10 @@ impl <'a>Ili9341<'a>
     pub fn square(&mut self, color : u16, x : usize, y : usize, w: usize, h:usize)
     {
         self.access.set_address(x,y,w,h);
+        self.access.data_begin();
         let f=w*h;
         self.access.flood_words(f,color);
+        self.access.data_end();
     }
     //-------------------------------------------------------------------------------
 }

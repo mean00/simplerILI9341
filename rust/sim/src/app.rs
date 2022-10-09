@@ -1,5 +1,6 @@
 #![allow(non_camel_case_types)]
 #![allow(unused_imports)]
+#![allow(unused_variables)]
 extern crate sdl2;
 
 extern crate ili9341;
@@ -12,6 +13,8 @@ use sdl2::keyboard::Keycode;
 use sdl2::pixels;
 use sdl2::render::Canvas;
 use sdl2::video::Window;
+use sdl2::rect::Point;
+use sdl2::EventPump;
 
 use sdl2::gfx::primitives::DrawRenderer;
 
@@ -23,6 +26,32 @@ const SCREEN_HEIGHT: u32 = 240;
 struct sdlAccess <'a>
 {
     canvas :  &'a mut Canvas<Window>,
+    x1 : usize,
+    x2 : usize,
+    y1 : usize,
+    y2 : usize,
+    x  : usize,
+    y  : usize,
+}
+impl sdlAccess <'_>
+{
+    fn next(&mut self)
+    {
+        self.x+=1;
+        if(self.x > self.x2)
+        {
+            self.x = self.x1;
+            self.y +=1;
+        }
+        if(self.y > self.y2)
+        {
+            self.y = self.y1;        
+        }
+    }
+    fn flush(&mut self)
+    {
+        self.canvas.present();
+    }
 }
 //-------
 impl Ili9341Access for sdlAccess <'_>
@@ -31,26 +60,54 @@ impl Ili9341Access for sdlAccess <'_>
     {
             self.canvas.present();
     }
-    fn send_word(&mut self,  b : u16)
+    
+    fn send_word(&mut self,  color : u16)
     {
-        self.canvas.present();
+        let r= color >> 11;
+        let g = (color >> 6) & 0x1f;
+        let b = color & 0x3f;
+        let color = pixels::Color::RGB((r*8) as u8,(g*4) as u8 ,(b*8) as u8);
+        self.canvas.set_draw_color(color);
+        self.canvas.draw_point( Point::new(self.x as i32, self.y as i32));        
+        self.next();
+        
+       
+       
     }
     fn update_hw_rotation(&mut self, rotation  : usize )
     {
-        self.canvas.present();
+        self.flush();
     }
     fn set_address(&mut self,  x: usize, y : usize, w: usize, h:usize)
     {
-        self.canvas.present();
+        self.x1=x;
+        self.x2=x+w-1;
+        self.y1=y;
+        self.y2=y+h-1;
+        self.x=self.x1;
+        self.y=self.y1;
+        self.flush();
     }
     fn data_end(&mut self, )
     {
-
+        self.flush();
     }
     fn data_begin(&mut self, )
     {
-
+        self.flush();
     }   
+}
+
+fn evt(events : &  mut EventPump) -> bool
+{    
+    for event in events.poll_iter() 
+    {
+        match event {
+            Event::Quit { .. } => {return true;},
+            _ => {}
+        }        
+    }
+    return false;
 }
 
 //--
@@ -75,18 +132,21 @@ fn main() -> Result<(), String> {
     canvas.clear();
     canvas.present();
 
-    let mut lastx = 0;
-    let mut lasty = 0;
+    let  mut events = sdl_context.event_pump()?;
 
-    let mut events = sdl_context.event_pump()?;
-
-    let mut access = sdlAccess{ canvas : &mut canvas};
+    let mut access = sdlAccess{ canvas : &mut canvas , x1: 0, x2: 0, y1: 0, y2  :0 , x : 0, y:0 };
 
     let ili = ili9341::simpler9341::Ili9341::new( SCREEN_WIDTH as usize, SCREEN_HEIGHT as usize, &mut  access);
-    loop {
+    'main: loop {
         ili.fill_screen(0xf);
+
+        if evt(& mut events)        {            break 'main;        }
+
         ili.fill_screen(0xf<<6);
+        if evt(& mut events)        {            break 'main;        }
+
         ili.fill_screen(0xf<<11);
+        if evt(& mut events)        {            break 'main;        }
     }
     
 
