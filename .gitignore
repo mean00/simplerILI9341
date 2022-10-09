@@ -30,3 +30,7 @@
 *.exe
 *.out
 *.app
+#
+*.sw*
+target/*
+rust/Ili9341/target/
