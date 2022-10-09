@@ -34,3 +34,4 @@
 *.sw*
 target/*
 rust/Ili9341/target/
+rust/sim/target/

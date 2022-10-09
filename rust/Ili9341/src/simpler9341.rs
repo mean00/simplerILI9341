@@ -36,7 +36,7 @@ pub fn unsafe_array_alloc<T>(count : usize ) -> *mut T
     }    
 }
 //-----------
-struct Ili9341 <'a>
+pub struct Ili9341 <'a>
 {
     physical_width   : usize,
     physical_height  : usize,
@@ -70,7 +70,7 @@ impl <'a>Ili9341<'a>
         
     }
     //-------------------------------------------------------------------------------
-    fn new (w: usize, h:usize, access: &'a mut dyn Ili9341Access) -> &mut Ili9341
+    pub fn new (w: usize, h:usize, access: &'a mut dyn Ili9341Access) -> &mut Ili9341
     {
         // there is probably a better way to do this
         // we dont want to use the stack (even temporarily) as it will overflow
@@ -82,7 +82,7 @@ impl <'a>Ili9341<'a>
         }
     }
     //-------------------------------------------------------------------------------
-    fn fill_screen(&mut self, color : u16 ) 
+    pub fn fill_screen(&mut self, color : u16 ) 
     {
         const ONE_GO: usize = 320; // If we DMA too much, we may overflow, it should be elsewhere...
         if self.height > ONE_GO // bug ? int color, int x, int y, int w, int h
@@ -96,7 +96,7 @@ impl <'a>Ili9341<'a>
         }
     }
     //-------------------------------------------------------------------------------
-    fn set_rotation(&mut self,rotation : usize)
+    pub fn set_rotation(&mut self,rotation : usize)
     {
         self.rotation=rotation;
         match rotation
@@ -118,7 +118,7 @@ impl <'a>Ili9341<'a>
         self.access.update_hw_rotation(rotation);
     }
     //-------------------------------------------------------------------------------
-    fn square(&mut self, color : u16, x : usize, y : usize, w: usize, h:usize)
+    pub fn square(&mut self, color : u16, x : usize, y : usize, w: usize, h:usize)
     {
         self.access.set_address(x,y,w,h);
         let f=w*h;
