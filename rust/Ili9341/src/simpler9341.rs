@@ -8,6 +8,7 @@ use alloc::alloc::alloc as alloc;
 use crate::access::Ili9341Access;
 //
 const ST7735_BUFFER_SIZE_WORD : usize = 320;
+mod geometry;
 //
 //https://stackoverflow.com/questions/59232877/how-to-allocate-structs-on-the-heap-without-taking-up-space-on-the-stack-in-stab
 
@@ -127,6 +128,15 @@ impl <'a>Ili9341<'a>
         self.access.data_end();
     }
     //-------------------------------------------------------------------------------
+    fn color_map(&self, color : u16) -> u16
+    {
+        return color;
+
+       // if(!IS_7789()) return d;
+       // uint32_t r=(d>>11),b=d&0x1f,g=(d>>5)&0x3f;
+       // return r+(g<<5)+(b<<11);
+    
+    }
 }
 
 // EOF
