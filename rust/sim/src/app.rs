@@ -98,12 +98,19 @@ impl Ili9341Access for sdlAccess <'_>
     }   
 }
 
-fn evt(events : &  mut EventPump) -> bool
+fn exit_requested(events : &  mut EventPump) -> bool
 {    
     for event in events.poll_iter() 
     {
         match event {
             Event::Quit { .. } => {return true;},
+            Event::KeyDown {
+                keycode: Some(keycode),
+                ..
+            } => {
+                if keycode == Keycode::Escape 
+                    {return true;}
+            }
             _ => {}
         }        
     }
@@ -138,15 +145,19 @@ fn main() -> Result<(), String> {
 
     let ili = ili9341::simpler9341::Ili9341::new( SCREEN_WIDTH as usize, SCREEN_HEIGHT as usize, &mut  access);
     'main: loop {
-        ili.fill_screen(0xf);
-
-        if evt(& mut events)        {            break 'main;        }
+        ili.fill_screen(0x0);
+        ili.draw_line(10,10,200,200,0x1f);
+        ili.draw_line(10,200,200,10,0x1f);
+        while true
+        {
+        if exit_requested(& mut events)        {            break 'main;        }
+        }
 
         ili.fill_screen(0xf<<6);
-        if evt(& mut events)        {            break 'main;        }
+        if exit_requested(& mut events)        {            break 'main;        }
 
         ili.fill_screen(0xf<<11);
-        if evt(& mut events)        {            break 'main;        }
+        if exit_requested(& mut events)        {            break 'main;        }
     }
     
 
