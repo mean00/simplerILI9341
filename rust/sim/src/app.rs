@@ -146,8 +146,13 @@ fn main() -> Result<(), String> {
     let ili = ili9341::simpler9341::Ili9341::new( SCREEN_WIDTH as usize, SCREEN_HEIGHT as usize, &mut  access);
     'main: loop {
         ili.fill_screen(0x0);
-        ili.draw_line(10,10,200,200,0x1f);
-        ili.draw_line(10,200,200,10,0x1f);
+        ili.draw_line(10,10,200,200,0x1f); // \
+        ili.draw_line(10,200,200,10,0x1f); // /
+        ili.draw_line(10,200,10,10,0x1f);  // ^ Left
+        ili.draw_line(200,200,10,200,0x1f);// _ Bottom
+        ili.draw_line(10,10,200,10,0x1f);  // - Top
+        ili.draw_line(200,10,200,200,0x1f);// \/ Right
+
         while true
         {
         if exit_requested(& mut events)        {            break 'main;        }

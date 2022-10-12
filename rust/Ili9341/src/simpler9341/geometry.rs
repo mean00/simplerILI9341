@@ -8,6 +8,17 @@ impl <'a>Ili9341<'a>
         if x < 0         {return -x;}
         x
     }
+    fn swap( a: &mut isize, b : &mut isize)
+    {
+        let z: isize = *a;
+        *a=*b;
+        *b=z;
+    }
+    fn min(a : isize, b: isize) -> isize
+    {
+        if a< b { return a;}
+        b
+    }
     pub fn vline(&mut self,x0:usize, y0: usize, h:usize, color : u16)
     {
         let color=self.color_map(color);
@@ -32,12 +43,15 @@ impl <'a>Ili9341<'a>
         let mut y1: isize= y1 as isize;
         let mut z : isize;
        
-    
-        if x0==x1  { self.vline(x0 as usize,y0 as usize ,(y1-y0+1) as usize,color);return;}
-        if y0==y1  { self.hline(x0 as usize ,y0 as usize ,(x1-x0+1) as usize,color);return;}
-        let color=self.color_map(color);
+       
         let adx = (Ili9341::myabs( x1  - x0 ) as usize)+1;
         let ady = (Ili9341::myabs( y1  - y0 ) as usize)+1;
+    
+        if x0==x1  { self.vline(x0 as usize, Ili9341::min(y0,y1) as usize ,ady, color);return;}
+        if y0==y1  { self.hline(Ili9341::min(x0,x1) as usize, y0 as usize ,adx, color);return;}
+       
+        let color=self.color_map(color);
+
         if adx < ady
         {
             let inc=(ady*2048)/adx;
@@ -45,8 +59,8 @@ impl <'a>Ili9341<'a>
             let mut inv: bool =false;
             if x0>x1
             {
-                z=y0;y0=y1;y1=z;
-                z=x0;x0=x1;x1=z;
+                Self::swap(&mut x0,&mut x1);
+                Self::swap(&mut y0,&mut y1);
             }
             if y0 > y1
             {
@@ -76,8 +90,8 @@ impl <'a>Ili9341<'a>
         let mut inv : bool =false;
         if y0>y1
         {
-            z=y0;y0=y1;y1=z;
-            z=x0;x0=x1;x1=z;
+            Self::swap(&mut x0,&mut x1);
+            Self::swap(&mut y0,&mut y1);
         }
         if x0 > x1
         {
