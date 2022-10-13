@@ -25,12 +25,12 @@ impl quadAccess
     fn next(&mut self)
     {
         self.x+=1;
-        if(self.x > self.x2)
+        if self.x > self.x2
         {
             self.x = self.x1;
             self.y +=1;
         }
-        if(self.y > self.y2)
+        if self.y > self.y2
         {
             self.y = self.y1;        
         }
@@ -50,9 +50,9 @@ impl Ili9341Access for quadAccess
     
     fn send_word(&mut self,  color : u16)
     {
-        let mut r : f32= (color >> 11) as f32;
-        let mut g : f32 = ((color >> 5) & 0x1f) as f32;
-        let mut b : f32 = (color & 0x1f) as f32;
+        let   r : f32= (color >> 11) as f32;
+        let   g : f32 = ((color >> 5) & 0x1f) as f32;
+        let   b : f32 = (color & 0x1f) as f32;
 
         let ix= (self.x as i32)*2;
         let iy= (self.y as i32)*2;
@@ -96,20 +96,21 @@ async fn main() {
     let ili = ili9341::simpler9341::Ili9341::new( SCREEN_WIDTH as usize, SCREEN_HEIGHT as usize, &mut  access);
     
     ili.fill_screen(0x0);
-    next_frame().await;
+    //next_frame().await;
     ili.draw_line(10,10,200,200,0x1f); // \
-    next_frame().await;
+    //next_frame().await;
     ili.draw_line(10,200,200,10,0x1f); // /
-    next_frame().await;
+    //next_frame().await;
     ili.draw_line(10,200,10,10,0x1f);  // ^ Left
-    next_frame().await;
+    //next_frame().await;
     ili.draw_line(200,10,200,200,0x1f);// | right
-    next_frame().await;
+    //next_frame().await;
     ili.draw_line(200,200,10,200,0x1f);// _ Bottom
-    next_frame().await;
+    //next_frame().await;
     ili.draw_line(10,10,200,10,0x1f);// - top
-    next_frame().await;
+    //next_frame().await;
     ili.circle(60,60,24,(0x3f)<<5);
+    ili.disc(120,60,24,(0x1f)<<11);
 
     
     next_frame().await;

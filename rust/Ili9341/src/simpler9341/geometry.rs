@@ -24,7 +24,7 @@ impl <'a>Ili9341<'a>
         self.access.flood_words(w,color);
         self.access.data_end();
     }
-    fn CIRCLE_ADVANCE( xx : &mut usize, yy : &mut usize, E : &mut isize)
+    fn circle_advance( xx : &mut usize, yy : &mut usize, E : &mut isize)
     {
         if (*E)>0
         {
@@ -41,9 +41,9 @@ impl <'a>Ili9341<'a>
         let mut E: isize=5-4*(radius as isize);
         let mut yy=0;
         let mut xx=radius;
-        while(yy<xx)
+        while yy<xx
         {
-            Self::CIRCLE_ADVANCE(&mut xx,&mut yy,&mut E);
+            Self::circle_advance(&mut xx,&mut yy,&mut E);
             // Use simple symetry
             self.access.set_address(x+xx,y+yy,1,1);
             self.access.flood_words(1,color);
@@ -62,10 +62,35 @@ impl <'a>Ili9341<'a>
             self.access.flood_words(1,color);
             self.access.set_address(x+yy,y-xx,1,1);
             self.access.flood_words(1,color);
+        }
 
     }
-}
+    pub fn disc(&mut self, x: usize, y: usize, radius: usize, color: u16)    
+    {
+        // https://bariweiss.substack.com/p/hollywoods-new-rules?s=r
+        let color=self.color_map(color);
+        let mut E: isize=5-4*(radius as isize);
+        let mut yy=0;
+        let mut xx=radius;
+        
+        while yy<=xx
+        {
+    
+            self.access.set_address(x+xx-2*xx,y+yy,2*xx,1);
+            self.access.flood_words(2*xx,color);
+    
+            self.access.set_address(x+xx-2*xx,y-yy,2*xx,1);
+            self.access.flood_words(2*xx,color);       
 
+            self.access.set_address(x+yy-2*yy,y+xx,2*yy,1);
+            self.access.flood_words(2*yy,color);
+
+            self.access.set_address(x+yy-2*yy,y-xx,2*yy,1);
+            self.access.flood_words(2*yy,color);       
+
+            Self::circle_advance(&mut xx,&mut yy,&mut E);
+        }
+    }
 
     /**
      * 
@@ -76,7 +101,7 @@ impl <'a>Ili9341<'a>
         let mut x1: isize= x1 as isize;
         let mut y0: isize= y0 as isize;
         let mut y1: isize= y1 as isize;
-        let mut z : isize;
+        
        
        
         let adx = (xabs( x1  - x0 ) as usize)+1;

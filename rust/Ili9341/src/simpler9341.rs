@@ -1,7 +1,7 @@
 
 #![allow(dead_code)]
 extern crate alloc;
-use alloc::boxed::Box;
+//use alloc::boxed::Box;
 use alloc::alloc::Layout as Layout;
 use alloc::alloc::alloc as alloc;
 //
