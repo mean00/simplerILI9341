@@ -1,37 +1,72 @@
 
 use super :: Ili9341;
+use crate::util::xswap as xswap;
+use crate::util::xmin as xmin;
+use crate::util::xabs as xabs;
 
 impl <'a>Ili9341<'a>
 {
-    fn myabs(x: isize) -> isize
-    {
-        if x < 0         {return -x;}
-        x
-    }
-    fn swap( a: &mut isize, b : &mut isize)
-    {
-        let z: isize = *a;
-        *a=*b;
-        *b=z;
-    }
-    fn min(a : isize, b: isize) -> isize
-    {
-        if a< b { return a;}
-        b
-    }
+   
     pub fn vline(&mut self,x0:usize, y0: usize, h:usize, color : u16)
     {
+        
         let color=self.color_map(color);
         self.access.set_address(x0,y0,1,h);
+        self.access.data_begin();
         self.access.flood_words(h,color);
+        self.access.data_end();
     }
     pub fn hline(&mut self,x0:usize, y0: usize, w:usize, color : u16)
     {
         let color=self.color_map(color);
         self.access.set_address(x0,y0,w,1);
+        self.access.data_begin();
         self.access.flood_words(w,color);
+        self.access.data_end();
     }
-    
+    fn CIRCLE_ADVANCE( xx : &mut usize, yy : &mut usize, E : &mut isize)
+    {
+        if (*E)>0
+        {
+            (*xx)-=1;
+            *E=(*E)-8*(*xx as isize);
+        }
+        (*yy)+=1;
+        (*E)+=8*(*yy as isize)+4;
+    }
+    pub fn circle(&mut self, x: usize, y: usize, radius: usize, color: u16)    
+    {
+        // https://bariweiss.substack.com/p/hollywoods-new-rules?s=r
+        let color=self.color_map(color);
+        let mut E: isize=5-4*(radius as isize);
+        let mut yy=0;
+        let mut xx=radius;
+        while(yy<xx)
+        {
+            Self::CIRCLE_ADVANCE(&mut xx,&mut yy,&mut E);
+            // Use simple symetry
+            self.access.set_address(x+xx,y+yy,1,1);
+            self.access.flood_words(1,color);
+            self.access.set_address(x-xx,y+yy,1,1);
+            self.access.flood_words(1,color);
+            self.access.set_address(x-xx,y-yy,1,1);
+            self.access.flood_words(1,color);
+            self.access.set_address(x+xx,y-yy,1,1);
+            self.access.flood_words(1,color);
+            // Use 45 degrees symetry, swapping x & y
+            self.access.set_address(x+yy,y+xx,1,1);
+            self.access.flood_words(1,color);
+            self.access.set_address(x-yy,y+xx,1,1);
+            self.access.flood_words(1,color);
+            self.access.set_address(x-yy,y-xx,1,1);
+            self.access.flood_words(1,color);
+            self.access.set_address(x+yy,y-xx,1,1);
+            self.access.flood_words(1,color);
+
+    }
+}
+
+
     /**
      * 
      */
@@ -44,11 +79,11 @@ impl <'a>Ili9341<'a>
         let mut z : isize;
        
        
-        let adx = (Ili9341::myabs( x1  - x0 ) as usize)+1;
-        let ady = (Ili9341::myabs( y1  - y0 ) as usize)+1;
+        let adx = (xabs( x1  - x0 ) as usize)+1;
+        let ady = (xabs( y1  - y0 ) as usize)+1;
     
-        if x0==x1  { self.vline(x0 as usize, Ili9341::min(y0,y1) as usize ,ady, color);return;}
-        if y0==y1  { self.hline(Ili9341::min(x0,x1) as usize, y0 as usize ,adx, color);return;}
+        if x0==x1  { self.vline(x0 as usize, xmin(y0,y1) as usize ,ady, color);return;}
+        if y0==y1  { self.hline(xmin(x0,x1) as usize, y0 as usize ,adx, color);return;}
        
         let color=self.color_map(color);
 
@@ -59,8 +94,8 @@ impl <'a>Ili9341<'a>
             let mut inv: bool =false;
             if x0>x1
             {
-                Self::swap(&mut x0,&mut x1);
-                Self::swap(&mut y0,&mut y1);
+                xswap(&mut x0,&mut x1);
+                xswap(&mut y0,&mut y1);
             }
             if y0 > y1
             {
@@ -73,7 +108,9 @@ impl <'a>Ili9341<'a>
                 let h : usize=val>>11;
                 val&=(1<<11)-1;
                 self.access.set_address(x,posy,1,h);
+                self.access.data_begin();
                 self.access.flood_words(h,color);
+                self.access.data_end();
                 if inv
                 {
                     posy-=h;
@@ -90,8 +127,8 @@ impl <'a>Ili9341<'a>
         let mut inv : bool =false;
         if y0>y1
         {
-            Self::swap(&mut x0,&mut x1);
-            Self::swap(&mut y0,&mut y1);
+            xswap(&mut x0,&mut x1);
+            xswap(&mut y0,&mut y1);
         }
         if x0 > x1
         {
@@ -104,7 +141,9 @@ impl <'a>Ili9341<'a>
             let h: usize =val>>11;
             val&=(1<<11)-1;
             self.access.set_address(posx,y,h,1);
+            self.access.data_begin();
             self.access.flood_words(h,color);            
+            self.access.data_end();
             if inv
             {
                 posx-=h;

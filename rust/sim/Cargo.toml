@@ -10,5 +10,6 @@ path = "src/app.rs"
 #crate-type = ["staticlib"] # Creates static lib
 
 [dependencies]
-sdl2 = { version = "0.35" , features = ["gfx"]}
+#sdl2 = { version = "0.35" , features = ["gfx"]}
+macroquad = "0.3"
 ili9341 = { version = "*" , path="../Ili9341"}
