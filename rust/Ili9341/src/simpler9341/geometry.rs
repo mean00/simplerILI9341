@@ -178,4 +178,146 @@ impl <'a>Ili9341<'a>
             }
         }    
     }
+    /**
+    * 
+    */
+    pub fn inverted_disc_corner(&mut self, x: usize, y: usize, radius: usize, corner : usize, color: u16)    
+    {
+        const  OFS : usize = 1;
+        // https://bariweiss.substack.com/p/hollywoods-new-rules?s=r
+        let color=self.color_map(color);
+        let mut E: isize=5-4*(radius as isize);
+        let mut yy=0;
+        let mut xx=radius;
+        while yy<=xx
+        {
+            if(corner & 2)!=0
+            {
+                self.access.set_address(x+xx,y-yy+radius-1,radius,1);
+                self.access.flood_words(radius-xx,color);
+                self.access.set_address(x+yy,y-xx+radius-1,radius,1);
+                self.access.flood_words(radius-yy,color);
+            }
+            if(corner & 1)!=0
+            {
+                self.access.set_address(x,radius+y-yy,radius,1);
+                self.access.flood_words(radius-xx,color);
+                self.access.set_address(x,radius+y-xx,radius,1);
+                self.access.flood_words(radius-yy,color);
+            }        
+            
+            if(corner & 4)!=0
+            {
+                self.access.set_address(x,y+yy-OFS,radius,1);
+                self.access.flood_words(radius-xx,color);
+                self.access.set_address(x,y+xx-OFS,radius,1);
+                self.access.flood_words(radius-yy,color);
+            }        
+            if(corner & 8)!=0
+            {
+                self.access.set_address(x+xx,y+yy-OFS,radius,1);
+                self.access.flood_words(radius-xx,color);
+                self.access.set_address(x+yy,y+xx-OFS,radius,1);
+                self.access.flood_words(radius-yy,color);
+            }
+            Self::circle_advance(&mut xx,&mut yy,&mut E);
+        }
+    }
+    pub fn quarter_disc(&mut self, mx: usize, radius: usize, preload : usize, out : &mut [u16])    -> usize
+    {
+        let mut E: isize=5-4*(radius as isize);
+        let mut yy=0;
+        let mut xx=radius as isize;
+        if preload*2>=radius
+        {
+            return 0;
+        }
+        for _i in 0..preload
+        {
+            if E>0
+            {
+                xx-=1;
+                E=E-8*xx;
+            }
+            yy+=1;
+            E+=8*yy+4;
+        }
+        let mut nb : usize=0;
+        for _i in preload..radius
+        {
+            out[nb]=xx as u16;
+            nb+=1;
+            if nb*2>=radius
+            {
+                return nb;
+            }
+            if nb>=mx
+            {
+                 return nb;
+            }
+            if E>0
+            {
+                xx-=1;
+                E-=8*xx;
+            }
+            yy+=1;
+            E+=8*yy+4;
+        }
+        return nb;
+    }
+    //
+    pub fn fill_round_rect(&mut self, x0: usize, y0: usize, w: usize, h: usize,  radius: usize,  outcolor: u16,    incolor : u16)
+    {        
+        let outcolor=self.color_map(outcolor);
+        let incolor=self.color_map(incolor);
+        let mut E: isize=5-4*(radius as isize);
+        let mut yy=0;
+        let mut xx=radius-1;
+        
+        let mut last: usize =1<<31;
+        let _colors : [u16;3]=[outcolor, incolor, outcolor];
+        let mut sizes : [usize;3] =[0,0,0];
+    
+    //#define LINE(dest)     {setAddress(x0,y0+dest,w,1); multiFloodWords(3,sizes,colors);}
+        macro_rules! LINE {
+        ( $( $x:expr ),* ) => 
+            {
+            {        
+                $(
+                    self.access.set_address(x0,y0+$x,w,1);
+                    self.access.multi_flood_words(&sizes,&_colors);
+                    //temp_vec.push($x);
+                )*   
+            }
+            };
+        }    
+        while yy<=xx
+        {
+            sizes[0]=radius-xx;
+            sizes[2]=sizes[0];
+            sizes[1]=w-2*sizes[0];  
+    
+            let invy=radius-yy-1;
+            LINE!(invy);            
+            LINE!(h-invy-1);            
+    
+            sizes[0]=radius-yy;
+            sizes[2]=sizes[0];
+            sizes[1]=w-2*sizes[0]; 
+            let  invx=radius-xx-1;
+            if invx!=last
+            {
+                LINE!(invx);
+                LINE!(h-invx-1);
+            }
+            last=invx;
+            Self::circle_advance(&mut xx,&mut yy,&mut E);
+        }
+        // interior now
+        self.access.set_address(x0,y0+radius, w,h-2*radius);
+        self.access.flood_words( w*(h+2-2*radius),incolor);
+    }
+    
+    
+
 }

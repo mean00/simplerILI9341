@@ -4,25 +4,24 @@
 
 // single glyph structure
 #[repr(C)]
-struct PFXglyph{
-    bitmapOffset: u16,  //< Pointer into GFXfont->bitmap
-    width       : u8,   //< Bitmap dimensions in pixels
-    height      : u8,   //< Bitmap dimensions in pixels
-    xAdvance    : u8,   //< Distance to advance cursor (x axis)
-    xOffset     : i8,   //< X dist from cursor pos to UL corner
-    yOffset     : i8,   //< Y dist from cursor pos to UL corner
+pub struct PFXglyph{
+    pub offset      : u16,  //< Pointer into GFXfont->bitmap
+    pub width       : u8,   //< Bitmap dimensions in pixels
+    pub height      : u8,   //< Bitmap dimensions in pixels
+    pub x_advance   : u8,   //< Distance to advance cursor (x axis)
+    pub x_offset    : i8,   //< X dist from cursor pos to UL corner
+    pub y_offset    : i8,   //< Y dist from cursor pos to UL corner
 } 
-// Whole font
 #[repr(C)]
-struct PFXfont
+pub struct PFXfont
 {
-  bitmap      : *const u8,        //< Glyph bitmaps, concatenated
-  glyph       : *const PFXglyph,  //< Glyph array
-  first       : u16,              //< ASCII extents (first char)
-  last        : u16,              //< ASCII extents (last char)
-  yAdvance    : u8,               //< Newline distance (y axis)
-  bpp         : u8 ,              //< bit per pixel, 1 or 4 at the moment
-  shrinked    : u8,               //< compressed ?
+  pub bitmap      : &'static[u8],        //< Glyph bitmaps, concatenated
+  pub glyphs      : &'static[PFXglyph],  //< Glyph array
+  pub first       : u16,              //< ASCII extents (first char)
+  pub last        : u16,              //< ASCII extents (last char)
+  pub y_advance   : u8,               //< Newline distance (y axis)
+  pub bpp         : u8 ,              //< bit per pixel, 1 or 4 at the moment
+  pub shrinked    : u8,               //< compressed ?
 }
 
 extern {
