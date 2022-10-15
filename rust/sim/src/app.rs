@@ -8,6 +8,11 @@ extern crate ili9341;
 use ili9341::simpler9341 as simpler9341;
 use ili9341::access::Ili9341Access as Ili9341Access;
 
+
+
+mod testfont;
+use crate::testfont::NotoSans_Bold12pt7b;
+
 const SCREEN_WIDTH: u32 = 320;
 const SCREEN_HEIGHT: u32 = 240;
 
@@ -93,7 +98,9 @@ async fn main() {
 
     let mut access = quadAccess{  x1: 0, x2: 0, y1: 0, y2  :0 , x : 0, y:0 };
 
-    let ili = ili9341::simpler9341::Ili9341::new( SCREEN_WIDTH as usize, SCREEN_HEIGHT as usize, &mut  access);
+    let ili = ili9341::simpler9341::Ili9341::new( SCREEN_WIDTH as usize, SCREEN_HEIGHT as usize, &mut  access,
+    &NotoSans_Bold12pt7b,&NotoSans_Bold12pt7b,&NotoSans_Bold12pt7b    
+    );
     
     ili.fill_screen(0x0);
     //next_frame().await;
@@ -112,7 +119,13 @@ async fn main() {
     ili.circle(60,60,24,(0x3f)<<5);
     ili.disc(120,60,24,(0x1f)<<11);
 
+    ili.inverted_disc_corner(40,120, 30,4,0x1f<<11);
+    ili.inverted_disc_corner(80,120, 30,1,0x1f);
     
+    ili.fill_round_rect( 20,20,100,16,4,0x1f,(0x1f<<5));
+    
+    ili.print(5,5,"Some text");
+
     next_frame().await;
     }
 }

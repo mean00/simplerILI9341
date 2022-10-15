@@ -6,12 +6,21 @@ extern crate alloc;
 use crate::util::unsafe_array_alloc as unsafe_array_alloc;
 use crate::util::unsafe_box_allocate as unsafe_box_allocate;
 //
+use crate::glyph::{PFXfont,PFXglyph,FontInfo};
+//
 use crate::access::Ili9341Access;
 //
 const ST7735_BUFFER_SIZE_WORD : usize = 320;
 mod geometry;
 mod text;
 
+
+enum FontFamily
+{
+    SmallFont=0,
+    MediumFont=1,
+    BigFont=2,
+}
 //-----------
 pub struct Ili9341 <'a>
 {
@@ -26,34 +35,57 @@ pub struct Ili9341 <'a>
     y_offset         : usize,  
     src_buf         : *mut u16,
     access          : &'a mut dyn Ili9341Access,
+    current_font    : &'a FontInfo,
+    font_infos      : [FontInfo;3],
+    cursor_x        : usize,
+    cursor_y        : usize,
+
+    fg              : u16,
+    bg              : u16,
 }
 
 impl <'a>Ili9341<'a>
 {
     //-------------------------------------------------------------------------------
-    fn _init(&'a mut self,w: usize, h:usize, access: &'a mut dyn Ili9341Access) 
+    fn _init(&'a mut self,w: usize, h:usize, access: &'a mut dyn Ili9341Access, smallfont :  &'static PFXfont, mediumfont:  &'static PFXfont, bigfont :  &'static PFXfont ) 
     {
         self.physical_width     = w;
         self.physical_height    = h;
         self.width = w;
         self.height = h;
         self.rotation = h;
-        self.physical_x_offset = 0;
-        self.physical_y_offset = 0;
-        self.x_offset         = 0;
-        self.y_offset         = 0;        
-        self.src_buf         = unsafe_array_alloc(ST7735_BUFFER_SIZE_WORD);
-        self.access = access;
+        self.physical_x_offset  = 0;
+        self.physical_y_offset  = 0;
+        self.x_offset           = 0;
+        self.y_offset           = 0;     
+        self.cursor_x           = 0;   
+        self.cursor_y           = 0;
+        self.fg                 = 0xffff;
+        self.bg                 = 0;
+        self.src_buf            = unsafe_array_alloc(ST7735_BUFFER_SIZE_WORD);
+        self.access             = access;
+
         
-    }
+        self.font_infos[0].font       = smallfont;        
+        self.font_infos[1].font       = mediumfont;
+        self.font_infos[2].font       = bigfont;        
+        self.current_font= &(self.font_infos[0]);
+        for i in 0..3
+        {
+            // TODO TO DO
+          //  self.check_font(  self.font_infos[0].font , &mut self.font_infos[i]  );
+        }        
+    }   
     //-------------------------------------------------------------------------------
-    pub fn new (w: usize, h:usize, access: &'a mut dyn Ili9341Access) -> &mut Ili9341
+    pub fn new (w: usize, h:usize, access: &'a mut dyn Ili9341Access, 
+                smallfont :  &'static PFXfont, mediumfont:  &'static PFXfont, bigfont :  &'static PFXfont ) 
+                -> &'a mut Ili9341 <'a>
     {
         // there is probably a better way to do this
         // we dont want to use the stack (even temporarily) as it will overflow
         unsafe {
             let  allocated :  *mut Ili9341   = unsafe_box_allocate();
-            (*allocated)._init(w,h,access);        
+            (*allocated)._init(w,h,access,smallfont,mediumfont,bigfont);        
         // We normally never free this, so a mem leak is a not a big deal            
             return &mut (*allocated);
         }

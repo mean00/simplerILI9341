@@ -1,4 +1,6 @@
 use super :: Ili9341;
+use crate::glyph::{PFXfont,PFXglyph,FontInfo};
+
 
 
 macro_rules! INCLUDE_TEMPLATE {
@@ -48,5 +50,253 @@ impl <'a>Ili9341<'a>
     //INCLUDE_TEMPLATE!( innerLoop1 , {}, *p, p=p.add(1));   
     //INCLUDE_TEMPLATE!( innerLoop1C , iliHS hs(p),  hs.next() );
 
+    ///
+    /// 
+    /// 
+    pub fn check_font(&'a mut self, info : & 'a mut FontInfo )
+    {
+        let mut mW : usize =0;
+        let mut mH : usize =0;
+                
+        for i in info.font.glyphs
+        {
+            let mut x: usize =0;
+            let mut y: usize =0;
+            x=i.x_advance as usize;
+            y=(-(i.y_offset as isize)) as usize;
+            if x>mW {mW=x;}
+            if y>mH {mH=y;}
+        }
+        info.max_height=mH + 1;
+        info.max_width=mW;    
+        
+    }
+    ///
+    /// 
+    /// 
+    fn string_length(&mut self, text : &str) -> usize
+    {
+        let mut width : usize =0;
+        for c in text.chars()
+        {
+            width+=match c
+            {
+                '\n' | '\r' => 0,
+                x => {
+                    let first = self.current_font.font.first as usize;
+                    let x = x as usize;
+                    if (x < first) || (x > (self.current_font.font.last as usize))
+                    {
+                        return 0;
+                    }
+                    return self.current_font.font.glyphs[(c as usize)-(first as usize)].x_advance as usize;                    
+                },
+            }
+        }
+        width
+    }
+    ///
+    /// 
+    /// 
+    fn my_square(&mut self,  x : usize, y : usize, w: usize, h:usize, filler : u16)
+    {
+        let mut w:usize = w;
+        let mut h:usize = h;
 
+        if (w+x)>=self.width
+        {    
+            w=self.width-x;    
+            if w<=0
+            {
+                 return ;
+            }
+        }    
+        if (h+y)>=self.height
+        {    
+            h=self.height-y;
+            if h<=0
+            {
+                return;
+            }
+        }    
+        
+        self.access.set_address(x,y,w,h);
+        self.access.data_begin();
+        self.access.flood_words(w*h,filler);
+        self.access.data_end();
+        return ;
+    }
+    ///
+    /// 
+    /// 
+    pub fn write_char(&mut self, c: char) -> ()
+    {
+    
+        if  c == '\n'
+        {
+          self.cursor_x = 0;
+          self.cursor_y +=  self.current_font.font.y_advance as usize;
+          return;
+        } 
+        if c=='\r'
+        {
+          return ;
+        }
+        let c: usize = c as usize;
+        if (c < self.current_font.font.first as usize) || (c > self.current_font.font.last as usize)
+        {
+            return ;
+        }
+        let first : usize = self.current_font.font.first as usize;
+        let glyph : &PFXglyph = &self.current_font.font.glyphs[(c as usize)-first];
+        let  w = glyph.width as usize;
+        let  h = glyph.height as usize;
+        
+        // also ' ' here
+        if (w <= 0) || (h <= 0)
+        {
+            //
+            self.my_square(
+                    self.cursor_x,
+                    self.cursor_y-self.current_font.max_height, 
+                    self.current_font.font.glyphs[0].x_advance as usize,  // advance by the 1st char, not necessarily correct
+                    self.current_font.max_height+(glyph.y_offset as usize),
+                    self.bg);
+            self.cursor_x += glyph.x_advance as usize ;    
+            return ;
+        }
+    
+        let xo = glyph.x_offset; // sic
+        if (self.cursor_x +  ((xo as usize) + w)) > self.width
+        {
+          self.cursor_x = 0;
+          self.cursor_y +=   self.current_font.font.y_advance as usize;
+        }    
+        
+        self.cursor_x += self.my_draw_char(
+                    self.cursor_x, 
+                    self.cursor_y, 
+                    c, 
+                    self.fg,
+                    self.bg);
+    }
+    ///
+    /// 
+    /// 
+    fn my_draw_char(&mut self,  x: usize, y : usize, c: usize, fg: u16, bg : u16) -> usize
+    { 
+
+        let full_c = c;
+        let mut c =c;
+        let mut y : usize = y;
+        c -= self.current_font.font.first as usize;
+
+        let glyph : &PFXglyph = &( self.current_font.font.glyphs[c]);
+                               
+        let  w: usize    = glyph.width as usize;
+        let  mut h: usize    = glyph.height as usize;    
+        let  advv: usize = glyph.x_advance as usize +1;
+        let  top : usize = self.current_font.max_height as usize +glyph.y_offset as usize;
+        // Special case
+        if full_c==(' ' as usize)
+        {
+            self.my_square(x,
+                        (y-top) as usize,
+                        advv, //Fix!
+                        self.current_font.max_height+2,bg);
+            return advv;
+        }       
+      
+        
+        // top & bottom
+        
+        self.my_square(x,
+                y-self.current_font.max_height,
+                advv,
+                top,bg);
+    
+        let bottom: isize =-(glyph.y_offset as isize)-(h as isize);
+        if bottom>=-2
+        {
+            self.my_square(x,((y as isize)-bottom) as usize,advv,(bottom+2) as usize,bg);      
+        }
+        
+        let fg=self.color_map(fg);
+        let bg=self.color_map(bg);
+    
+        y+= glyph.y_offset as usize;   // offset is <0 most of the time
+        
+        let left: usize =glyph.x_offset as usize;
+        let mut right: isize =(advv as isize)-(w as isize + (left as isize));
+        if right<0
+        {
+            right=0;
+        } 
+        
+        self.access.set_address(x,y, advv, h);                
+        // Pre-fill & left /right
+        for i in 0..left
+        {
+            unsafe { *(self.src_buf.add(i))=bg;} // TODO speedup
+        }            
+        let right_border = left+w+right as usize;
+        for i in (w+left)..right_border
+        {
+            unsafe { *(self.src_buf.add(i))=bg; } // TODO speedup            
+        }
+        // fill in body
+        
+        self.access.data_begin();
+    
+        // dont draw out of screen 
+        if y+h>=self.height
+        {
+            h= self.height-y;
+            if h<0
+            {
+                h=0;
+            }
+        }
+
+        match self.current_font.font.bpp
+        {
+            1 =>             {
+                    if self.current_font.font.shrinked != 0
+                    {
+                        //TODO self.innerLoop1C(w,h,left,advv,fg,bg,p);
+                    }
+                    else
+                    {
+                        //TODO self.innerLoop1NC(w,h,left,advv,fg,bg,p);
+                    }
+                },
+            2 =>   {
+                    if self.current_font.font.shrinked != 0
+                    {
+                        //TODO self.innerLoop2C(w,h,left,advv,fg,bg,p);
+                    }
+                    else
+                    {
+                        //TODO self.innerLoop2NC(w,h,left,advv,fg,bg,p);
+                    }
+                },
+            _ => panic!("Crap"),
+            }
+        self.access.data_end();
+        return glyph.x_advance as usize;    
+    }
+    ///
+    /// 
+    /// 
+    pub fn print(&mut self, x : usize, y : usize, text  : &str)
+    {
+        self.cursor_x=x;
+        self.cursor_y=y;
+        for c in text.chars()
+        {
+            self.write_char(c);
+            self.cursor_x +=1;
+        }
+    }   
 }
+// EOF

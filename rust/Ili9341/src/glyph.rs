@@ -24,6 +24,14 @@ pub struct PFXfont
   pub shrinked    : u8,               //< compressed ?
 }
 
+
+pub struct FontInfo
+{
+    pub max_height  : usize, 
+    pub max_width   : usize, 
+    pub font        : &'static PFXfont
+}
+
 extern {
   fn load_font_info(data : &[u8], font : &mut PFXfont) -> bool;
 }
