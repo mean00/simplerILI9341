@@ -45,6 +45,11 @@ impl quadAccess
         
     }
 }
+const iRED :   u16  = (0x1f<<11);
+const iGREEN : u16  = (0x3f<<5);
+const iBLUE :  u16  = (0x1f<<0);
+const iBLACK : u16  = 0;
+const iWHITE : u16  = 0xffff;
 //-------
 impl Ili9341Access for quadAccess 
 {
@@ -55,9 +60,9 @@ impl Ili9341Access for quadAccess
     
     fn send_word(&mut self,  color : u16)
     {
-        let   r : f32= (color >> 11) as f32;
-        let   g : f32 = ((color >> 5) & 0x1f) as f32;
-        let   b : f32 = (color & 0x1f) as f32;
+        let   r : f32= ((color >> 11)*8) as f32;
+        let   g : f32 = (((color >> 5) & 0x1f)*4) as f32;
+        let   b : f32 = ((color & 0x1f)*8) as f32;
 
         let ix= (self.x as i32)*2;
         let iy= (self.y as i32)*2;
@@ -104,31 +109,33 @@ async fn main() {
     
     ili.fill_screen(0x0);
     //next_frame().await;
-    ili.draw_line(10,10,200,200,0x1f); // \
+    ili.draw_line(10,10,200,200,iBLUE); // \
     //next_frame().await;
-    ili.draw_line(10,200,200,10,0x1f); // /
+    ili.draw_line(10,200,200,10,iBLUE); // /
     //next_frame().await;
-    ili.draw_line(10,200,10,10,0x1f);  // ^ Left
+    ili.draw_line(10,200,10,10,iBLUE);  // ^ Left
     //next_frame().await;
-    ili.draw_line(200,10,200,200,0x1f);// | right
+    ili.draw_line(200,10,200,200,iBLUE);// | right
     //next_frame().await;
-    ili.draw_line(200,200,10,200,0x1f);// _ Bottom
+    ili.draw_line(200,200,10,200,iBLUE);// _ Bottom
     //next_frame().await;
-    ili.draw_line(10,10,200,10,0x1f);// - top
+    ili.draw_line(10,10,200,10,iBLUE);// - top
     //next_frame().await;
-    ili.circle(60,60,24,(0x3f)<<5);
-    ili.disc(120,60,24,(0x1f)<<11);
+    ili.circle(60,60,24,iRED);
+    ili.disc(120,60,24,iGREEN);
 
-    ili.inverted_disc_corner(40,120, 30,4,0x1f<<11);
-    ili.inverted_disc_corner(80,120, 30,1,0x1f);
+    ili.inverted_disc_corner(200,40, 30,4,iBLUE);
+    ili.inverted_disc_corner(80,120, 30,1,iRED);
     
     
-    ili.fill_round_rect( 20,20,100,16,4,0x1f,(0x1f<<5));
+    ili.fill_round_rect( 20,220,100,16,4,iRED,iGREEN);
    
-    ili.print(5,5,"Some text");
-    ili.print(5,35,"Some text");
-    ili.print(5,65,"Some text");
-    ili.print(5,95,"Some text");
+    ili.set_text_color(iRED,iBLUE);
+
+    
+    ili.print(5,35,"Some  text");
+    ili.print(5,65,"Some  text");
+    ili.print(5,95,"Some  text");
 
     next_frame().await;
     }

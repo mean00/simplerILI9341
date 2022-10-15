@@ -15,6 +15,7 @@ const ST7735_BUFFER_SIZE_WORD : usize = 320;
 mod geometry;
 mod text;
 mod text_1NC;
+mod text_2NC;
 
 
 enum FontFamily

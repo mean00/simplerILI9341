@@ -1,6 +1,4 @@
 use super :: Ili9341;
-//use crate::glyph::{PFXfont,PFXglyph,FontInfo};
-
 
 impl <'a>Ili9341<'a>
 {
