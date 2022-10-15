@@ -48,7 +48,26 @@ impl quadAccess
         
     }
 }
-
+//-------
+fn full_to_unit( c : u16 , shift: usize, range : usize) -> f32
+{
+    let mut f= c;
+    f=f>>shift;
+    if(range==6)
+    {
+        f&=0x3f;
+    }else {
+        f&=0x1f;
+    }
+    f<<=(8-range);     
+    let mut m=f as f32;
+    m=m/255.;
+    if m>1.0
+    {
+        m=1.0;
+    }
+    m
+}
 //-------
 impl Ili9341Access for quadAccess 
 {
@@ -56,12 +75,12 @@ impl Ili9341Access for quadAccess
     {
 
     }
-    
+   
     fn send_word(&mut self,  color : u16)
     {
-        let   r : f32= ((color >> 11)*8) as f32;
-        let   g : f32 = (((color >> 5) & 0x1f)*4) as f32;
-        let   b : f32 = ((color & 0x1f)*8) as f32;
+        let   r : f32=  full_to_unit( color, 11,5);
+        let   g : f32 = full_to_unit( color, 5, 6);
+        let   b : f32 = full_to_unit( color, 0, 5);
 
         let ix= (self.x as i32)*2;
         let iy= (self.y as i32)*2;
@@ -133,7 +152,9 @@ async fn main() {
 
     
     ili.print(5,35,"Some  text");
+    ili.set_text_color(ili9341::colors::rgb(0xff,0xff,0xff), 0);
     ili.print(5,65,"Some  text");
+    ili.set_text_color(ili9341::colors::RED,ili9341::colors::BLUE);
     ili.print(5,95,"Some  text");
 
     next_frame().await;
