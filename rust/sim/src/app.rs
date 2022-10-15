@@ -7,7 +7,10 @@ extern crate ili9341;
 
 use ili9341::simpler9341 as simpler9341;
 use ili9341::access::Ili9341Access as Ili9341Access;
-
+use ili9341::colors::GREEN;
+use ili9341::colors::BLUE;
+use ili9341::colors::RED;
+use ili9341::colors::BLACK;
 
 
 mod testfont;
@@ -45,11 +48,7 @@ impl quadAccess
         
     }
 }
-const iRED :   u16  = (0x1f<<11);
-const iGREEN : u16  = (0x3f<<5);
-const iBLUE :  u16  = (0x1f<<0);
-const iBLACK : u16  = 0;
-const iWHITE : u16  = 0xffff;
+
 //-------
 impl Ili9341Access for quadAccess 
 {
@@ -99,7 +98,7 @@ impl Ili9341Access for quadAccess
 #[macroquad::main("BasicShapes")]
 async fn main() {
     loop {
-    clear_background(BLACK);
+    clear_background(macroquad::color::BLACK);
 
     let mut access = quadAccess{  x1: 0, x2: 0, y1: 0, y2  :0 , x : 0, y:0 };
 
@@ -109,28 +108,28 @@ async fn main() {
     
     ili.fill_screen(0x0);
     //next_frame().await;
-    ili.draw_line(10,10,200,200,iBLUE); // \
+    ili.draw_line(10,10,200,200,ili9341::colors::BLUE); // \
     //next_frame().await;
-    ili.draw_line(10,200,200,10,iBLUE); // /
+    ili.draw_line(10,200,200,10,ili9341::colors::BLUE); // /
     //next_frame().await;
-    ili.draw_line(10,200,10,10,iBLUE);  // ^ Left
+    ili.draw_line(10,200,10,10,ili9341::colors::BLUE);  // ^ Left
     //next_frame().await;
-    ili.draw_line(200,10,200,200,iBLUE);// | right
+    ili.draw_line(200,10,200,200,ili9341::colors::BLUE);// | right
     //next_frame().await;
-    ili.draw_line(200,200,10,200,iBLUE);// _ Bottom
+    ili.draw_line(200,200,10,200,ili9341::colors::BLUE);// _ Bottom
     //next_frame().await;
-    ili.draw_line(10,10,200,10,iBLUE);// - top
+    ili.draw_line(10,10,200,10,ili9341::colors::BLUE);// - top
     //next_frame().await;
-    ili.circle(60,60,24,iRED);
-    ili.disc(120,60,24,iGREEN);
+    ili.circle(60,60,24,ili9341::colors::RED);
+    ili.disc(120,60,24,ili9341::colors::GREEN);
 
-    ili.inverted_disc_corner(200,40, 30,4,iBLUE);
-    ili.inverted_disc_corner(80,120, 30,1,iRED);
+    ili.inverted_disc_corner(200,40, 30,4,ili9341::colors::BLUE);
+    ili.inverted_disc_corner(80,120, 30,1,ili9341::colors::RED);
     
     
-    ili.fill_round_rect( 20,220,100,16,4,iRED,iGREEN);
+    ili.fill_round_rect( 20,220,100,16,4,ili9341::colors::RED,ili9341::colors::GREEN);
    
-    ili.set_text_color(iRED,iBLUE);
+    ili.set_text_color(ili9341::colors::RED,ili9341::colors::BLUE);
 
     
     ili.print(5,35,"Some  text");
