@@ -122,9 +122,13 @@ async fn main() {
     ili.inverted_disc_corner(40,120, 30,4,0x1f<<11);
     ili.inverted_disc_corner(80,120, 30,1,0x1f);
     
-    ili.fill_round_rect( 20,20,100,16,4,0x1f,(0x1f<<5));
     
+    ili.fill_round_rect( 20,20,100,16,4,0x1f,(0x1f<<5));
+   
     ili.print(5,5,"Some text");
+    ili.print(5,35,"Some text");
+    ili.print(5,65,"Some text");
+    ili.print(5,95,"Some text");
 
     next_frame().await;
     }

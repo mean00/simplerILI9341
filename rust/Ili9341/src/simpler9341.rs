@@ -6,13 +6,15 @@ extern crate alloc;
 use crate::util::unsafe_array_alloc as unsafe_array_alloc;
 use crate::util::unsafe_box_allocate as unsafe_box_allocate;
 //
-use crate::glyph::{PFXfont,PFXglyph,FontInfo};
+use crate::glyph::{PFXfont,FontInfo};
+
 //
 use crate::access::Ili9341Access;
 //
 const ST7735_BUFFER_SIZE_WORD : usize = 320;
 mod geometry;
 mod text;
+mod text_1NC;
 
 
 enum FontFamily
@@ -47,7 +49,8 @@ pub struct Ili9341 <'a>
 impl <'a>Ili9341<'a>
 {
     //-------------------------------------------------------------------------------
-    fn _init(&'a mut self,w: usize, h:usize, access: &'a mut dyn Ili9341Access, smallfont :  &'static PFXfont, mediumfont:  &'static PFXfont, bigfont :  &'static PFXfont ) 
+    fn _init(&'a mut self,w: usize, h:usize, access: &'a mut dyn Ili9341Access, 
+            smallfont :  &'static PFXfont, mediumfont:  &'static PFXfont, bigfont :  &'static PFXfont ) 
     {
         self.physical_width     = w;
         self.physical_height    = h;
@@ -68,13 +71,9 @@ impl <'a>Ili9341<'a>
         
         self.font_infos[0].font       = smallfont;        
         self.font_infos[1].font       = mediumfont;
-        self.font_infos[2].font       = bigfont;        
+        self.font_infos[2].font       = bigfont;                
+        self.check_font( );
         self.current_font= &(self.font_infos[0]);
-        for i in 0..3
-        {
-            // TODO TO DO
-          //  self.check_font(  self.font_infos[0].font , &mut self.font_infos[i]  );
-        }        
     }   
     //-------------------------------------------------------------------------------
     pub fn new (w: usize, h:usize, access: &'a mut dyn Ili9341Access, 

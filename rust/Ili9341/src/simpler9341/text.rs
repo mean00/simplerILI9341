@@ -53,23 +53,26 @@ impl <'a>Ili9341<'a>
     ///
     /// 
     /// 
-    pub fn check_font(&'a mut self, info : & 'a mut FontInfo )
+    pub fn check_font(& mut self )
     {
-        let mut mW : usize =0;
-        let mut mH : usize =0;
-                
-        for i in info.font.glyphs
+        for _i in 0..3
         {
-            let mut x: usize =0;
-            let mut y: usize =0;
-            x=i.x_advance as usize;
-            y=(-(i.y_offset as isize)) as usize;
-            if x>mW {mW=x;}
-            if y>mH {mH=y;}
+            let info : &mut FontInfo=&mut self.font_infos[_i];
+            let mut mW : usize =0;
+            let mut mH : isize =0;
+                    
+            for i in info.font.glyphs
+            {
+                let mut x: usize =0;
+                let mut y: isize =0;
+                x=i.x_advance as usize;
+                y=(-(i.y_offset as isize)) as isize;
+                if x>mW {mW=x;}
+                if y>mH {mH=y;}
+            }
+            info.max_height=(mH as usize) + 1;
+            info.max_width=mW;    
         }
-        info.max_height=mH + 1;
-        info.max_width=mW;    
-        
     }
     ///
     /// 
@@ -196,25 +199,29 @@ impl <'a>Ili9341<'a>
         let  w: usize    = glyph.width as usize;
         let  mut h: usize    = glyph.height as usize;    
         let  advv: usize = glyph.x_advance as usize +1;
-        let  top : usize = self.current_font.max_height as usize +glyph.y_offset as usize;
+        let  top : usize = (self.current_font.max_height as isize +glyph.y_offset as isize) as usize;
         // Special case
         if full_c==(' ' as usize)
         {
-            self.my_square(x,
-                        (y-top) as usize,
-                        advv, //Fix!
-                        self.current_font.max_height+2,bg);
+            if(y>=top)
+            {
+                self.my_square(x,
+                            (y-top) as usize,
+                            advv, //Fix!
+                            self.current_font.max_height+2,bg);
+            }
             return advv;
         }       
       
         
         // top & bottom
-        
-        self.my_square(x,
-                y-self.current_font.max_height,
-                advv,
-                top,bg);
-    
+        if y > self.current_font.max_height
+        {
+            self.my_square(x,
+                    y-self.current_font.max_height,
+                    advv,
+                    top,bg);
+        }
         let bottom: isize =-(glyph.y_offset as isize)-(h as isize);
         if bottom>=-2
         {
@@ -224,8 +231,15 @@ impl <'a>Ili9341<'a>
         let fg=self.color_map(fg);
         let bg=self.color_map(bg);
     
-        y+= glyph.y_offset as usize;   // offset is <0 most of the time
-        
+        // offset is <0 most of the time
+        let mut tmpy : isize = y as isize;
+        tmpy+= glyph.y_offset as isize;   
+        if tmpy<0
+        {
+            return glyph.x_advance as usize;
+        }
+        y = tmpy as usize;
+
         let left: usize =glyph.x_offset as usize;
         let mut right: isize =(advv as isize)-(w as isize + (left as isize));
         if right<0
@@ -267,6 +281,7 @@ impl <'a>Ili9341<'a>
                     }
                     else
                     {
+                        self.innerLoop1NC(w,h,left,advv,fg,bg, &(self.current_font.font.bitmap[ glyph.offset as usize]));
                         //TODO self.innerLoop1NC(w,h,left,advv,fg,bg,p);
                     }
                 },
@@ -283,7 +298,7 @@ impl <'a>Ili9341<'a>
             _ => panic!("Crap"),
             }
         self.access.data_end();
-        return glyph.x_advance as usize;    
+        return glyph.x_advance as usize;
     }
     ///
     /// 
