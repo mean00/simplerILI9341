@@ -16,6 +16,7 @@ mod geometry;
 mod text;
 mod text_1NC_r;
 mod text_2NC_r;
+mod bitmap;
 #[cfg(feature = "sim")]
 mod text_1C_r;
 #[cfg(feature = "sim")]
