@@ -32,7 +32,3 @@ pub struct FontInfo
     pub font        : &'static PFXfont
 }
 
-extern {
-  fn load_font_info(data : &[u8], font : &mut PFXfont) -> bool;
-}
-
