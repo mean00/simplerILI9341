@@ -14,7 +14,7 @@ use ili9341::colors::BLACK;
 
 
 mod testfont;
-use crate::testfont::NotoSans_Bold12pt7b;
+use crate::testfont::NotoSans_Bold20pt7b;
 
 const SCREEN_WIDTH: u32 = 320;
 const SCREEN_HEIGHT: u32 = 240;
@@ -53,13 +53,13 @@ fn full_to_unit( c : u16 , shift: usize, range : usize) -> f32
 {
     let mut f= c;
     f=f>>shift;
-    if(range==6)
+    if range==6
     {
         f&=0x3f;
     }else {
         f&=0x1f;
     }
-    f<<=(8-range);     
+    f<<= 8-range;
     let mut m=f as f32;
     m=m/255.;
     if m>1.0
@@ -122,8 +122,10 @@ async fn main() {
     let mut access = quadAccess{  x1: 0, x2: 0, y1: 0, y2  :0 , x : 0, y:0 };
 
     let ili = ili9341::simpler9341::Ili9341::new( SCREEN_WIDTH as usize, SCREEN_HEIGHT as usize, &mut  access,
-    &NotoSans_Bold12pt7b,&NotoSans_Bold12pt7b,&NotoSans_Bold12pt7b    
-    );
+            &NotoSans_Bold20pt7b,
+            &NotoSans_Bold20pt7b,
+            &NotoSans_Bold20pt7b    
+            );
     
     ili.fill_screen(0x0);
     //next_frame().await;

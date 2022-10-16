@@ -2,7 +2,7 @@ use super :: Ili9341;
 
 impl <'a>Ili9341<'a>
 {
-  pub fn innerLoop1NC(&mut self, w: usize, h : usize, left: usize, line_size: usize, fg: u16, bg : u16, p : *const u8)
+  pub fn innerLoop1C(&mut self, w: usize, h : usize, left: usize, line_size: usize, fg: u16, bg : u16, p : *const u8)
   {
       let mut bits : usize =0;
       let mut mask : usize =0;

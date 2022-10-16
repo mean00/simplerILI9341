@@ -236,20 +236,17 @@ impl <'a>Ili9341<'a>
             1 =>             {
                     if self.current_font.font.shrinked != 0
                     {
-                        //TODO self.innerLoop1C(w,h,left,advv,fg,bg,p);
-                        panic!("Nope");
+                        self.innerLoop1C(w,h,left,advv,fg,bg,&(self.current_font.font.bitmap[ glyph.offset as usize]));                        
                     }
                     else
                     {
-                        self.innerLoop1NC(w,h,left,advv,fg,bg, &(self.current_font.font.bitmap[ glyph.offset as usize]));
-                        //TODO self.innerLoop1NC(w,h,left,advv,fg,bg,p);
+                        self.innerLoop1NC(w,h,left,advv,fg,bg, &(self.current_font.font.bitmap[ glyph.offset as usize]));                        
                     }
                 },
             2 =>   {
                     if self.current_font.font.shrinked != 0
                     {
-                        //TODO self.innerLoop2C(w,h,left,advv,fg,bg,p);
-                        panic!("Nope");
+                        self.innerLoop2C(w,h,left,advv,fg,bg,&(self.current_font.font.bitmap[ glyph.offset as usize]));      
                     }
                     else
                     {

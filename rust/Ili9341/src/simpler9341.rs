@@ -16,6 +16,13 @@ mod geometry;
 mod text;
 mod text_1NC_r;
 mod text_2NC_r;
+#[cfg(feature = "sim")]
+mod text_1C_r;
+#[cfg(feature = "sim")]
+mod text_2C_r;
+
+#[cfg(not(feature = "sim"))]
+mod text_nohs;
 
 
 enum FontFamily

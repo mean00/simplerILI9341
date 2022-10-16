@@ -3,5 +3,14 @@
 version = 3
 
 [[package]]
+name = "heatshrink"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "efb0a929f7a00a443ade1bb4532758a7a377bfcf9124faa7e77e907a9a2e342b"
+
+[[package]]
 name = "ili9341"
 version = "0.1.0"
+dependencies = [
+ "heatshrink",
+]

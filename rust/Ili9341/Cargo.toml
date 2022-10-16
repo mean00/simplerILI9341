@@ -5,6 +5,7 @@ edition = "2021"
 
 [features]
 sim = []
-
+hs = []
 
 [dependencies]
+heatshrink = "0.1.0"

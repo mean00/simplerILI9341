@@ -31,7 +31,7 @@ fn b( l:usize, r: usize, fg: usize, bg : usize) -> u16
 
 impl <'a>Ili9341<'a>
 {
-    pub fn innerLoop2NC(&mut self, w: usize, h : usize, left: usize, line_size: usize, fg: u16, bg : u16, p : *const u8)
+    pub fn innerLoop2C(&mut self, w: usize, h : usize, left: usize, line_size: usize, fg: u16, bg : u16, p : *const u8)
     {        
     let fg2= fg as usize;
     let bg2= bg as usize;

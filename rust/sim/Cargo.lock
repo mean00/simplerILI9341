@@ -150,6 +150,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "heatshrink"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "efb0a929f7a00a443ade1bb4532758a7a377bfcf9124faa7e77e907a9a2e342b"
+
+[[package]]
 name = "hound"
 version = "3.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -158,6 +164,9 @@ checksum = "4d13cdbd5dbb29f9c88095bbdc2590c9cba0d0a1269b983fef6b2cdd7e9f4db1"
 [[package]]
 name = "ili9341"
 version = "0.1.0"
+dependencies = [
+ "heatshrink",
+]
 
 [[package]]
 name = "ili_sim"
