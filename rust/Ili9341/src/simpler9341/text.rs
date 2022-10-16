@@ -1,5 +1,5 @@
 use super :: Ili9341;
-use crate::glyph::{PFXfont,PFXglyph,FontInfo};
+use crate::glyph::{PFXglyph,FontInfo};
 
 //--
 
@@ -17,10 +17,8 @@ impl <'a>Ili9341<'a>
                     
             for i in info.font.glyphs
             {
-                let mut x: usize =0;
-                let mut y: isize =0;
-                x=i.x_advance as usize;
-                y=(-(i.y_offset as isize)) as isize;
+                let x : usize = i.x_advance as usize;
+                let y : isize =(-(i.y_offset as isize)) as isize;
                 if x>mW {mW=x;}
                 if y>mH {mH=y;}
             }
@@ -230,11 +228,7 @@ impl <'a>Ili9341<'a>
         // dont draw out of screen 
         if y+h>=self.height
         {
-            h= self.height-y;
-            if h<0
-            {
-                h=0;
-            }
+            h= self.height-y;           
         }
 
         match self.current_font.font.bpp
