@@ -12,4 +12,4 @@ path = "src/app.rs"
 [dependencies]
 #sdl2 = { version = "0.35" , features = ["gfx"]}
 macroquad = "0.3"
-ili9341 = { version = "*" , path="../Ili9341", features = ["sim"]}
+ili9341 = { version = "*" , path="../Ili9341", features = ["sim","hs"]}

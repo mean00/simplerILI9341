@@ -8,4 +8,5 @@ sim = []
 hs = []
 
 [dependencies]
-heatshrink = "0.1.0"
+cty = "0.2.2"
+

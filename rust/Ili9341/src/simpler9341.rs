@@ -17,12 +17,15 @@ mod text;
 mod text_1NC_r;
 mod text_2NC_r;
 mod bitmap;
-#[cfg(feature = "sim")]
+
+#[cfg(feature = "hs")]
+//use heatshrink;
+#[cfg(feature = "hs")]
 mod text_1C_r;
-#[cfg(feature = "sim")]
+#[cfg(feature = "hs")]
 mod text_2C_r;
 
-#[cfg(not(feature = "sim"))]
+#[cfg(not(feature = "hs"))]
 mod text_nohs;
 
 
@@ -53,6 +56,11 @@ pub struct Ili9341 <'a>
 
     fg              : u16,
     bg              : u16,
+
+    #[cfg(feature = "hs")]
+    dummy           : u16,
+
+
 }
 
 impl <'a>Ili9341<'a>
