@@ -12,12 +12,12 @@ impl <'a>Ili9341<'a>
       unsafe {
       start=start.add(left);
       }
-      for line in 0..h // for( int line=h-1;line>=0;line--)
+      for _line in 0..h // for( int line=h-1;line>=0;line--)
       {
           col=start;
           // mid
           //for( int xcol=w-1;xcol>=0;xcol--)
-          for xcol in 0..w
+          for _xcol in 0..w
           {
             unsafe {
               if mask==0 // reload ?
