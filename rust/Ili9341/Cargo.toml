@@ -9,4 +9,4 @@ hs = []
 
 [dependencies]
 cty = "0.2.2"
-
+#heatshrink = { version = "*", path = "heatshrink" }
