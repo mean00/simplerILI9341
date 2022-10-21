@@ -1,7 +1,7 @@
 use super :: Ili9341;
 #[cfg(feature = "sim")]
 extern crate std;
-
+@IMPORT@
 #[inline(always)]
 fn c(x : usize, shift : usize, bits: usize) -> usize
 {
@@ -31,14 +31,14 @@ fn b( l:usize, r: usize, fg: usize, bg : usize) -> u16
 
 impl <'a>Ili9341<'a>
 {
-    pub fn innerLoop2C(&mut self, w: usize, h : usize, left: usize, line_size: usize, fg: u16, bg : u16, p: &'a [u8])
+    pub fn @NAME@(&mut self, w: usize, h : usize, left: usize, line_size: usize, fg: u16, bg : u16, p: &'a [u8])
     {        
     let fg2= fg as usize;
     let bg2= bg as usize;
     let  low: u16=r(1,3,fg2,bg2)+g(1,3,fg2,bg2)+b(1,3,fg2,bg2);
     let  hi:  u16=r(3,1,fg2,bg2)+g(3,1,fg2,bg2)+b(3,1,fg2,bg2);
 
-    self.hs.reset(p);
+    @INIT@
     let colorGrad : [u16;4]=[bg,low,hi,fg];
     let mut bits : usize =0;
     let mut rank : isize = -1;
@@ -55,9 +55,7 @@ impl <'a>Ili9341<'a>
         {
             if rank<0  // reload ?
             {
-                unsafe {
-                bits=self.hs.next() as usize;
-                }
+                bits=@NEXT@
                 rank = 6;
             }      
             let pix=(bits>>rank)&3;

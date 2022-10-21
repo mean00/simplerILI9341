@@ -7,7 +7,7 @@ impl <'a>Ili9341<'a>
       let mut bits : usize =0;
       let mut mask : usize =0;
       let mut col  : *mut u16;
-      let mut p : *const u8 = p.as_ptr();
+      let mut ix : usize =0; 
       let mut start : *mut u16 = self.src_buf;
       unsafe {
       start=start.add(left);
@@ -22,7 +22,7 @@ impl <'a>Ili9341<'a>
             unsafe {
               if mask==0 // reload ?
               {
-                  bits=*p as usize;p=p.add(1);
+                  bits= p[ix] as usize;ix+=1;
                   mask = 0x80;
               }      
                               

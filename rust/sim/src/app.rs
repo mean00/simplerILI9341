@@ -1,7 +1,7 @@
 #![allow(non_camel_case_types)]
 #![allow(unused_imports)]
 #![allow(unused_variables)]
-
+#![allow(non_snake_case)]
 use macroquad::prelude::*;
 extern crate ili9341;
 

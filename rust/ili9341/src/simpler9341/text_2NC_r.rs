@@ -38,7 +38,7 @@ impl <'a>Ili9341<'a>
     let  low: u16=r(1,3,fg2,bg2)+g(1,3,fg2,bg2)+b(1,3,fg2,bg2);
     let  hi:  u16=r(3,1,fg2,bg2)+g(3,1,fg2,bg2)+b(3,1,fg2,bg2);
 
-    let mut p : *const u8 = p.as_ptr();
+    let mut ix : usize = 0 ;
     let colorGrad : [u16;4]=[bg,low,hi,fg];
     let mut bits : usize =0;
     let mut rank : isize = -1;
@@ -55,9 +55,7 @@ impl <'a>Ili9341<'a>
         {
             if rank<0  // reload ?
             {
-                unsafe {
-                bits=*p as usize;p=p.add(1);
-                }
+                bits= p[ix] as usize; ix+=1;
                 rank = 6;
             }      
             let pix=(bits>>rank)&3;

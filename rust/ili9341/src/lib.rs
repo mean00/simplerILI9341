@@ -11,5 +11,3 @@ pub mod glyph;
 pub mod simpler9341;
 mod util;
 
-#[cfg(feature = "hs")]
-use heatshrink_byte as hs;
