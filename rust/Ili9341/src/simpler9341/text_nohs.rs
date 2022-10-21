@@ -11,7 +11,7 @@ impl<'a> Ili9341<'a> {
         line_size: usize,
         fg: u16,
         bg: u16,
-        p: *const u8,
+        p: &[u8],
     ) {
         panic!("No heatshrink!");
     }
@@ -23,7 +23,7 @@ impl<'a> Ili9341<'a> {
         line_size: usize,
         fg: u16,
         bg: u16,
-        p: *const u8,
+        p: &[u8],
     ) {
         panic!("No heatshrink!");
     }

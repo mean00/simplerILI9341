@@ -156,6 +156,11 @@ dependencies = [
 ]
 
 [[package]]
+name = "heatshrink_byte"
+version = "0.1.0"
+source = "git+https://github.com/mean00/heatshrink#ae217dbeaaac0d840850125b5fe9aa606cf07ba9"
+
+[[package]]
 name = "hound"
 version = "3.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -166,6 +171,7 @@ name = "ili9341"
 version = "0.1.0"
 dependencies = [
  "cty",
+ "heatshrink_byte",
 ]
 
 [[package]]

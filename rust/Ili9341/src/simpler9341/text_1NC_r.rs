@@ -2,12 +2,12 @@ use super :: Ili9341;
 
 impl <'a>Ili9341<'a>
 {
-  pub fn innerLoop1NC(&mut self, w: usize, h : usize, left: usize, line_size: usize, fg: u16, bg : u16, p : *const u8)
+  pub fn innerLoop1NC(&mut self, w: usize, h : usize, left: usize, line_size: usize, fg: u16, bg : u16, p: &'a [u8])
   {
       let mut bits : usize =0;
       let mut mask : usize =0;
       let mut col  : *mut u16;
-      let mut p : *const u8 = p;
+      let mut p : *const u8 = p.as_ptr();
       let mut start : *mut u16 = self.src_buf;
       unsafe {
       start=start.add(left);

@@ -1,10 +1,16 @@
 use super :: Ili9341;
 use crate::glyph::{PFXglyph,FontInfo};
+use crate::simpler9341::FontFamily;
 
 //--
 
 impl <'a>Ili9341<'a>
 {   
+    ///
+    pub fn select_font(&'a mut self, f: FontFamily )
+    {
+        self.current_font= &(self.font_infos[f as usize]);
+    }
     /// 
     /// 
     pub fn check_font(& mut self )
@@ -230,27 +236,27 @@ impl <'a>Ili9341<'a>
         {
             h= self.height-y;           
         }
-
+        let glyph_data : &[u8] = &(self.current_font.font.bitmap[ (glyph.offset as usize)..]);
         match self.current_font.font.bpp
         {
             1 =>             {
                     if self.current_font.font.shrinked != 0
                     {
-                        self.innerLoop1C(w,h,left,advv,fg,bg,&(self.current_font.font.bitmap[ glyph.offset as usize]));                        
+                        self.innerLoop1C(w,h,left,advv,fg,bg,glyph_data );                        
                     }
                     else
                     {
-                        self.innerLoop1NC(w,h,left,advv,fg,bg, &(self.current_font.font.bitmap[ glyph.offset as usize]));                        
+                        self.innerLoop1NC(w,h,left,advv,fg,bg, glyph_data );                        
                     }
                 },
             2 =>   {
                     if self.current_font.font.shrinked != 0
                     {
-                        self.innerLoop2C(w,h,left,advv,fg,bg,&(self.current_font.font.bitmap[ glyph.offset as usize]));      
+                        self.innerLoop2C(w,h,left,advv,fg,bg,glyph_data);      
                     }
                     else
                     {
-                        self.innerLoop2NC(w,h,left,advv,fg,bg, &(self.current_font.font.bitmap[ glyph.offset as usize]));
+                        self.innerLoop2NC(w,h,left,advv,fg,bg,glyph_data);
                     }
                 },
             _ => panic!("Crap"),

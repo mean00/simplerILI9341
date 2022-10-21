@@ -1,7 +1,7 @@
 use super :: Ili9341;
 #[cfg(feature = "sim")]
 extern crate std;
-
+@IMPORT@
 #[inline(always)]
 fn c(x : usize, shift : usize, bits: usize) -> usize
 {
@@ -31,7 +31,7 @@ fn b( l:usize, r: usize, fg: usize, bg : usize) -> u16
 
 impl <'a>Ili9341<'a>
 {
-    pub fn @NAME@(&mut self, w: usize, h : usize, left: usize, line_size: usize, fg: u16, bg : u16, p : *const u8)
+    pub fn @NAME@(&mut self, w: usize, h : usize, left: usize, line_size: usize, fg: u16, bg : u16, p: &'a [u8])
     {        
     let fg2= fg as usize;
     let bg2= bg as usize;

@@ -19,7 +19,7 @@ mod text_2NC_r;
 mod bitmap;
 
 #[cfg(feature = "hs")]
-//use heatshrink;
+use heatshrink_byte as heatshrink;
 #[cfg(feature = "hs")]
 mod text_1C_r;
 #[cfg(feature = "hs")]
@@ -29,7 +29,7 @@ mod text_2C_r;
 mod text_nohs;
 
 
-enum FontFamily
+pub enum FontFamily
 {
     SmallFont=0,
     MediumFont=1,
@@ -58,7 +58,7 @@ pub struct Ili9341 <'a>
     bg              : u16,
 
     #[cfg(feature = "hs")]
-    dummy           : u16,
+    hs              : heatshrink::HeatshrinkDecoder<'a>,
 
 
 }
@@ -84,7 +84,8 @@ impl <'a>Ili9341<'a>
         self.bg                 = 0;
         self.src_buf            = unsafe_array_alloc(ST7735_BUFFER_SIZE_WORD);
         self.access             = access;
-
+        #[cfg(feature = "hs")]
+        self.hs                 = heatshrink::HeatshrinkDecoder::new( &[], &(heatshrink::Config::new(7,4).unwrap()));
         
         self.font_infos[0].font       = smallfont;        
         self.font_infos[1].font       = mediumfont;
