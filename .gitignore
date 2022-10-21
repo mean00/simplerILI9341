@@ -33,5 +33,5 @@
 #
 *.sw*
 target/*
-rust/Ili9341/target/
 rust/sim/target/
+rust/ili9341/target/
