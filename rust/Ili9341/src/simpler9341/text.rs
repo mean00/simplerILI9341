@@ -7,9 +7,10 @@ use crate::simpler9341::FontFamily;
 impl <'a>Ili9341<'a>
 {   
     ///
-    pub fn select_font(&'a mut self, f: FontFamily )
+    pub fn select_font(&mut self, f: FontFamily )
     {
-        self.current_font= &(self.font_infos[f as usize]);
+        
+        self.current_font_index= f;
     }
     /// 
     /// 
@@ -44,13 +45,13 @@ impl <'a>Ili9341<'a>
             {
                 '\n' | '\r' => 0,
                 x => {
-                    let first = self.current_font.font.first as usize;
+                    let first = self.current_font().font.first as usize;
                     let x = x as usize;
-                    if (x < first) || (x > (self.current_font.font.last as usize))
+                    if (x < first) || (x > (self.current_font().font.last as usize))
                     {
                         return 0;
                     }
-                    return self.current_font.font.glyphs[(c as usize)-(first as usize)].x_advance as usize;                    
+                    return self.current_font().font.glyphs[(c as usize)-(first as usize)].x_advance as usize;                    
                 },
             }
         }
@@ -96,7 +97,7 @@ impl <'a>Ili9341<'a>
         if  c == '\n'
         {
           self.cursor_x = 0;
-          self.cursor_y +=  self.current_font.font.y_advance as usize;
+          self.cursor_y +=  self.current_font().font.y_advance as usize;
           return;
         } 
         if c=='\r'
@@ -104,12 +105,12 @@ impl <'a>Ili9341<'a>
           return ;
         }
         let c: usize = c as usize;
-        if (c < self.current_font.font.first as usize) || (c > self.current_font.font.last as usize)
+        if (c < self.current_font().font.first as usize) || (c > self.current_font().font.last as usize)
         {
             return ;
         }
-        let first : usize = self.current_font.font.first as usize;
-        let glyph : &PFXglyph = &self.current_font.font.glyphs[(c as usize)-first];
+        let first : usize = self.current_font().font.first as usize;
+        let glyph : &PFXglyph = &self.current_font().font.glyphs[(c as usize)-first];
         let  w = glyph.width as usize;
         let  h = glyph.height as usize;
         
@@ -117,13 +118,13 @@ impl <'a>Ili9341<'a>
         if (w <= 0) || (h <= 0)
         {
             //
-            if self.cursor_y>self.current_font.max_height
+            if self.cursor_y>self.current_font().max_height
             {
                 self.my_square(
                         self.cursor_x,
-                        self.cursor_y-self.current_font.max_height, 
-                        self.current_font.font.glyphs[0].x_advance as usize,  // advance by the 1st char, not necessarily correct
-                        self.current_font.max_height+(glyph.y_offset as usize),
+                        self.cursor_y-self.current_font().max_height, 
+                        self.current_font().font.glyphs[0].x_advance as usize,  // advance by the 1st char, not necessarily correct
+                        self.current_font().max_height+(glyph.y_offset as usize),
                         self.bg);
             }
             self.cursor_x += glyph.x_advance as usize ;    
@@ -134,7 +135,7 @@ impl <'a>Ili9341<'a>
         if (self.cursor_x +  ((xo as usize) + w)) > self.width
         {
           self.cursor_x = 0;
-          self.cursor_y +=   self.current_font.font.y_advance as usize;
+          self.cursor_y +=   self.current_font().font.y_advance as usize;
         }    
         
         self.cursor_x += self.my_draw_char(
@@ -161,14 +162,14 @@ impl <'a>Ili9341<'a>
         let full_c = c;
         let mut c =c;
         let mut y : usize = y;
-        c -= self.current_font.font.first as usize;
+        c -= self.current_font().font.first as usize;
 
-        let glyph : &PFXglyph = &( self.current_font.font.glyphs[c]);
+        let glyph : &PFXglyph = &( self.current_font().font.glyphs[c]);
                                
         let  w: usize    = glyph.width as usize;
         let  mut h: usize    = glyph.height as usize;    
         let  advv: usize = glyph.x_advance as usize +1;
-        let  top : usize = (self.current_font.max_height as isize +glyph.y_offset as isize) as usize;
+        let  top : usize = (self.current_font().max_height as isize +glyph.y_offset as isize) as usize;
         // Special case
         if full_c==(' ' as usize)
         {
@@ -177,17 +178,17 @@ impl <'a>Ili9341<'a>
                 self.my_square(x,
                             (y-top) as usize,
                             advv, //Fix!
-                            self.current_font.max_height+2,bg);
+                            self.current_font().max_height+2,bg);
             }
             return advv;
         }       
       
         
         // top & bottom
-        if y > self.current_font.max_height
+        if y > self.current_font().max_height
         {
             self.my_square(x,
-                    y-self.current_font.max_height,
+                    y-self.current_font().max_height,
                     advv,
                     top,bg);
         }
@@ -236,11 +237,11 @@ impl <'a>Ili9341<'a>
         {
             h= self.height-y;           
         }
-        let glyph_data : &[u8] = &(self.current_font.font.bitmap[ (glyph.offset as usize)..]);
-        match self.current_font.font.bpp
+        let glyph_data : &[u8] = &(self.current_font().font.bitmap[ (glyph.offset as usize)..]);
+        match self.current_font().font.bpp
         {
             1 =>             {
-                    if self.current_font.font.shrinked != 0
+                    if self.current_font().font.shrinked != 0
                     {
                         self.innerLoop1C(w,h,left,advv,fg,bg,glyph_data );                        
                     }
@@ -250,7 +251,7 @@ impl <'a>Ili9341<'a>
                     }
                 },
             2 =>   {
-                    if self.current_font.font.shrinked != 0
+                    if self.current_font().font.shrinked != 0
                     {
                         self.innerLoop2C(w,h,left,advv,fg,bg,glyph_data);      
                     }

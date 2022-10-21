@@ -126,7 +126,7 @@ async fn main() {
     let ili = ili9341::simpler9341::Ili9341::new( SCREEN_WIDTH as usize, SCREEN_HEIGHT as usize, &mut  access,
             &DejaVuSans20pt7b, //NotoSans_Bold20pt7b,
             &NotoSans_Bold20pt7b,
-            &DejaVuSans20pt7b    
+            &NotoSans_Bold20pt7b    
             );
     
     ili.fill_screen(0x0);
@@ -160,7 +160,7 @@ async fn main() {
     ili.print(5,65,"Some  text");
     ili.set_text_color(ili9341::colors::RED,ili9341::colors::BLUE);
     
-//    ili.select_font( ili9341::simpler9341::FontFamily::BigFont);
+    ili.select_font( ili9341::simpler9341::FontFamily::BigFont);
     ili.print(5,95,"Some  text");
 
     next_frame().await;

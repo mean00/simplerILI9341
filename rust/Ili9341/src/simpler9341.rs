@@ -28,7 +28,7 @@ mod text_2C_r;
 #[cfg(not(feature = "hs"))]
 mod text_nohs;
 
-
+#[derive(Copy, Clone)]
 pub enum FontFamily
 {
     SmallFont=0,
@@ -49,7 +49,7 @@ pub struct Ili9341 <'a>
     y_offset         : usize,  
     src_buf         : *mut u16,
     access          : &'a mut dyn Ili9341Access,
-    current_font    : &'a FontInfo,
+    current_font_index : FontFamily,
     font_infos      : [FontInfo;3],
     cursor_x        : usize,
     cursor_y        : usize,
@@ -65,6 +65,11 @@ pub struct Ili9341 <'a>
 
 impl <'a>Ili9341<'a>
 {
+    fn current_font(&self) -> &FontInfo
+    {        
+        let ix = self.current_font_index as usize;
+        return &self.font_infos[ix];
+    }
     //-------------------------------------------------------------------------------
     fn _init(&'a mut self,w: usize, h:usize, access: &'a mut dyn Ili9341Access, 
             smallfont :  &'static PFXfont, mediumfont:  &'static PFXfont, bigfont :  &'static PFXfont ) 
@@ -91,7 +96,7 @@ impl <'a>Ili9341<'a>
         self.font_infos[1].font       = mediumfont;
         self.font_infos[2].font       = bigfont;                
         self.check_font( );
-        self.current_font= &(self.font_infos[0]);
+        self.current_font_index       = FontFamily::SmallFont;
     }   
     //-------------------------------------------------------------------------------
     pub fn new (w: usize, h:usize, access: &'a mut dyn Ili9341Access, 
