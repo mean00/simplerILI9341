@@ -5,7 +5,7 @@
 use macroquad::prelude::*;
 extern crate ili9341;
 
-use ili9341::simpler9341 as simpler9341;
+use ili9341::ili9341 as simpler9341;
 use ili9341::access::Ili9341Access as Ili9341Access;
 use ili9341::colors::GREEN;
 use ili9341::colors::BLUE;
@@ -129,7 +129,7 @@ async fn main() {
 
     let mut access = quadAccess{  x1: 0, x2: 0, y1: 0, y2  :0 , x : 0, y:0 };
 
-    let ili = ili9341::simpler9341::Ili9341::new( SCREEN_WIDTH as usize, SCREEN_HEIGHT as usize, &mut  access,
+    let ili = simpler9341::Ili9341::new( SCREEN_WIDTH as usize, SCREEN_HEIGHT as usize, &mut  access,
             &DejaVuSans20pt7b, //NotoSans_Bold20pt7b,
             &NotoSans_Bold20pt7b,
             &NotoSans_Bold20pt7b    
@@ -166,7 +166,7 @@ async fn main() {
     ili.print(5,65,"Some  text");
     ili.set_text_color(ili9341::colors::RED,ili9341::colors::BLUE);
     
-    ili.select_font( ili9341::simpler9341::FontFamily::BigFont);
+    ili.select_font( simpler9341::FontFamily::BigFont);
     ili.print(5,95,"Some  text");
 
     next_frame().await;

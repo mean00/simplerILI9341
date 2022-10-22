@@ -1,6 +1,6 @@
 use super :: Ili9341;
 use crate::glyph::{PFXglyph,FontInfo};
-use crate::simpler9341::FontFamily;
+use super ::FontFamily;
 
 //--
 
