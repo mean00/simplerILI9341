@@ -119,6 +119,9 @@ impl Ili9341Access for quadAccess
 #[macroquad::main("BasicShapes")]
 async fn main() {
     let mut loops = 0;
+    let bitmap_width = 96;
+    let bitmap_height = 96;
+    let bitmap = include_bytes!("test_bitmap.bin");
     loop {
     loops+=1;
     if loops > 5
@@ -168,6 +171,9 @@ async fn main() {
     
     ili.select_font( simpler9341::FontFamily::BigFont);
     ili.print(5,95,"Some  text");
+
+    ili.drawHSBitmap(bitmap_width, bitmap_height, 40,80, ili9341::colors::GREEN, ili9341::colors::BLACK, bitmap);
+
 
     next_frame().await;
     }

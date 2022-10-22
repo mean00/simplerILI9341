@@ -10,4 +10,5 @@ pub mod colors;
 pub mod glyph;
 pub mod ili9341;
 mod util;
+mod settings;
 

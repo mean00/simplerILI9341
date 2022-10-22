@@ -1,23 +1,23 @@
 
 #![allow(dead_code)]
 extern crate alloc;
-//use alloc::boxed::Box;
-//
+
 use crate::util::unsafe_array_alloc as unsafe_array_alloc;
 use crate::util::unsafe_box_allocate as unsafe_box_allocate;
-//use crate::util::unsafe_box_deallocate as unsafe_box_deallocate;
+
 //
 use crate::glyph::{PFXfont,FontInfo};
-
 //
 use crate::access::Ili9341Access;
 //
-const ST7735_BUFFER_SIZE_WORD : usize = 320;
+use crate::settings::ST7735_BUFFER_SIZE_WORD;
+//
 mod geometry;
 mod text;
 mod text_1NC_r;
 mod text_2NC_r;
 mod bitmap;
+
 
 #[cfg(feature = "hs")]
 use heatshrink_byte as heatshrink;
