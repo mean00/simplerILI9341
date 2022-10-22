@@ -1096,6 +1096,7 @@ pub const NotoSans_Bold20pt7b :  PFXfont = PFXfont {
 	y_advance :  0 ,
 	bpp      :  2 ,
 	shrinked :  0 ,
+	hs_conf  :  0x74 ,
 };
 // Bitmap output size   : about 11803 bytes (12 kBytes)
 // Header : about 768 bytes (1 kBytes)

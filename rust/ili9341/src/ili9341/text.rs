@@ -19,6 +19,13 @@ impl <'a>Ili9341<'a>
         for _i in 0..3
         {
             let info : &mut FontInfo=&mut self.font_infos[_i];
+            if info.font.shrinked!=0
+            {
+                if info.font.hs_conf !=0x74
+                {
+                    panic!("HSCONF");
+                }
+            }
             let mut mW : usize =0;
             let mut mH : isize =0;
                     

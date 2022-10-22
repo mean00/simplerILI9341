@@ -708,6 +708,7 @@ pub const DejaVuSans20pt7b :  PFXfont = PFXfont {
 	y_advance :  0 ,
 	bpp      :  2 ,
 	shrinked :  1 ,
+	hs_conf  :  0x74 ,
 };
 // Bitmap uncompressed  : about 11903 bytes (12 kBytes)
 // Bitmap output size   : about 7149 bytes (7 kBytes)

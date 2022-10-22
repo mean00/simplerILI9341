@@ -22,6 +22,7 @@ pub struct PFXfont
   pub y_advance   : u8,               //< Newline distance (y axis)
   pub bpp         : u8 ,              //< bit per pixel, 1 or 4 at the moment
   pub shrinked    : u8,               //< compressed ?
+  pub hs_conf     : u8,               // 4 bits = windowd, 4 bits = rewind , MAX=(7,7)
 }
 
 
