@@ -1,5 +1,6 @@
 use alloc::alloc::Layout as Layout;
 use alloc::alloc::alloc as alloc;
+//use alloc::alloc::dealloc as dealloc;
 
 
 pub fn xabs(x: isize) -> isize
@@ -31,6 +32,16 @@ pub fn unsafe_box_allocate<T>() ->  *mut T
         ptr
     }
 }
+/*
+pub fn unsafe_box_deallocate<T>(instance : &mut T)
+{        
+    let layout = Layout::new::<T>();
+    unsafe {        
+        //let ptr : *mut u8= instance.as_mut() as *mut u8;
+        //dealloc(ptr,layout);
+    }
+}
+*/
 //-----------
 pub fn unsafe_array_alloc<T>(count : usize ) -> *mut T 
 {

@@ -5,6 +5,7 @@ extern crate alloc;
 //
 use crate::util::unsafe_array_alloc as unsafe_array_alloc;
 use crate::util::unsafe_box_allocate as unsafe_box_allocate;
+//use crate::util::unsafe_box_deallocate as unsafe_box_deallocate;
 //
 use crate::glyph::{PFXfont,FontInfo};
 
@@ -59,10 +60,8 @@ pub struct Ili9341 <'a>
 
     #[cfg(feature = "hs")]
     hs              : heatshrink::HeatshrinkDecoder<'a>,
-
-
 }
-
+//-----------------
 impl <'a>Ili9341<'a>
 {
     fn current_font(&self) -> &FontInfo

@@ -118,7 +118,13 @@ impl Ili9341Access for quadAccess
 //---
 #[macroquad::main("BasicShapes")]
 async fn main() {
+    let mut loops = 0;
     loop {
+    loops+=1;
+    if loops > 5
+    {
+        break;
+    }
     clear_background(macroquad::color::BLACK);
 
     let mut access = quadAccess{  x1: 0, x2: 0, y1: 0, y2  :0 , x : 0, y:0 };
@@ -165,4 +171,5 @@ async fn main() {
 
     next_frame().await;
     }
+    std::println!("Exiting....");
 }
