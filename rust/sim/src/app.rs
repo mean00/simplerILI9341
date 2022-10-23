@@ -163,7 +163,7 @@ async fn main() {
    
     ili.set_text_color(ili9341::colors::RED,ili9341::colors::BLUE);
 
-    
+    /*
     ili.print(5,35,"Some  text");
     ili.set_text_color(ili9341::colors::rgb(0xff,0xff,0xff), 0);
     ili.print(5,65,"Some  text");
@@ -171,8 +171,8 @@ async fn main() {
     
     ili.select_font( simpler9341::FontFamily::BigFont);
     ili.print(5,95,"Some  text");
-
-   // ili.drawHSBitmap(bitmap_width, bitmap_height, 40,80, ili9341::colors::GREEN, ili9341::colors::BLACK, bitmap);
+*/
+    ili.drawHSBitmap(bitmap_width, bitmap_height, 40,80, ili9341::colors::GREEN, ili9341::colors::BLACK, bitmap);
 
 
     next_frame().await;
