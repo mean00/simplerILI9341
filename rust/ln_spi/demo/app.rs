@@ -22,7 +22,7 @@ use rnarduino::rnSpi::rnSpiBitOrder::*;
 use rnarduino::rnSpi::rnSPISettings;
 
 use ili9341::ili9341::Ili9341;
-use crate::spi_ili9341;
+use lnspi_ili9341::spi_ili9341 as spi_ili9341;
 
 
 use crate::testfont::NotoSans_Bold20pt7b;
@@ -74,7 +74,7 @@ impl runTime
       spi.begin();
       spi.begin_transaction(&transaction);
 
-      let mut ili_access = spi_ili9341::spi_ili9341::new(spi, ILI_PIN_CS, ILI_PIN_DC,ILI_PIN_RESET);
+      let mut ili_access = spi_ili9341::new(spi, ILI_PIN_CS, ILI_PIN_DC,ILI_PIN_RESET);
       // init low level
       ili_access.reset();
       ili_access.send_init_sequence(DSO_RESET);
