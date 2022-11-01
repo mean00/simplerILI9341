@@ -16,9 +16,11 @@ pub trait Ili9341Access {
     }
     fn update_hw_rotation(&mut self, rotation: usize);
     fn flood_words(&mut self, nb: usize, color: u16) {
+        self.data_begin();
         for _i in 0..nb {
             self.send_word(color);
         }
+        self.data_end();
     }
     fn set_address(&mut self, x: usize, y: usize, w: usize, h: usize);
     fn data_end(&mut self);

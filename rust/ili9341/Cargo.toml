@@ -10,3 +10,17 @@ hs = []
 [dependencies]
 cty = "0.2.2"
 heatshrink_byte = { git = "https://github.com/mean00/heatshrink",  version = "*"  }
+
+[profile.dev]
+codegen-units = 1
+debug = true
+lto = false
+opt-level       = 's'
+
+[profile.release]
+codegen-units = 1
+debug = false
+lto = false
+opt-level       = 's'
+
+
