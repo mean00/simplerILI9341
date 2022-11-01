@@ -1,0 +1,35 @@
+[package] 
+authors = ["mean00 <mean00@gmail.com>"]
+edition = "2021"
+readme = "README.md"
+name = "lnspi_ili9341"
+version = "0.0.0"
+
+
+[dependencies]
+cty = "0.2.2"
+#panic-abort = "*"
+embedded-hal = "1.0.0-alpha.9"
+#embedded-hal-bus = { git = "https://github.com/rust-embedded/embedded-hal"}
+
+
+[lib]
+name = "lnspi_ili9341"
+path = "src/spi_ili9341.rs"
+crate-type = ["rlib"] # Creates static lib
+
+[profile.dev]
+codegen-units = 1
+debug = true
+lto = false
+opt-level       = 's'
+
+[profile.release]
+codegen-units = 1
+debug = false
+lto = false
+opt-level       = 's'
+
+[profile.dev.package."*"]
+codegen-units   = 1
+opt-level       = "s"
