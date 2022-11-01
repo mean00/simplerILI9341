@@ -7,11 +7,9 @@ version = "0.0.0"
 
 
 [dependencies]
-cty = "0.2.2"
-#panic-abort = "*"
-embedded-hal = "1.0.0-alpha.9"
-#embedded-hal-bus = { git = "https://github.com/rust-embedded/embedded-hal"}
-
+cty         = "0.2.2"
+rnarduino   =           { path = "../../../../lnArduino/rust/rnArduino/"}
+ili9341     =           { path = "../ili9341", features = ["hs"]}
 
 [lib]
 name = "lnspi_ili9341"

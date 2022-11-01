@@ -1,5 +1,5 @@
 
-
+#![no_std]
 #![allow(unused_imports)]
 #![allow(unused_mut)]
 #![allow(unused_variables)]
