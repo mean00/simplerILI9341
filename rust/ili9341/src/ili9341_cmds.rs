@@ -31,7 +31,7 @@ pub const  ILI9341_MADCTL_ML            : u8 = 0x10;
 pub const  ILI9341_MADCTL_RGB           : u8 = 0x00;
 pub const  ILI9341_MADCTL_BGR           : u8 = 0x08;
 pub const  ILI9341_MADCTL_MH            : u8 = 0x04;
-
+pub const  FAKE_DELAY_COMMAND           : u8 = 0xff;
 // EOF
 
 
