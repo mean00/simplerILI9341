@@ -6,13 +6,19 @@ use super ::FontFamily;
 
 impl <'a>Ili9341<'a>
 {   
+    pub fn set_font_size (&mut self, f : FontFamily)
+    {
+        self.current_font_index = f;
+    }
+
     ///
-    pub fn select_font(&mut self, f: FontFamily )
+    pub fn set_cursor(&mut self,  x: usize,  y : usize )
     {
         
-        self.current_font_index= f;
+        self.cursor_x= x;
+        self.cursor_y= y;
     }
-    /// 
+     /// 
     /// 
     pub fn check_font(& mut self )
     {

@@ -17,7 +17,7 @@ mod text;
 mod text_1NC_r;
 mod text_2NC_r;
 mod bitmap;
-
+use alloc::boxed::Box;
 
 #[cfg(feature = "hs")]
 use heatshrink_byte as heatshrink;
@@ -49,7 +49,7 @@ pub struct Ili9341 <'a>
     x_offset         : usize,
     y_offset         : usize,  
     src_buf         : *mut u16,
-    access          : &'a mut dyn Ili9341Access,
+    access          : Box< dyn Ili9341Access>,
     current_font_index : FontFamily,
     font_infos      : [FontInfo;3],
     cursor_x        : usize,
@@ -70,7 +70,7 @@ impl <'a>Ili9341<'a>
         return &self.font_infos[ix];
     }
     //-------------------------------------------------------------------------------
-    fn _init(&'a mut self,w: usize, h:usize, access: &'a mut dyn Ili9341Access, 
+    fn _init(&'a mut self,w: usize, h:usize, access:  Box< dyn Ili9341Access>, 
             smallfont :  &'static PFXfont, mediumfont:  &'static PFXfont, bigfont :  &'static PFXfont ) 
     {
         self.physical_width     = w;
@@ -98,18 +98,59 @@ impl <'a>Ili9341<'a>
         self.current_font_index       = FontFamily::SmallFont;
     }   
     //-------------------------------------------------------------------------------
-    pub fn new (w: usize, h:usize, access: &'a mut dyn Ili9341Access, 
-                smallfont :  &'static PFXfont, mediumfont:  &'static PFXfont, bigfont :  &'static PFXfont ) 
-                -> &'a mut Ili9341 <'a>
+    pub fn new (w: usize, h:usize, access:  Box< dyn Ili9341Access>, 
+                smallfont :  &'static PFXfont, 
+                mediumfont:  &'static PFXfont, 
+                bigfont :  &'static PFXfont )                ->   Ili9341 
     {
         // there is probably a better way to do this
         // we dont want to use the stack (even temporarily) as it will overflow
+        /*
         unsafe {
             let  allocated :  *mut Ili9341   = unsafe_box_allocate();
             (*allocated)._init(w,h,access,smallfont,mediumfont,bigfont);        
         // We normally never free this, so a mem leak is a not a big deal            
             return &mut (*allocated);
-        }
+            */
+            let  mut allocated  = Ili9341{
+                physical_width     : w,
+                physical_height    : h,
+                width : w,
+                height : h,
+                rotation : h,
+                physical_x_offset  : 0,
+                physical_y_offset  : 0,
+                x_offset           : 0,
+                y_offset           : 0,     
+                cursor_x           : 0,   
+                cursor_y           : 0,
+                fg                 : 0xffff,
+                bg                 : 0,
+                src_buf            : unsafe_array_alloc(ST7735_BUFFER_SIZE_WORD),
+                access             : access,
+                #[cfg(feature = "hs")]
+                hs                 : heatshrink::HeatshrinkDecoder::new( &[], &(heatshrink::Config::new(7,4).unwrap())),
+                
+                current_font_index : FontFamily::SmallFont,
+                font_infos          :[
+                                    FontInfo{  
+                                        max_height  : 0, 
+                                        max_width   : 0, 
+                                        font        : smallfont,
+                                    },
+                                    FontInfo{  
+                                        max_height  : 0, 
+                                        max_width   : 0, 
+                                        font        : mediumfont,
+                                    },
+                                    FontInfo{  
+                                        max_height  : 0, 
+                                        max_width   : 0, 
+                                        font        : bigfont,
+                                    } ],
+            };
+            allocated.check_font( );
+            return allocated;        
     }
     //-------------------------------------------------------------------------------
     pub fn fill_screen(&mut self, color : u16 ) 
