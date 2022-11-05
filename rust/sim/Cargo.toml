@@ -28,5 +28,4 @@ opt-level       = 's'
 [profile.dev.package."*"]
 codegen-units   = 1
 opt-level       = "s"
-lto = true
 
