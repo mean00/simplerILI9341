@@ -1,7 +1,7 @@
 use super :: Ili9341;
 use crate::glyph::{PFXglyph,FontInfo};
 use super ::FontFamily;
-
+use crate::colors::WHITE;
 //--
 
 impl <'a>Ili9341<'a>
@@ -291,5 +291,27 @@ impl <'a>Ili9341<'a>
             self.cursor_x +=1;
         }
     }   
+    pub fn print_up_to(&mut self, text  : &str, max_width_in_pixels : usize)
+    {
+        let last_pos=self.cursor_x + max_width_in_pixels;
+        let index = self.current_font_index as usize;
+        let s= text.len() as usize;
+        for i in 0..s
+        {
+            if self.cursor_x>=last_pos
+            {
+                return;
+            }
+            let c: char = text.as_bytes()[i] as char;
+            self.write_char(c);
+        }
+        
+        if last_pos>self.cursor_x // fill in
+        {
+            let  mut w  = last_pos-self.cursor_x;            
+            let mut max_height = self.font_infos[index].max_height;
+            self.my_square(self.cursor_x, self.cursor_y -max_height ,  w, max_height+2, self.bg);
+        }
+    }
 }
 // EOF

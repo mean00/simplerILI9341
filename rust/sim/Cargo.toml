@@ -13,3 +13,20 @@ path = "src/app.rs"
 #sdl2 = { version = "0.35" , features = ["gfx"]}
 macroquad = "0.3"
 ili9341 = { version = "*" , path="../ili9341", features = ["sim","hs"]}
+[profile.dev]
+codegen-units = 1
+debug = true
+lto = true
+opt-level       = 's'
+
+[profile.release]
+codegen-units = 1
+debug = false
+lto = true
+opt-level       = 's'
+
+[profile.dev.package."*"]
+codegen-units   = 1
+opt-level       = "s"
+lto = true
+
