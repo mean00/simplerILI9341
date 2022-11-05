@@ -1,7 +1,6 @@
 use super :: Ili9341;
 use crate::glyph::{PFXglyph,FontInfo};
 use super ::FontFamily;
-use crate::colors::WHITE;
 //--
 
 impl <'a>Ili9341<'a>
@@ -13,8 +12,7 @@ impl <'a>Ili9341<'a>
 
     ///
     pub fn set_cursor(&mut self,  x: usize,  y : usize )
-    {
-        
+    {        
         self.cursor_x= x;
         self.cursor_y= y;
     }
@@ -106,7 +104,6 @@ impl <'a>Ili9341<'a>
     /// 
     pub fn write_char(&mut self, c: char) -> ()
     {
-    
         if  c == '\n'
         {
           self.cursor_x = 0;
@@ -171,7 +168,6 @@ impl <'a>Ili9341<'a>
     /// 
     fn my_draw_char(&mut self,  x: usize, y : usize, c: usize, fg: u16, bg : u16) -> usize
     { 
-
         let full_c = c;
         let mut c =c;
         let mut y : usize = y;
@@ -211,8 +207,8 @@ impl <'a>Ili9341<'a>
             self.my_square(x,((y as isize)-bottom) as usize,advv,(bottom+2) as usize,bg);      
         }
         
-        let fg=self.color_map(fg);
-        let bg=self.color_map(bg);
+        let fg=self.access.color_map(fg);
+        let bg=self.access.color_map(bg);
     
         // offset is <0 most of the time
         let mut tmpy : isize = y as isize;
@@ -308,8 +304,8 @@ impl <'a>Ili9341<'a>
         
         if last_pos>self.cursor_x // fill in
         {
-            let  mut w  = last_pos-self.cursor_x;            
-            let mut max_height = self.font_infos[index].max_height;
+            let w  = last_pos-self.cursor_x;            
+            let max_height = self.font_infos[index].max_height;
             self.my_square(self.cursor_x, self.cursor_y -max_height ,  w, max_height+2, self.bg);
         }
     }

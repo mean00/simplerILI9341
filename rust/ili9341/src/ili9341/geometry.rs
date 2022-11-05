@@ -5,14 +5,14 @@ use crate::util::xswap;
 
 impl<'a> Ili9341<'a> {
     pub fn vline(&mut self, x0: usize, y0: usize, h: usize, color: u16) {
-        let color = self.color_map(color);
+        let color = self.access.color_map(color);
         self.access.set_address(x0, y0, 1, h);
         self.access.data_begin();
         self.access.flood_words(h, color);
         self.access.data_end();
     }
     pub fn hline(&mut self, x0: usize, y0: usize, w: usize, color: u16) {
-        let color = self.color_map(color);
+        let color = self.access.color_map(color);
         self.access.set_address(x0, y0, w, 1);
         self.access.data_begin();
         self.access.flood_words(w, color);
@@ -28,7 +28,7 @@ impl<'a> Ili9341<'a> {
     }
     pub fn circle(&mut self, x: usize, y: usize, radius: usize, color: u16) {
         // https://bariweiss.substack.com/p/hollywoods-new-rules?s=r
-        let color = self.color_map(color);
+        let color = self.access.color_map(color);
         let mut E: isize = 5 - 4 * (radius as isize);
         let mut yy = 0;
         let mut xx = radius;
@@ -56,7 +56,7 @@ impl<'a> Ili9341<'a> {
     }
     pub fn disc(&mut self, x: usize, y: usize, radius: usize, color: u16) {
         // https://bariweiss.substack.com/p/hollywoods-new-rules?s=r
-        let color = self.color_map(color);
+        let color = self.access.color_map(color);
         let mut E: isize = 5 - 4 * (radius as isize);
         let mut yy = 0;
         let mut xx = radius;
@@ -99,7 +99,7 @@ impl<'a> Ili9341<'a> {
             return;
         }
 
-        let color = self.color_map(color);
+        let color = self.access.color_map(color);
 
         if adx < ady {
             let inc = (ady * 2048) / adx;
@@ -169,7 +169,7 @@ impl<'a> Ili9341<'a> {
     ) {
         const OFS: usize = 1;
         // https://bariweiss.substack.com/p/hollywoods-new-rules?s=r
-        let color = self.color_map(color);
+        let color = self.access.color_map(color);
         let mut E: isize = 5 - 4 * (radius as isize);
         let mut yy = 0;
         let mut xx = radius;
@@ -255,8 +255,8 @@ impl<'a> Ili9341<'a> {
         outcolor: u16,
         incolor: u16,
     ) {
-        let outcolor = self.color_map(outcolor);
-        let incolor = self.color_map(incolor);
+        let outcolor = self.access.color_map(outcolor);
+        let incolor = self.access.color_map(incolor);
         let mut E: isize = 5 - 4 * (radius as isize);
         let mut yy = 0;
         let mut xx = radius - 1;

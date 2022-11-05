@@ -3,7 +3,9 @@
 #![allow(unused_imports)]
 #![allow(unused_mut)]
 #![allow(unused_variables)]
-
+#![allow(non_camel_case_types)]
+#![allow(non_snake_case)]
+#![allow(dead_code)]
 
 extern crate ili9341;
 
@@ -118,26 +120,22 @@ impl spi_ili9341
     fn read_chip_id(&mut self) -> u32
     {      
         return 0x9341;
-        /*
-      uint32_t regD3=readRegister32(0xd3);
-      uint32_t reg04=readRegister32(0x04);
-      
-      if(regD3==0x9341) 
-      {
-        Logger("ILI 9341 detected\n");
-        return 0x9341; // 9341 
-      }
-      reg04>>=8;
-      reg04&=0xffff;
-      if(reg04 ==0x8552) 
-      {
-        Logger("ST7789 detected\n");
-        return 0x7789; // is it really a 7789 ?
-      }
-      Logger("Warning : Unknown LCD detected\n");
-      return 0x9341; // unknown
-      */
+        let reg_d3 = self.read_register32(0xd3);
+        let mut reg_04 = self.read_register32(0x04);
+
+        if reg_d3 == 0x9341
+        {
+            return 0x9341;
+        }
+        reg_04>>=8;
+        reg_04&=0xffff;
+        if reg_04 ==0x8552
+        {                 
+            return 0x7789; // is it really a 7789 ?
+        }        
+        return 0x9341; // unknown        
     }
+
     pub fn send_init_sequence(&mut self, data : &[u8])
     {
             let mut  index = 0;
@@ -215,6 +213,18 @@ impl spi_ili9341
 //-----------------------------------
 impl Ili9341Access for spi_ili9341
 {
+    fn color_map(&self, d : u16) -> u16
+    {
+      //  if self.chip_id  != 0x7789
+        //{
+        //   return d;
+        //}
+        let r= d>>11;
+        let b= d&0x1f;
+        let g= (d>>5)&0x3f;
+        return  r+(g<<5)+(b<<11);
+    }
+
     fn send_byte(&mut self, b: u8)
     {
         self.spi.write(b);

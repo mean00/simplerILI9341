@@ -3,8 +3,6 @@
 extern crate alloc;
 
 use crate::util::unsafe_array_alloc;
-use crate::util::unsafe_box_allocate;
-
 //
 use crate::glyph::{PFXfont,FontInfo};
 //
@@ -57,6 +55,8 @@ pub struct Ili9341 <'a>
 
     fg                  : u16,
     bg                  : u16,
+
+    chip_id             : u16,
 
     #[cfg(feature = "hs")]
     hs              : heatshrink::HeatshrinkDecoder<'a>,
@@ -112,6 +112,8 @@ impl <'a>Ili9341<'a>
         // We normally never free this, so a mem leak is a not a big deal            
             return &mut (*allocated);
             */
+            let mut access = access;
+            
             let  mut allocated  = Box::new(Ili9341{
                 physical_width     : w,
                 physical_height    : h,
@@ -131,6 +133,8 @@ impl <'a>Ili9341<'a>
                 #[cfg(feature = "hs")]
                 hs                 : heatshrink::HeatshrinkDecoder::new( &[], &(heatshrink::Config::new(7,4).unwrap())),
                 
+                chip_id             : 0x9341,
+
                 current_font_index : FontFamily::SmallFont,
                 font_infos          :[
                                     FontInfo{  
@@ -197,16 +201,7 @@ impl <'a>Ili9341<'a>
         self.access.flood_words(f,color);
         self.access.data_end();
     }
-    //-------------------------------------------------------------------------------
-    fn color_map(&self, color : u16) -> u16
-    {
-        return color;
-
-       // if(!IS_7789()) return d;
-       // uint32_t r=(d>>11),b=d&0x1f,g=(d>>5)&0x3f;
-       // return r+(g<<5)+(b<<11);
-    
-    }
+    //-------------------------------------------------------------------------------   
 }
 
 // EOF
