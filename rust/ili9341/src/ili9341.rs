@@ -2,8 +2,8 @@
 #![allow(dead_code)]
 extern crate alloc;
 
-use crate::util::unsafe_array_alloc as unsafe_array_alloc;
-use crate::util::unsafe_box_allocate as unsafe_box_allocate;
+use crate::util::unsafe_array_alloc;
+use crate::util::unsafe_box_allocate;
 
 //
 use crate::glyph::{PFXfont,FontInfo};
@@ -39,24 +39,24 @@ pub enum FontFamily
 //-----------
 pub struct Ili9341 <'a>
 {
-    physical_width   : usize,
-    physical_height  : usize,
-    width           : usize,
-    height          : usize,
-    rotation        : usize,
-    physical_x_offset : usize,
-    physical_y_offset : usize,
-    x_offset         : usize,
-    y_offset         : usize,  
-    src_buf         : *mut u16,
-    access          : Box< dyn Ili9341Access>,
-    current_font_index : FontFamily,
-    font_infos      : [FontInfo;3],
-    cursor_x        : usize,
-    cursor_y        : usize,
+    physical_width      : usize,
+    physical_height     : usize,
+    width               : usize,
+    height              : usize,
+    rotation            : usize,
+    physical_x_offset   : usize,
+    physical_y_offset   : usize,
+    x_offset            : usize,
+    y_offset            :  usize,  
+    src_buf             : *mut u16,
+    access              : Box< dyn Ili9341Access>,
+    current_font_index  : FontFamily,
+    font_infos          : [FontInfo;3],
+    cursor_x            : usize,
+    cursor_y            : usize,
 
-    fg              : u16,
-    bg              : u16,
+    fg                  : u16,
+    bg                  : u16,
 
     #[cfg(feature = "hs")]
     hs              : heatshrink::HeatshrinkDecoder<'a>,
@@ -101,7 +101,7 @@ impl <'a>Ili9341<'a>
     pub fn new (w: usize, h:usize, access:  Box< dyn Ili9341Access>, 
                 smallfont :  &'static PFXfont, 
                 mediumfont:  &'static PFXfont, 
-                bigfont :  &'static PFXfont )                ->   Ili9341 
+                bigfont :  &'static PFXfont )                ->   Box<Ili9341>
     {
         // there is probably a better way to do this
         // we dont want to use the stack (even temporarily) as it will overflow
@@ -112,7 +112,7 @@ impl <'a>Ili9341<'a>
         // We normally never free this, so a mem leak is a not a big deal            
             return &mut (*allocated);
             */
-            let  mut allocated  = Ili9341{
+            let  mut allocated  = Box::new(Ili9341{
                 physical_width     : w,
                 physical_height    : h,
                 width : w,
@@ -148,7 +148,7 @@ impl <'a>Ili9341<'a>
                                         max_width   : 0, 
                                         font        : bigfont,
                                     } ],
-            };
+            });
             allocated.check_font( );
             return allocated;        
     }
