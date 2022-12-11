@@ -4,7 +4,7 @@ extern crate alloc;
 
 use crate::util::unsafe_array_alloc;
 //
-use crate::glyph::{PFXfont,FontInfo};
+use simpler_gfx::{PFXfont,FontInfo};
 //
 use crate::access::Ili9341Access;
 //
@@ -101,7 +101,7 @@ impl <'a>Ili9341<'a>
     pub fn new (w: usize, h:usize, access:  Box< dyn Ili9341Access>, 
                 smallfont :  &'static PFXfont, 
                 mediumfont:  &'static PFXfont, 
-                bigfont :  &'static PFXfont )                ->   Box<Ili9341>
+                bigfont :  &'static PFXfont )                ->   Box<Ili9341 <'a>>
     {
         // there is probably a better way to do this
         // we dont want to use the stack (even temporarily) as it will overflow

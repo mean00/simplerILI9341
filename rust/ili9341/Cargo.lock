@@ -11,7 +11,7 @@ checksum = "b365fabc795046672053e29c954733ec3b05e4be654ab130fe8f1f94d7051f35"
 [[package]]
 name = "heatshrink_byte"
 version = "0.1.0"
-source = "git+https://github.com/mean00/heatshrink#ae217dbeaaac0d840850125b5fe9aa606cf07ba9"
+source = "git+https://github.com/mean00/heatshrink#ba7810a670cb8a8e6b6b89ef1fe606555e1258bd"
 
 [[package]]
 name = "ili9341"
@@ -19,4 +19,13 @@ version = "0.1.0"
 dependencies = [
  "cty",
  "heatshrink_byte",
+ "simpler_gfx",
+]
+
+[[package]]
+name = "simpler_gfx"
+version = "0.1.0"
+source = "git+https://github.com/mean00/simpler_gfx.git#31145e50f3fccd7eed92767b60ca1af6995a8317"
+dependencies = [
+ "cty",
 ]

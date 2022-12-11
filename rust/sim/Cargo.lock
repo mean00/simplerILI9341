@@ -172,6 +172,7 @@ version = "0.1.0"
 dependencies = [
  "cty",
  "heatshrink_byte",
+ "simpler_gfx",
 ]
 
 [[package]]
@@ -180,6 +181,7 @@ version = "0.1.0"
 dependencies = [
  "ili9341",
  "macroquad",
+ "simpler_gfx",
 ]
 
 [[package]]
@@ -369,6 +371,14 @@ dependencies = [
  "libc",
  "quad-alsa-sys",
  "winapi",
+]
+
+[[package]]
+name = "simpler_gfx"
+version = "0.1.0"
+source = "git+https://github.com/mean00/simpler_gfx.git#31145e50f3fccd7eed92767b60ca1af6995a8317"
+dependencies = [
+ "cty",
 ]
 
 [[package]]

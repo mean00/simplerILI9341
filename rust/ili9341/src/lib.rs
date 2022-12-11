@@ -7,7 +7,6 @@ extern crate alloc;
 
 pub mod access;
 pub mod colors;
-pub mod glyph;
 pub mod ili9341;
 pub mod ili9341_cmds;
 mod util;

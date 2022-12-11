@@ -9,7 +9,8 @@ hs = []
 
 [dependencies]
 cty = "0.2.2"
-heatshrink_byte = { git = "https://github.com/mean00/heatshrink",  version = "*"  }
+heatshrink_byte =   { git = "https://github.com/mean00/heatshrink",  version = "*"  }
+simpler_gfx =       { git="https://github.com/mean00/simpler_gfx.git"}
 
 [profile.dev]
 codegen-units = 1
