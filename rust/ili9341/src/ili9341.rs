@@ -112,7 +112,7 @@ impl <'a>Ili9341<'a>
         // We normally never free this, so a mem leak is a not a big deal            
             return &mut (*allocated);
             */
-            let mut access = access;
+            //let mut access = access;
             
             let  mut allocated  = Box::new(Ili9341{
                 physical_width     : w,
