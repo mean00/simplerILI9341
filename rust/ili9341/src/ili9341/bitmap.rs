@@ -20,6 +20,8 @@ impl<'a> Ili9341<'a> {
     output_slice = core::slice::from_raw_parts_mut( self.src_buf,ST7735_BUFFER_SIZE_WORD);
     }
     self.access.data_begin();
+    let fg = self.access.color_map(fg);
+    let bg = self.access.color_map(bg);
     while pixel<nb_pixels
     {
         // load next
