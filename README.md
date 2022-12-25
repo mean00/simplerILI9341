@@ -7,7 +7,7 @@ The library supports modified "Truetype"/adafruit fonts (
 1 bit per pixel, 2 bit per pixel and font compression are supported). \
 The library prints strings "in place", so you can avoid flickering effects (no need to clear-then-print, just print).
 
-It also supports heatshrink-byte compressed one bpp bitmap.
+It also supports heatshrink-byte compressed one bpp bitmap (i.e. 2 colors image).
 
 
 # C++
@@ -30,5 +30,6 @@ In your derived class , you have to provide the following methods :
 # Rust
 
 You must provide an "access" crate, have a look at the sim or lnArduino samples.
+Basically 4 functions to provide.
 
 
