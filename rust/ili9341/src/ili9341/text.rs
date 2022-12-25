@@ -30,18 +30,18 @@ impl <'a>Ili9341<'a>
                     panic!("HSCONF");
                 }
             }
-            let mut mW : usize =0;
-            let mut mH : isize =0;
+            let mut m_w : usize =0;
+            let mut m_h : isize =0;
                     
             for i in info.font.glyphs
             {
                 let x : usize = i.x_advance as usize;
                 let y : isize =(-(i.y_offset as isize)) as isize;
-                if x>mW {mW=x;}
-                if y>mH {mH=y;}
+                if x>m_w {m_w=x;}
+                if y>m_h {m_h=y;}
             }
-            info.max_height=(mH as usize) + 1;
-            info.max_width=mW;    
+            info.max_height=(m_h as usize) + 1;
+            info.max_width=m_w;    
         }
     }
     ///

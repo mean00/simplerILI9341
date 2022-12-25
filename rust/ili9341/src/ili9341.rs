@@ -12,17 +12,17 @@ use crate::settings::ST7735_BUFFER_SIZE_WORD;
 //
 mod geometry;
 mod text;
-mod text_1NC_r;
-mod text_2NC_r;
+mod text_1nc_r;
+mod text_2nc_r;
 mod bitmap;
 use alloc::boxed::Box;
 
 #[cfg(feature = "hs")]
 use heatshrink_byte as heatshrink;
 #[cfg(feature = "hs")]
-mod text_1C_r;
+mod text_1c_r;
 #[cfg(feature = "hs")]
-mod text_2C_r;
+mod text_2c_r;
 
 #[cfg(not(feature = "hs"))]
 mod text_nohs;

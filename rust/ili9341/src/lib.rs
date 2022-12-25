@@ -1,7 +1,6 @@
 #![no_std]
 #![no_main]
 #![allow(dead_code)]
-#![allow(non_snake_case)]
 #![feature(stmt_expr_attributes)]
 extern crate alloc;
 

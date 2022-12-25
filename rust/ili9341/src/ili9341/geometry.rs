@@ -18,22 +18,22 @@ impl<'a> Ili9341<'a> {
         self.access.flood_words(w, color);
         self.access.data_end();
     }
-    fn circle_advance(xx: &mut usize, yy: &mut usize, E: &mut isize) {
-        if (*E) > 0 {
+    fn circle_advance(xx: &mut usize, yy: &mut usize, e: &mut isize) {
+        if (*e) > 0 {
             (*xx) -= 1;
-            *E = (*E) - 8 * (*xx as isize);
+            *e = (*e) - 8 * (*xx as isize);
         }
         (*yy) += 1;
-        (*E) += 8 * (*yy as isize) + 4;
+        (*e) += 8 * (*yy as isize) + 4;
     }
     pub fn circle(&mut self, x: usize, y: usize, radius: usize, color: u16) {
         // https://bariweiss.substack.com/p/hollywoods-new-rules?s=r
         let color = self.access.color_map(color);
-        let mut E: isize = 5 - 4 * (radius as isize);
+        let mut e: isize = 5 - 4 * (radius as isize);
         let mut yy = 0;
         let mut xx = radius;
         while yy < xx {
-            Self::circle_advance(&mut xx, &mut yy, &mut E);
+            Self::circle_advance(&mut xx, &mut yy, &mut e);
             // Use simple symetry
             self.access.set_address(x + xx, y + yy, 1, 1);
             self.access.flood_words(1, color);
@@ -57,7 +57,7 @@ impl<'a> Ili9341<'a> {
     pub fn disc(&mut self, x: usize, y: usize, radius: usize, color: u16) {
         // https://bariweiss.substack.com/p/hollywoods-new-rules?s=r
         let color = self.access.color_map(color);
-        let mut E: isize = 5 - 4 * (radius as isize);
+        let mut e: isize = 5 - 4 * (radius as isize);
         let mut yy = 0;
         let mut xx = radius;
 
@@ -74,7 +74,7 @@ impl<'a> Ili9341<'a> {
             self.access.set_address(x + yy - 2 * yy, y - xx, 2 * yy, 1);
             self.access.flood_words(2 * yy, color);
 
-            Self::circle_advance(&mut xx, &mut yy, &mut E);
+            Self::circle_advance(&mut xx, &mut yy, &mut e);
         }
     }
 
@@ -170,7 +170,7 @@ impl<'a> Ili9341<'a> {
         const OFS: usize = 1;
         // https://bariweiss.substack.com/p/hollywoods-new-rules?s=r
         let color = self.access.color_map(color);
-        let mut E: isize = 5 - 4 * (radius as isize);
+        let mut e: isize = 5 - 4 * (radius as isize);
         let mut yy = 0;
         let mut xx = radius;
         while yy <= xx {
@@ -201,7 +201,7 @@ impl<'a> Ili9341<'a> {
                 self.access.set_address(x + yy, y + xx - OFS, radius, 1);
                 self.access.flood_words(radius - yy, color);
             }
-            Self::circle_advance(&mut xx, &mut yy, &mut E);
+            Self::circle_advance(&mut xx, &mut yy, &mut e);
         }
     }
     pub fn quarter_disc(
@@ -211,19 +211,19 @@ impl<'a> Ili9341<'a> {
         preload: usize,
         out: &mut [u16],
     ) -> usize {
-        let mut E: isize = 5 - 4 * (radius as isize);
+        let mut e: isize = 5 - 4 * (radius as isize);
         let mut yy = 0;
         let mut xx = radius as isize;
         if preload * 2 >= radius {
             return 0;
         }
         for _i in 0..preload {
-            if E > 0 {
+            if e > 0 {
                 xx -= 1;
-                E = E - 8 * xx;
+                e = e - 8 * xx;
             }
             yy += 1;
-            E += 8 * yy + 4;
+            e += 8 * yy + 4;
         }
         let mut nb: usize = 0;
         for _i in preload..radius {
@@ -235,12 +235,12 @@ impl<'a> Ili9341<'a> {
             if nb >= mx {
                 return nb;
             }
-            if E > 0 {
+            if e > 0 {
                 xx -= 1;
-                E -= 8 * xx;
+                e -= 8 * xx;
             }
             yy += 1;
-            E += 8 * yy + 4;
+            e += 8 * yy + 4;
         }
         return nb;
     }
@@ -257,7 +257,7 @@ impl<'a> Ili9341<'a> {
     ) {
         let outcolor = self.access.color_map(outcolor);
         let incolor = self.access.color_map(incolor);
-        let mut E: isize = 5 - 4 * (radius as isize);
+        let mut e: isize = 5 - 4 * (radius as isize);
         let mut yy = 0;
         let mut xx = radius - 1;
 
@@ -296,7 +296,7 @@ impl<'a> Ili9341<'a> {
                 LINE!(h - invx - 1);
             }
             last = invx;
-            Self::circle_advance(&mut xx, &mut yy, &mut E);
+            Self::circle_advance(&mut xx, &mut yy, &mut e);
         }
         // interior now
         self.access.set_address(x0, y0 + radius, w, h - 2 * radius);

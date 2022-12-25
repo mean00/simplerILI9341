@@ -4,7 +4,7 @@ use crate::settings::ST7735_BUFFER_SIZE_WORD;
 impl<'a> Ili9341<'a> {
 
     #[cfg(feature = "hs")]
-    pub fn drawHSBitmap(&mut self, width : usize, height: usize, wx: usize, wy: usize, fg: u16, bg : u16, hsdata : &'a [u8])
+    pub fn draw_bitmap_hs(&mut self, width : usize, height: usize, wx: usize, wy: usize, fg: u16, bg : u16, hsdata : &'a [u8])
     {
     self.hs.reset(hsdata);
     self.access.set_address(wx, wy,  width, height);
