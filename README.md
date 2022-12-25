@@ -31,5 +31,6 @@ In your derived class , you have to provide the following methods :
 
 You must provide an "access" crate, have a look at the sim or lnArduino samples.
 Basically 4 functions to provide.
+There is also a rust "simulator" running on a PC to test your code before putting it on the final system.
 
 
