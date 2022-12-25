@@ -29,8 +29,13 @@ In your derived class , you have to provide the following methods :
 
 # Rust
 
-You must provide an "access" crate, have a look at the sim or lnArduino samples.
-Basically 4 functions to provide.
-There is also a rust "simulator" running on a PC to test your code before putting it on the final system.
+You must provide an "access" crate to give access to your device. That part is platform / hw dependant.
+The core is platform agnostic.
+There are 2 samples provided :
+- lnSPI : ILI9341 connected to SPI bus, using the lnArduino framework
+- SIM   : Basic port to run the driver on your PC
+
+The access crate is very small, basically 4 or 5 functions to provide.
+NB : There is also a "simulator" in the sim folder. It enables running your stuff on a PC to test it before putting it on the final system.
 
 
