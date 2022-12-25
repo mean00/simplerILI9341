@@ -130,7 +130,7 @@ async fn main() {
     }
     clear_background(macroquad::color::BLACK);
 
-    let mut access = Box::new(quadAccess{  x1: 0, x2: 0, y1: 0, y2  :0 , x : 0, y:0 });
+    let access = Box::new(quadAccess{  x1: 0, x2: 0, y1: 0, y2  :0 , x : 0, y:0 });
 
     let mut ili = simpler9341::Ili9341::new( SCREEN_WIDTH as usize, SCREEN_HEIGHT as usize, access,
             &DejaVuSans20pt7b, //NotoSans_Bold20pt7b,
@@ -170,7 +170,7 @@ async fn main() {
     
     ili.set_font_size( simpler9341::FontFamily::BigFont);
     ili.print(5,95,"Some  text");
-    ili.drawHSBitmap(bitmap_width, bitmap_height, 40,80, ili9341::colors::GREEN, ili9341::colors::BLACK, bitmap);
+    ili.draw_bitmap_hs(bitmap_width, bitmap_height, 40,80, ili9341::colors::GREEN, ili9341::colors::BLACK, bitmap);
 
 
     next_frame().await;
