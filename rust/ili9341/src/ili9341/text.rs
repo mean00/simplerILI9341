@@ -252,21 +252,21 @@ impl <'a>Ili9341<'a>
             1 =>             {
                     if self.current_font().font.shrinked != 0
                     {
-                        self.innerLoop1C(w,h,left,advv,fg,bg,glyph_data );                        
+                        self.inner_loop_1c(w,h,left,advv,fg,bg,glyph_data );                        
                     }
                     else
                     {
-                        self.innerLoop1NC(w,h,left,advv,fg,bg, glyph_data );                        
+                        self.inner_loop_1nc(w,h,left,advv,fg,bg, glyph_data );                        
                     }
                 },
             2 =>   {
                     if self.current_font().font.shrinked != 0
                     {
-                        self.innerLoop2C(w,h,left,advv,fg,bg,glyph_data);      
+                        self.inner_loop_2c(w,h,left,advv,fg,bg,glyph_data);      
                     }
                     else
                     {
-                        self.innerLoop2NC(w,h,left,advv,fg,bg,glyph_data);
+                        self.inner_loop_2nc(w,h,left,advv,fg,bg,glyph_data);
                     }
                 },
             _ => panic!("Crap"),

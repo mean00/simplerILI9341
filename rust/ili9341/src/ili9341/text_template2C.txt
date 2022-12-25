@@ -39,7 +39,7 @@ impl <'a>Ili9341<'a>
     let  hi:  u16=r(3,1,fg2,bg2)+g(3,1,fg2,bg2)+b(3,1,fg2,bg2);
 
     @INIT@
-    let colorGrad : [u16;4]=[bg,low,hi,fg];
+    let color_grad : [u16;4]=[bg,low,hi,fg];
     let mut bits : usize =0;
     let mut rank : isize = -1;
     let mut start : *mut u16 = self.src_buf;
@@ -70,7 +70,7 @@ impl <'a>Ili9341<'a>
             }
             rank-=2;
             unsafe {
-            *col=colorGrad[pix];
+            *col=color_grad[pix];
             col=col.add(1);
             }
         }

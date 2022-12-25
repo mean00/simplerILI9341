@@ -31,7 +31,7 @@ fn b( l:usize, r: usize, fg: usize, bg : usize) -> u16
 
 impl <'a>Ili9341<'a>
 {
-    pub fn innerLoop2C(&mut self, w: usize, h : usize, left: usize, line_size: usize, fg: u16, bg : u16, p: &'a [u8])
+    pub fn inner_loop_2c(&mut self, w: usize, h : usize, left: usize, line_size: usize, fg: u16, bg : u16, p: &'a [u8])
     {        
     let fg2= fg as usize;
     let bg2= bg as usize;
@@ -39,7 +39,7 @@ impl <'a>Ili9341<'a>
     let  hi:  u16=r(3,1,fg2,bg2)+g(3,1,fg2,bg2)+b(3,1,fg2,bg2);
 
     self.hs.reset(p);
-    let colorGrad : [u16;4]=[bg,low,hi,fg];
+    let color_grad : [u16;4]=[bg,low,hi,fg];
     let mut bits : usize =0;
     let mut rank : isize = -1;
     let mut start : *mut u16 = self.src_buf;
@@ -70,7 +70,7 @@ impl <'a>Ili9341<'a>
             }
             rank-=2;
             unsafe {
-            *col=colorGrad[pix];
+            *col=color_grad[pix];
             col=col.add(1);
             }
         }
