@@ -15,6 +15,10 @@ use ili9341::colors::BLACK;
 
 mod testfont;
 mod testfont2C;
+mod rust_logo_nc;
+
+
+
 use crate::testfont::NotoSans_Bold20pt7b;
 use crate::testfont2C::DejaVuSans20pt7b;
 
@@ -171,9 +175,13 @@ async fn main() {
     ili.set_font_size( simpler9341::FontFamily::BigFont);
     ili.print(5,95,"Some  text");
     ili.draw_bitmap_hs(bitmap_width, bitmap_height, 40,80, ili9341::colors::GREEN, ili9341::colors::BLACK, bitmap);
+    ili.draw_bitmap(crate::rust_logo_nc::WIDTH, crate::rust_logo_nc::HEIGHT, 240,120, ili9341::colors::GREEN, ili9341::colors::BLACK, &crate::rust_logo_nc::BITMAP);
+    ili.draw_bitmap(crate::rust_logo_nc::WIDTH, crate::rust_logo_nc::HEIGHT, 40,120,  ili9341::colors::BLACK, ili9341::colors::GREEN, &crate::rust_logo_nc::BITMAP);
 
-
-    next_frame().await;
+    //loop 
+    {
+        next_frame().await;
+    }
     }
     std::println!("Exiting....");
 }
