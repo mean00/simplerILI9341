@@ -11,11 +11,11 @@ extern crate ili9341;
 
 extern crate rnarduino as rn;
 
-use rn::rnGpio as rnGpio;
-use rn::rnSpi::rnSPI as rnSPI;
+use rn::rn_gpio as rnGpio;
+use rn::rn_spi::rnSPI as rnSPI;
 
-use rn::rnGpio::rnPin as rnPin;
-use rnarduino::rnOsHelper::rnDelayUs;
+use rn::rn_gpio::rnPin as rnPin;
+use rnarduino::rn_os_helper::delay_us;
 use rnGpio::rnFastIO as rnFastIO;
 
 
@@ -23,7 +23,7 @@ use rnPin::NoPin;
 
 use ili9341::access::Ili9341Access;
 use ili9341::ili9341_cmds as cmd;
-use rnarduino::rnOsHelper::rnDelay as rnDelay;
+use rnarduino::rn_os_helper::delay_ms as rnDelay;
 
 const SINGLE_TRANSFER : usize = (1<<16)-2;
 
@@ -109,7 +109,7 @@ impl spi_ili9341
         self.CD_COMMAND();  
         self.spi.write(r);        
         self.CD_DATA();        
-        rnDelayUs(5);
+        delay_us(5);
         self.spi.transfer(&mut tx,&mut rx);
         // revert
         let rx2: u32 =rx[3] as u32+( (rx[2] as u32) <<8)+( (rx[1] as u32) <<16)+( (rx[0] as u32) <<24);
@@ -164,23 +164,23 @@ impl spi_ili9341
     }
     pub fn reset(&mut self)
     {
-        rn::rnGpio::pinMode(self.pin_dc , rnGpio::rnGpioMode::lnOUTPUT);
-        rn::rnGpio::digitalWrite(self.pin_dc , true);
+        rnGpio::pinMode(self.pin_dc , rnGpio::rnGpioMode::lnOUTPUT);
+        rnGpio::digital_write(self.pin_dc , true);
         if self.pin_cs!=NoPin
         {
-            rn::rnGpio::pinMode(self.pin_cs,rnGpio::rnGpioMode::lnOUTPUT);
-            rn::rnGpio::digitalWrite(self.pin_cs,true);
+            rnGpio::pinMode(self.pin_cs,rnGpio::rnGpioMode::lnOUTPUT);
+            rnGpio::digital_write(self.pin_cs,true);
         }
         self.CS_IDLE();
         self.CD_DATA();
         if self.pin_reset != NoPin
         {            
-            rn::rnGpio::pinMode(self.pin_reset, rnGpio::rnGpioMode::lnOUTPUT);    
-            rn::rnGpio::digitalWrite(self.pin_reset,true);
+            rnGpio::pinMode(self.pin_reset, rnGpio::rnGpioMode::lnOUTPUT);    
+            rnGpio::digital_write(self.pin_reset,true);
             rnDelay(50);
-            rn::rnGpio::digitalWrite(self.pin_reset,false);
+            rnGpio::digital_write(self.pin_reset,false);
             rnDelay(50);
-            rn::rnGpio::digitalWrite(self.pin_reset,true);	
+            rnGpio::digital_write(self.pin_reset,true);	
             rnDelay(50);
         }
         self.chip_id=self.read_chip_id();
