@@ -9,6 +9,7 @@ The library prints strings "in place", so you can avoid flickering effects (no n
 
 It also supports heatshrink-byte compressed one bpp bitmap (i.e. 2 colors image).
 
+It supports ILI3941 and partially ST7789/ST7735
 
 # C++
 You must derive the class and implements the hw dependant part.
