@@ -40,7 +40,7 @@
 
 
 const uint8_t st7735_data[] = {
-      ILI_CMD(ST7735_INVON),
+      ILI_CMD(ST7735_INVOFF),
       ILI_CMD4(ST7735_FRMCTR1,  0x05, 0x3a, 0x3a),
       ILI_CMD4(ST7735_FRMCTR2,  0x05, 0x3a, 0x3a), 
       ST7735_FRMCTR3, 6  ,  0x05, 0x3a, 0x3a, 0x05, 0x3a, 0x3a,
