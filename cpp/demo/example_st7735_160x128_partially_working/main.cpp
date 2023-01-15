@@ -34,15 +34,15 @@ void setup()
     
     
     spi->beginTransaction(transaction);
-    ili=new lnSpi9341( 240, 280,
+    ili=new lnSpi9341( HH, WW,
                                     spi,        
                                     PA11,       // A0/DC    YELLOW  PA11
                                     PA10,       // CS: ORANGE PA10
                                     PA12     // BLUE Reset
                       );
     ili->init(st7735_data,NULL); 
-    ili->forceChipId(0x7789);
-    ili->setRotation(1);
+    //ili->forceChipId(0x7789);
+    //ili->setRotation(1);
     ili->fillScreen(WHITE);   
 #define FONT OpenSans_Regular28pt7b    
     ili->setFontFamily(&FONT,&FONT,&FONT) ;
