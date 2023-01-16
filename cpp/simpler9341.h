@@ -8,6 +8,14 @@
 #include "simpler9341_color.h"
 
 #define FAKE_DELAY_COMMAND 0xff
+
+enum ChipID
+{
+    CHIPID_ILI9341 = 0x9341,
+    CHIPID_ST7789  = 0x7789, 
+    CHIPID_ST7735  = 0x7735,
+};
+
 /**
  *  ChipID:
  *          0x7789 : ST7789

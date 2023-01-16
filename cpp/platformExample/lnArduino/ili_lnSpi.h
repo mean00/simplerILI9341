@@ -48,6 +48,7 @@ class lnSpi9341 : public ili9341
             virtual void dataEnd();
             virtual void multiFloodWords(int n, int *size, const uint16_t *colors);
             virtual void pushColors(int len, uint16_t *data) {xAssert(0);}
+                    void setOffset(int xOffset, int yOffset);
             
             
                     uint32_t readChipId();

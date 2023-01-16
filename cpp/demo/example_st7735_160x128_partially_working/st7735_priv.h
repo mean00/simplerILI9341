@@ -58,7 +58,7 @@ const uint8_t st7735_data[] = {
       ST7735_CASET, 4, 0x00, XOFFSET, 0x00, WW+XOFFSET-1, // Column addr set: XSTART=0, XEND=width
       ST7735_RASET, 4, 0x00, YOFFSET, 0x00, HH+YOFFSET-1, // Row addr set: YSTART=0, YEND=height
       // 
-      ILI_CMD2(ST7735_MADCTL,   0x78), // 0x36: coord 08..168 / 120...200
+      ILI_CMD2(ST7735_MADCTL,   0x78), //  0x28 <-inverted->:   0x78: <-normal->, || 48 , || 18
       ILI_CMD(ST7735_DISPON),   
       ILI_CMD(ST7735_SLPOUT),   
       0

@@ -3,7 +3,7 @@
  *  (C) 2021/2022 MEAN00 fixounet@free.fr
  *  See license file
  * 
- * This is a spi driver for the ILI9341/ST7789 
+ * This is a spi driver for the ILI9341/ST7789/7735 
  * 
  * 
  * 
@@ -53,6 +53,13 @@ lnSpi9341::lnSpi9341( int w, int h ,hwlnSPIClass *spi, lnPin pinDC,lnPin pinCS, 
     _cacheSize=0;
     _3wire=false;
 
+}
+/**
+*/
+void lnSpi9341::setOffset(int xOffset, int yOffset)
+{
+    _PhysicalXoffset=xOffset;
+    _PhysicalYoffset=yOffset;    
 }
 /**
  */
@@ -280,8 +287,18 @@ void lnSpi9341::updateHwRotation(void)
 {
     uint8_t t;
     switch(_chipId)
-    {
-        case 0x9341:       
+    {  
+        case CHIPID_ST7735://         
+            switch(_rotation)
+            {
+                case 1:        t = ILI9341_MADCTL_MX | ILI9341_MADCTL_MY  ; break;                
+                case 2:        t = ILI9341_MADCTL_MY | ILI9341_MADCTL_MV  ; break;                
+                case 3:        t = 0 ;                                      break;
+                default:
+                case 0:        t = ILI9341_MADCTL_MV|ILI9341_MADCTL_ML|ILI9341_MADCTL_MX ;  break;
+           }          
+           break;
+        case CHIPID_ILI9341:       
             switch(_rotation) 
             {
                 case 1:        t = ILI9341_MADCTL_MX | ILI9341_MADCTL_MY | ILI9341_MADCTL_MV ;          break;
@@ -290,7 +307,7 @@ void lnSpi9341::updateHwRotation(void)
                 case 0:        default:t = ILI9341_MADCTL_MY ;                  break;
            }
            break;
-        case 0x7789:       
+        case CHIPID_ST7789:       
             switch(_rotation) 
             {
                 case 1:        t = ILI9341_MADCTL_MY | ILI9341_MADCTL_MV ;          break;
