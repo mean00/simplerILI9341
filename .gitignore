@@ -35,3 +35,4 @@
 target/*
 rust/sim/target/
 rust/ili9341/target/
+rust/ln_spi/target/
