@@ -14,7 +14,6 @@
  */
 void ili9341::VLine(int x0, int y0, int h, int color)
 {
-  int f=colorMap(color);
   setAddress(x0, y0, 1, h);
   floodWords(h,color);
 }
@@ -27,7 +26,6 @@ void ili9341::VLine(int x0, int y0, int h, int color)
  */
 void ili9341::HLine(int x0, int y0, int w, int color)
 {
-  int f=colorMap(color);
   setAddress(x0, y0, w, 1);
   floodWords(w,color);
 }

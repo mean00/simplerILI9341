@@ -563,7 +563,6 @@ void lnFast8bitIo::sendBlock(int nb, uint16_t *data)
     
     for(int i=0;i<nb;i++)
     {
-        int val=*data;
         int d=*(data++);
         int hi=WR_DATA8(d>>8);
         int lo=WR_DATA8(d&0xff);

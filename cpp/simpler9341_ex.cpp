@@ -37,9 +37,8 @@ int  ili9341::stringLength(const char *z)
  */
 void  ili9341::print(int x, int y,const char *z)
 {
-    cursor_x=x;
-    cursor_y=y;
-   int l=strlen(z);
+   cursor_x=x;
+   cursor_y=y;
    while(*z)
    {
        int inc=writeChar(*z);
