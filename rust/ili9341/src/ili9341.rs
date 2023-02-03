@@ -10,6 +10,7 @@ use crate::access::Ili9341Access;
 //
 use crate::settings::ST7735_BUFFER_SIZE_WORD;
 //
+mod sin;
 mod geometry;
 mod gauge;
 mod text;
