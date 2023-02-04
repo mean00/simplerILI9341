@@ -1,6 +1,6 @@
 
 use crate::ili9341::Ili9341;
-
+use crate::ili9341::sin::SIN_TABLE;
 pub struct Gauge <'a>
 {    
     radius_internal : usize,
@@ -58,7 +58,36 @@ impl <'a> Gauge <'a>
 
     }
     // 
-    pub fn draw(&mut self, ili : &mut Ili9341, x : usize, y : usize, color : u16, empty : bool)
+    fn draw_elem(&mut self, color : u16, line: usize, left: bool, right : bool, column: usize, len : usize)
+    {
+       if(left)
+       {        
+            let mut dex=column;
+            for _k in 0..=len
+            {                
+                self.buffer[dex]=color;
+                dex+=1;
+            }
+       }else
+       {
+
+       }
+       if(right)
+       {
+        let mut dex=column;
+        for _k in 0..=len
+        {                                        
+            self.buffer[self.radius_external*2-dex]=color;
+            dex+=1;
+        }
+       }
+       else
+       {
+
+       }
+    }
+
+    pub fn draw(&mut self, percent : usize, ili : &mut Ili9341, x : usize, y : usize, color : u16)
     {
         let last_line: usize = self.yext[self.radius_external] as usize;
         ili.hline(x-last_line,y-self.radius_external,2*last_line,color);
@@ -66,20 +95,69 @@ impl <'a> Gauge <'a>
         let first_ww: usize = (self.yext[0]-self.yint[0]) as usize;
         ili.hline(x-first_line,y,first_ww,color);
         ili.hline(x+first_line-first_ww-1,y,first_ww,color);
-        if empty
+
+        // Check the interieur start of filled
+        let mut over: bool =false;
+        let index: usize;
+        if percent > 50
         {
-            for i in 0..(self.radius_external)
+            over=true;
+            index=100-percent;
+        }else
+        {
+            over=false;
+            index=percent;
+        }
+        
+
+        let line = SIN_TABLE[index] as usize;
+        let _line_int=(self.radius_internal*line+127)>>8;
+        let line_ext=(self.radius_external*line+127)>>8; 
+        let mut left : bool;
+        let mut right : bool;
+
+        //-- Start to fill ...
+        for i in 0..self.radius_external        
+        {
+            let xext=self.yext[i] as usize;
+            let xint=self.yint[i] as usize;
+            let w=xext-xint;
+            let xext=self.radius_external-xext;
+            let xint=self.radius_external-xint;
+            for i in 0..self.buffer.len()
             {
-                let xext=self.yext[i] as usize;
-                let xint=self.yint[i] as usize;
-                let w=xext-xint;
-                let xext=self.radius_external-xext;
-                let xint=self.radius_external-xint;
-                // clear
-                for i in 0..self.buffer.len()
+                self.buffer[i]=0;
+            }
+            if over == true
+            {
+                left=true;
+                if i>line_ext
                 {
-                    self.buffer[i]=0;
-                }
+                    right= true  ;               
+                }else
+                {
+                    right= false;                
+                }            
+
+            }
+            else
+            {
+                right=false;
+                if i<line_ext
+                {
+                    left=true;               
+                }else
+                {
+                    left=false;                
+                }            
+            }
+            self.draw_elem(  color, i,  left, right, xext,w);
+            ili.send_data( x-self.radius_external,y-i,self.buffer);
+        
+        /*
+            else
+            {
+               
                 let mut pen = (self.yext[i]-self.yext[i+1]) as usize;
                 if pen==0
                 {
@@ -101,8 +179,7 @@ impl <'a> Gauge <'a>
                     {
                         pen=1;
                     }
-                    let mut dex=xint;
-                    // outer..
+                    let mut dex=xint;                    
                     for _k in 0..pen
                     {
                         self.buffer[dex]=color;
@@ -110,30 +187,10 @@ impl <'a> Gauge <'a>
                         dex=dex+1;
                     }
                 }
-                ili.send_data( x-self.radius_external,y-i,self.buffer);
             }
-        }else  // FULL
-        {
-            for i in 0..self.radius_external
-            {
-                let xext=self.yext[i] as usize;
-                let xint=self.yint[i] as usize;
-                let w=xext-xint;
-                let xext=self.radius_external-xext;
-                for i in 0..self.buffer.len()
-                {
-                    self.buffer[i]=0;
-                }
-                let mut dex=xext;
-                for i in 0..=w
-                {
-                    self.buffer[dex]=color;
-                    self.buffer[self.radius_external*2-dex]=color;
-                    dex+=1;
-                }
-                ili.send_data( x-self.radius_external,y-i,self.buffer);
-            }
-        }
+            */
+            
+        }        
     }
     pub fn draw2(&mut self, ili : &mut Ili9341, x : usize, y : usize, color : u16, empty : bool)
     {
