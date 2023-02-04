@@ -18,7 +18,7 @@ simpler_gfx =       { git="https://github.com/mean00/simpler_gfx.git"}
 [profile.dev]
 codegen-units = 1
 debug = true
-lto = true
+lto = false
 opt-level       = 's'
 
 [profile.release]

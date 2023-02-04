@@ -13,15 +13,15 @@ heatshrink_byte =   { git = "https://github.com/mean00/heatshrink",  version = "
 simpler_gfx =       { git="https://github.com/mean00/simpler_gfx.git"}
 
 [profile.dev]
-codegen-units = 1
+codegen-units = 0
 debug = true
-lto = true
-opt-level       = 's'
+lto = false
+#opt-level       = '1'
 
 [profile.release]
-codegen-units = 1
-debug = false
-lto = true
-opt-level       = 's'
+codegen-units = 0
+debug = true
+lto = false
+#opt-level       = 's'
 
 

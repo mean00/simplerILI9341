@@ -50,17 +50,15 @@ impl<'a> Ili9341<'a> {
                 found=true;
             }
         }
-        let inner_x = (col_ext*radius_internal+radius_external-1)/radius_external;
-        let inner_y = (line_ext*radius_internal+radius_external-1)/radius_external;
+        let inner_x = (col_ext*radius_internal+radius_external/2)/radius_external;
+        let inner_y = (line_ext*radius_internal+radius_external/2)/radius_external;
         if inverted
-        {
-            //self.draw_line(x,y,x+col_ext,y-line_ext,crate::colors::BLUE);
+        {            
             self.draw_line(x+inner_x,y-inner_y,x+col_ext,y-line_ext,crate::colors::RED);
         }
         else
         {
             self.draw_line(x-inner_x,y-inner_y,x-col_ext,y-line_ext,crate::colors::RED);
-            //self.draw_line(x,y,x-col_ext,y-line_ext,crate::colors::RED);
         }        
         //---
     }

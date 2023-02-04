@@ -12,6 +12,7 @@ use crate::settings::ST7735_BUFFER_SIZE_WORD;
 //
 mod sin;
 mod geometry;
+pub mod gauge_meter;
 mod gauge;
 mod text;
 mod text_1nc_r;
@@ -204,7 +205,7 @@ impl <'a>Ili9341<'a>
         self.access.data_end();
     }
     //-------------------------------------------------------------------------------   
-    fn circle_advance(xx: &mut usize, yy: &mut usize, e: &mut isize) {
+    pub fn circle_advance(xx: &mut usize, yy: &mut usize, e: &mut isize) {
         if (*e) > 0 {
             (*xx) -= 1;
             *e = (*e) - 8 * (*xx as isize);

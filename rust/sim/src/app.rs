@@ -11,6 +11,7 @@ use ili9341::colors::GREEN;
 use ili9341::colors::BLUE;
 use ili9341::colors::RED;
 use ili9341::colors::BLACK;
+use ili9341::ili9341::gauge_meter::Gauge;
 
 
 mod testfont;
@@ -128,7 +129,7 @@ async fn main() {
     let bitmap = include_bytes!("test_bitmap.bin");
     loop {
     loops+=1;
-    if loops > 5
+    if loops > 5000
     {
         break;
     }
@@ -143,43 +144,13 @@ async fn main() {
             );
     
     ili.fill_screen(0x0);
-    //next_frame().await;
-    ili.draw_line(10,10,200,200,ili9341::colors::BLUE); // \
-    //next_frame().await;
-    ili.draw_line(10,200,200,10,ili9341::colors::BLUE); // /
-    //next_frame().await;
-    ili.draw_line(10,200,10,10,ili9341::colors::BLUE);  // ^ Left
-    //next_frame().await;
-    ili.draw_line(200,10,200,200,ili9341::colors::BLUE);// | right
-    //next_frame().await;
-    ili.draw_line(200,200,10,200,ili9341::colors::BLUE);// _ Bottom
-    //next_frame().await;
-    ili.draw_line(10,10,200,10,ili9341::colors::BLUE);// - top
-    //next_frame().await;
-    ili.circle(60,60,24,ili9341::colors::RED);
-    ili.disc(120,60,24,ili9341::colors::GREEN);
-
-    ili.inverted_disc_corner(200,40, 30,4,ili9341::colors::BLUE);
-    ili.inverted_disc_corner(80,120, 30,1,ili9341::colors::RED);
-    
-    
-    ili.fill_round_rect( 20,220,100,16,4,ili9341::colors::RED,ili9341::colors::GREEN);
    
-    ili.set_text_color(ili9341::colors::RED,ili9341::colors::BLUE);
-
-    ili.print(5,35,"Some  text");
-    ili.set_text_color(ili9341::colors::rgb(0xff,0xff,0xff), 0);
-    ili.print(5,65,"Some  text");
-    ili.set_text_color(ili9341::colors::RED,ili9341::colors::BLUE);
-    
-    ili.set_font_size( simpler9341::FontFamily::BigFont);
-    ili.print(5,95,"Some  text");
-    ili.draw_bitmap_hs(bitmap_width, bitmap_height, 40,80, ili9341::colors::GREEN, ili9341::colors::BLACK, bitmap);
-    ili.draw_bitmap(crate::rust_logo_nc::WIDTH, crate::rust_logo_nc::HEIGHT, 240,120, ili9341::colors::GREEN, ili9341::colors::BLACK, &crate::rust_logo_nc::BITMAP);
-    ili.draw_bitmap(crate::rust_logo_nc::WIDTH, crate::rust_logo_nc::HEIGHT, 40,120,  ili9341::colors::BLACK, ili9341::colors::GREEN, &crate::rust_logo_nc::BITMAP);
-
-    //loop 
+    let mut gauge=Gauge::new(40,64);
+    gauge.init();
+    loop
     {
+        gauge.draw(&mut ili,100,100, ili9341::colors::RED,true);
+        gauge.draw(&mut ili,100,180, ili9341::colors::RED,false);
         next_frame().await;
     }
     }
