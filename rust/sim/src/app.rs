@@ -147,11 +147,21 @@ async fn main() {
    
     let mut gauge=Gauge::new(40,64);
     gauge.init();
+    let mut percent : isize =0;
+    let mut increment : isize =2;
     loop
     {
-        gauge.draw(&mut ili,100,100, ili9341::colors::RED,true);
-        gauge.draw(&mut ili,100,180, ili9341::colors::RED,false);
+        gauge.draw(percent as usize, &mut ili,100,100, ili9341::colors::RED);
+        percent+=increment;
         next_frame().await;
+        if percent<6 && increment < 0
+        {
+            increment=-increment;
+        }
+        if percent>95 && increment > 0
+        {
+            increment = -increment;
+        }
     }
     }
     std::println!("Exiting....");
