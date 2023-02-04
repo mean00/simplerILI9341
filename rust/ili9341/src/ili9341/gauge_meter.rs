@@ -17,13 +17,13 @@ impl <'a> Gauge <'a>
     {
         let ex = crate::util::unsafe_array_alloc::<u8>(radius_external+1);
         let ix = crate::util::unsafe_array_alloc::<u8>(radius_external+1);
-        let bf = crate::util::unsafe_array_alloc::<u16>(radius_external*2);
+        let bf = crate::util::unsafe_array_alloc::<u16>(radius_external*2+1);
         Gauge{                
                     radius_internal,
                     radius_external,
                     yext :  unsafe {core::slice::from_raw_parts_mut(ex,radius_external+1)},
                     yint :  unsafe {core::slice::from_raw_parts_mut(ix,radius_external+1)},
-                    buffer: unsafe {core::slice::from_raw_parts_mut(bf,2*radius_external)},
+                    buffer: unsafe {core::slice::from_raw_parts_mut(bf,2*radius_external+1)},
                    
         }
     }
@@ -68,6 +68,83 @@ impl <'a> Gauge <'a>
         ili.hline(x+first_line-first_ww-1,y,first_ww,color);
         if empty
         {
+            for i in 0..(self.radius_external)
+            {
+                let xext=self.yext[i] as usize;
+                let xint=self.yint[i] as usize;
+                let w=xext-xint;
+                let xext=self.radius_external-xext;
+                let xint=self.radius_external-xint;
+                // clear
+                for i in 0..self.buffer.len()
+                {
+                    self.buffer[i]=0;
+                }
+                let mut pen = (self.yext[i]-self.yext[i+1]) as usize;
+                if pen==0
+                {
+                    pen=1;
+                }
+                let mut dex=xext;
+                // outer..
+                for _k in 0..pen
+                {
+                    self.buffer[dex]=color;
+                    self.buffer[self.radius_external*2-dex]=color;
+                    dex=dex+1;
+                }
+                // inner
+                if self.yint[i]!=0
+                {
+                    let mut pen = (self.yint[i]-self.yint[i+1]) as usize;
+                    if pen==0
+                    {
+                        pen=1;
+                    }
+                    let mut dex=xint;
+                    // outer..
+                    for _k in 0..pen
+                    {
+                        self.buffer[dex]=color;
+                        self.buffer[self.radius_external*2-dex]=color;
+                        dex=dex+1;
+                    }
+                }
+                ili.send_data( x-self.radius_external,y-i,self.buffer);
+            }
+        }else  // FULL
+        {
+            for i in 0..self.radius_external
+            {
+                let xext=self.yext[i] as usize;
+                let xint=self.yint[i] as usize;
+                let w=xext-xint;
+                let xext=self.radius_external-xext;
+                for i in 0..self.buffer.len()
+                {
+                    self.buffer[i]=0;
+                }
+                let mut dex=xext;
+                for i in 0..=w
+                {
+                    self.buffer[dex]=color;
+                    self.buffer[self.radius_external*2-dex]=color;
+                    dex+=1;
+                }
+                ili.send_data( x-self.radius_external,y-i,self.buffer);
+            }
+        }
+    }
+    pub fn draw2(&mut self, ili : &mut Ili9341, x : usize, y : usize, color : u16, empty : bool)
+    {
+        let last_line: usize = self.yext[self.radius_external] as usize;
+        ili.hline(x-last_line,y-self.radius_external,2*last_line,color);
+        let first_line: usize = self.yext[0] as usize;
+        let first_ww: usize = (self.yext[0]-self.yint[0]) as usize;
+        ili.hline(x-first_line,y,first_ww,color);
+        ili.hline(x+first_line-first_ww-1,y,first_ww,color);
+        if empty
+        {
             for i in 0..self.radius_external
             {
                 let xext=self.yext[i] as usize;
@@ -98,6 +175,5 @@ impl <'a> Gauge <'a>
             }
         }
     }
-
 
 }

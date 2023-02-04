@@ -195,6 +195,14 @@ impl <'a>Ili9341<'a>
         }
         self.access.update_hw_rotation(rotation);
     }
+    //-----------------------
+    // Warning: The colors must be correct !
+    //-----------------------
+    pub fn send_data(&mut self, x: usize, y : usize, data : &[u16])
+    {
+        self.access.set_address(x,y,data.len(),1);
+        self.access.push_colors(data);
+    }
     //-------------------------------------------------------------------------------
     pub fn square(&mut self, color : u16, x : usize, y : usize, w: usize, h:usize)
     {
