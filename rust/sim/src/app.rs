@@ -133,7 +133,7 @@ async fn main() {
     let bitmap_height = 96;
     let bitmap = include_bytes!("test_bitmap.bin");
 
-    let ten_millis = time::Duration::from_millis(400);
+    let ten_millis = time::Duration::from_millis(10);
 
     loop {
     loops+=1;
@@ -154,8 +154,7 @@ async fn main() {
     ili.fill_screen(0x0);
    
     let mut gauge=Gauge::new(40,64);
-    gauge.init();
-    let mut percent : isize =12;
+    let mut percent : isize =15;
     let mut increment : isize =2;
     loop
     {
@@ -166,7 +165,7 @@ async fn main() {
         {
             increment=-increment;
         }
-        if percent>95 && increment > 0
+        if percent>45 && increment > 0
         {
             increment = -increment;
         }

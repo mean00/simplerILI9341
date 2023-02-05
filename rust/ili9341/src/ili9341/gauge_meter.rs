@@ -35,16 +35,18 @@ impl  <'a> Gauge <'a>
     //
     pub fn new (radius_internal : usize, radius_external : usize) -> Self
     {
-        Gauge{                
+        let mut r = Gauge{                
                     radius_internal,
                     radius_external,
                     yext :   crate::util::unsafe_slice_alloc::<u8>(radius_external+1),
                     yint :   crate::util::unsafe_slice_alloc::<u8>(radius_external+1),
                     buffer : crate::util::unsafe_slice_alloc::<u16>(2*radius_external+1),
-        }
+        };
+        r._init();
+        r
     }
     //
-    pub fn init(&mut self)
+    pub fn _init(&mut self)
     {
         let mut e: isize = 5 - 4 * (self.radius_external as isize);
         let mut yy = 0;
@@ -157,7 +159,7 @@ impl  <'a> Gauge <'a>
                             }
             },
             Area::Partial => {
-                                    let mut dex=column;
+                                    let mut dex=len_left-column;
                                     for _k in 0..=len_right
                                     {                
                                         self.buffer[self.radius_external*2-dex]=0x3f<<5;
@@ -237,10 +239,11 @@ impl  <'a> Gauge <'a>
             {
                 ev=Area::Partial;
                 let alpha = (koeff*(i-line_int))>>8;                
+                let abs_x = self.radius_external-xext;
                 abs_pos=col_int+alpha;
-                if xext > abs_pos
+                if abs_x > abs_pos
                 {
-                    adj = xext - abs_pos;
+                    adj = abs_x - abs_pos;
                     if adj > w
                     {
                         adj=w;
@@ -268,7 +271,7 @@ impl  <'a> Gauge <'a>
             }
             self.draw_elem(  color2, i,  left, right, xext,wleft,wright);
             ili.send_data( x-self.radius_external,y-i,&self.buffer);
-            ili.draw_line(x-abs_pos, y-i, x-abs_pos+1, y-i, crate::colors::RED) ;
+            //ili.draw_line(x-abs_pos, y-i, x-abs_pos+1, y-i, crate::colors::RED) ;
         }     
         if over
         {  
