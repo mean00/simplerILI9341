@@ -161,10 +161,10 @@ impl  <'a> Gauge <'a>
                             }
             },
             Area::Partial => {
-                                let mut dex=column+len_left-1; // start at internal , not external here
+                                let mut dex=2*self.radius_external-(column+len_left); // start at internal , not external here
                                 for _k in 0..=(len_left-len_right)
                                 {                
-                                    self.buffer[dex]=0x3f<<5;
+                                    self.buffer[dex]=0x1f;
                                     dex+=1;
                                 } 
                             },
