@@ -83,91 +83,74 @@ impl  <'a> Gauge <'a>
         }
         pen
     }
+    //
+    fn fill_x(&mut self,  start: usize, pen: usize, color : u16)
+    {
+        let mut dex=start;
+        for _k in 0..pen
+        {
+            self.buffer[dex]=color;
+            dex=dex+1;
+        }
+    }
+    fn fill_antix(&mut self,  start: usize, pen: usize, color : u16)
+    {
+        let mut dex=start;
+        for _k in 0..pen
+        {
+            self.buffer[2*self.radius_external-dex]=color;
+            dex=dex+1;
+        }
+    }
     // 
     fn draw_elem(&mut self, color : u16, line: usize, left: Area, right : Area, column: usize, len_left : usize, len_right : usize)
     {
+        let  pen_ext = self.pen_size(&self.yext,line);
+        let  pen_int = self.pen_size(&self.yint,line);
         match left
         {
-            Area::Full =>     {let mut dex=column;
-                        for _k in 0..=len_left
-                        {                
-                            self.buffer[dex]=color;
-                            dex+=1;
-                        }} ,
-            Area::Empty => {
-                    let  pen = self.pen_size(&self.yext,line);
-                    let mut dex=column;
-                    // outer..
-                    for _k in 0..pen
-                    {
-                        self.buffer[dex]=color;
-                        dex=dex+1;
-                    }
-                    // inner
-                    if self.yint[line]!=0
-                    {
-                        let  pen = self.pen_size(&self.yint,line);
-                        let mut dex=column+len_left;
-                        for _k in 0..pen
-                        {
-                            self.buffer[dex]=color;
-                            dex=dex+1;
-                        }
-                    }
-            },
+            Area::Full =>   {
+                                self.fill_x(column, len_left+1,color);
+                        },
+            Area::Empty =>  {         
+                                self.fill_x(column,pen_ext,color);
+                                // inner
+                                if self.yint[line]!=0
+                                {                        
+                                    self.fill_x(column+len_left,pen_int,color);
+                                }
+                        },
             Area::Partial => {
-                        // external 
-                        // internal
-                          let mut dex=column;
-                          for _k in 0..=len_left
-                          {                
-                                self.buffer[dex]=0x3f<<5;
-                                dex+=1;
-                          } 
-                          if self.yint[line]!=0
-                          {
-                            self.buffer[column+len_right]=0x3f<<5;
-                          }
-                    },
+                                self.fill_x(column,len_left+1,color);
+                                if self.yint[line]!=0
+                                {
+                                    self.fill_x(column+len_right, pen_int,color); // WRONG
+                                }
+                        },
         };
         match right
         {
-            Area::Full =>     {   
-                                let mut dex=column;
-                                for _k in 0..=len_right
-                                {                                        
-                                    self.buffer[self.radius_external*2-dex]=color;
-                                    dex+=1;
-                                }} ,
-            Area::Empty => {
-                            let  pen = self.pen_size(&self.yext,line);
-                            let mut dex=column;
-                            // outer..
-                            for _k in 0..pen
-                            {
-                                self.buffer[self.radius_external*2-dex]=color;
-                                dex=dex+1;
-                            }
-                            // inner
-                            if self.yint[line]!=0
-                            {
-                                let  pen = self.pen_size(&self.yint,line);
-                                let mut dex=column+len_right;
-                                for _k in 0..pen
+            Area::Full =>   {   
+                                self.fill_antix(column,len_right+1,color);
+                            } ,
+            Area::Empty => {         
+                                self.fill_antix(column,pen_ext,color);
+                                // inner
+                                if self.yint[line]!=0
                                 {
-                                    self.buffer[self.radius_external*2-dex]=color;
-                                    dex=dex+1;
+                                    self.fill_antix(column+len_right,pen_int,color);
                                 }
-                            }
-            },
+                        },
             Area::Partial => {
+                                //self.fill_antix(column,len_right+1,color);
                                 let mut dex=2*self.radius_external-(column+len_left); // start at internal , not external here
                                 for _k in 0..=(len_left-len_right)
                                 {                
-                                    self.buffer[dex]=0x1f;
+                                    self.buffer[dex]=color;
                                     dex+=1;
                                 } 
-                            },
+                                self.buffer[ 2*self.radius_external  -column] = color;
+                        },
         }
     }
 
@@ -275,7 +258,7 @@ impl  <'a> Gauge <'a>
             ili.send_data( x-self.radius_external,y-i,&self.buffer);
             //ili.draw_line(x-abs_pos, y-i, x-abs_pos+1, y-i, crate::colors::RED) ;
         }     
-        
+        /*
         if over
         {  
             ili.draw_line(x+col_int, y-line_int, x+col_ext, y-line_ext, crate::colors::BLUE) ;
@@ -283,5 +266,6 @@ impl  <'a> Gauge <'a>
         {            
             ili.draw_line(x-col_int, y-line_int, x-col_ext, y-line_ext, crate::colors::BLUE) ;
         }
+        */
     }
 }
