@@ -143,10 +143,10 @@ impl  <'a> Gauge <'a>
                         },
             Area::Partial => {
                                 //self.fill_antix(column,len_right+1,color);
-                                let mut dex=2*self.radius_external-(column+len_left); // start at internal , not external here
+                                let mut dex=(column+len_left); // start at internal , not external here
                                 for _k in 0..=(len_left-len_right)
                                 {                
-                                    self.buffer[dex]=color;
+                                    self.buffer[2*self.radius_external-dex]=color;
                                     dex+=1;
                                 } 
                                 self.buffer[ 2*self.radius_external  -column] = color;
