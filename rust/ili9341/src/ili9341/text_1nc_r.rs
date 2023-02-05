@@ -6,12 +6,11 @@ impl <'a>Ili9341<'a>
   {
       let mut bits : usize =0;
       let mut mask : usize =0;
-      let mut col  : *mut u16;
+      let mut col  : usize = 0;
       let mut ix : usize =0; 
-      let mut start : *mut u16 = self.src_buf;
-      unsafe {
-      start=start.add(left);
-      }
+      let mut start : usize =0;
+      start=start+left;
+      
       for _line in 0..h // for( int line=h-1;line>=0;line--)
       {
           col=start;
@@ -28,18 +27,18 @@ impl <'a>Ili9341<'a>
                               
               if (bits & mask)!=0
               {
-                  *col=fg;
-                  col=col.add(1);
+                  self.src_buf[col]=fg;
+                  col+=1;
               }else
               {
-                  *col=bg;
-                  col=col.add(1);
-              }
+                  self.src_buf[col]=bg;
+                  col+=1;
+            }
             }
               mask>>=1;
           }  
           unsafe {                      
-            self.access.send_words(  core::slice::from_raw_parts(self.src_buf, line_size));// TODO
+            self.access.send_words(  &self.src_buf[..line_size]);// TODO
           }
       }   
   }                

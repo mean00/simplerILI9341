@@ -42,11 +42,8 @@ impl <'a>Ili9341<'a>
     let color_grad : [u16;4]=[bg,low,hi,fg];
     let mut bits : usize =0;
     let mut rank : isize = -1;
-    let mut start : *mut u16 = self.src_buf;
-    unsafe {
-        start=start.add(left);
-        }
-    let mut col  : *mut u16;            
+    let mut start : usize =left;
+    let mut col  : usize;            
     for _line in 0..h // for( int line=h-1;line>=0;line--)
     {             
         col=start;
@@ -69,16 +66,13 @@ impl <'a>Ili9341<'a>
                 _ =>  (),
             }
             rank-=2;
-            unsafe {
-            *col=color_grad[pix];
-            col=col.add(1);
-            }
+            self.src_buf[col]=color_grad[pix];
+            col+=1;
+            
         }
         #[cfg(feature = "sim")]
         std::print!("\n");
-        unsafe {                      
-            self.access.send_words(  core::slice::from_raw_parts(self.src_buf, line_size));// TODO
-            }
+        self.access.send_words( &self.src_buf[..line_size]);// TODO        
     }   
  }
 }

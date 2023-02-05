@@ -18,7 +18,7 @@ mod text;
 mod text_1nc_r;
 mod text_2nc_r;
 mod bitmap;
-use alloc::boxed::Box;
+
 
 #[cfg(feature = "hs")]
 use heatshrink_byte as heatshrink;
@@ -49,7 +49,7 @@ pub struct Ili9341 <'a>
     physical_y_offset   : usize,
     x_offset            : usize,
     y_offset            :  usize,  
-    src_buf             : *mut u16,
+    src_buf             : &'a mut [u16],
     access              : Box< dyn Ili9341Access>,
     current_font_index  : FontFamily,
     font_infos          : [FontInfo;3],
@@ -89,7 +89,7 @@ impl <'a>Ili9341<'a>
         self.cursor_y           = 0;
         self.fg                 = 0xffff;
         self.bg                 = 0;
-        self.src_buf            = unsafe_array_alloc(ST7735_BUFFER_SIZE_WORD);
+        self.src_buf            =  crate::util::unsafe_slice_alloc::<u16>(ST7735_BUFFER_SIZE_WORD);
         self.access             = access;
         #[cfg(feature = "hs")]
         self.hs                 = heatshrink::HeatshrinkDecoder::new( &[], &(heatshrink::Config::new(7,4).unwrap()));
@@ -131,7 +131,7 @@ impl <'a>Ili9341<'a>
                 cursor_y           : 0,
                 fg                 : 0xffff,
                 bg                 : 0,
-                src_buf            : unsafe_array_alloc(ST7735_BUFFER_SIZE_WORD),
+                src_buf            : crate::util::unsafe_slice_alloc::<u16>(ST7735_BUFFER_SIZE_WORD),
                 access             : access,
                 #[cfg(feature = "hs")]
                 hs                 : heatshrink::HeatshrinkDecoder::new( &[], &(heatshrink::Config::new(7,4).unwrap())),

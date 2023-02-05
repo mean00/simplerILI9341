@@ -13,6 +13,11 @@ use ili9341::colors::RED;
 use ili9341::colors::BLACK;
 use ili9341::ili9341::gauge_meter::Gauge;
 
+extern crate std;
+use std::thread;
+use std::time;
+
+
 
 mod testfont;
 mod testfont2C;
@@ -127,6 +132,9 @@ async fn main() {
     let bitmap_width = 96;
     let bitmap_height = 96;
     let bitmap = include_bytes!("test_bitmap.bin");
+
+    let ten_millis = time::Duration::from_millis(400);
+
     loop {
     loops+=1;
     if loops > 5000
@@ -147,7 +155,7 @@ async fn main() {
    
     let mut gauge=Gauge::new(40,64);
     gauge.init();
-    let mut percent : isize =0;
+    let mut percent : isize =12;
     let mut increment : isize =2;
     loop
     {
@@ -162,6 +170,7 @@ async fn main() {
         {
             increment = -increment;
         }
+        thread::sleep(ten_millis);
     }
     }
     std::println!("Exiting....");

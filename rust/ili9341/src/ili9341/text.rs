@@ -230,12 +230,13 @@ impl <'a>Ili9341<'a>
         // Pre-fill & left /right
         for i in 0..left
         {
-            unsafe { *(self.src_buf.add(i))=bg;} // TODO speedup
+            self.src_buf[i]=bg;
+            
         }            
         let right_border = left+w+right as usize;
         for i in (w+left)..right_border
         {
-            unsafe { *(self.src_buf.add(i))=bg; } // TODO speedup            
+            self.src_buf[i]=bg;            
         }
         // fill in body
         
