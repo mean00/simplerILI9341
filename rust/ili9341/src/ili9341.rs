@@ -1,8 +1,8 @@
 
 #![allow(dead_code)]
 extern crate alloc;
-
-use crate::util::unsafe_array_alloc;
+use alloc::boxed::Box;
+//use crate::util::unsafe_array_alloc;
 //
 use simpler_gfx::{PFXfont,FontInfo};
 //

@@ -6,7 +6,7 @@ impl <'a>Ili9341<'a>
   {
       let mut bits : usize =0;
       let mut mask : usize =0;
-      let mut col  : usize = 0;
+      let mut col  : usize ;
       @INIT@
       let mut start : usize =0;
       start=start+left;
@@ -18,7 +18,6 @@ impl <'a>Ili9341<'a>
           //for( int xcol=w-1;xcol>=0;xcol--)
           for _xcol in 0..w
           {
-            unsafe {
               if mask==0 // reload ?
               {
                   bits=@NEXT@
@@ -33,13 +32,10 @@ impl <'a>Ili9341<'a>
               {
                   self.src_buf[col]=bg;
                   col+=1;
-            }
-            }
-              mask>>=1;
+            }          
+            mask>>=1;
           }  
-          unsafe {                      
-            self.access.send_words(  &self.src_buf[..line_size]);// TODO
-          }
+          self.access.send_words(  &self.src_buf[..line_size]);// TODO
       }   
   }                
 }

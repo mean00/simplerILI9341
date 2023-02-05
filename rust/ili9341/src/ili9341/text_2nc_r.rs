@@ -42,7 +42,7 @@ impl <'a>Ili9341<'a>
     let color_grad : [u16;4]=[bg,low,hi,fg];
     let mut bits : usize =0;
     let mut rank : isize = -1;
-    let mut start : usize =left;
+    let start : usize =left;
     let mut col  : usize;            
     for _line in 0..h // for( int line=h-1;line>=0;line--)
     {             
