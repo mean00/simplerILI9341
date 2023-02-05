@@ -140,17 +140,18 @@ impl  <'a> Gauge <'a>
                                 {
                                     self.fill_antix(column+len_right,pen_int,color);
                                 }
-                        },
-            Area::Partial => {
-                                //self.fill_antix(column,len_right+1,color);
-                                let mut dex=(column+len_left); // start at internal , not external here
-                                for _k in 0..=(len_left-len_right)
-                                {                
-                                    self.buffer[2*self.radius_external-dex]=color;
-                                    dex+=1;
-                                } 
-                                self.buffer[ 2*self.radius_external  -column] = color;
-                        },
+                },
+            Area::Partial => {                                
+                                if len_right>len_left
+                                {
+                                    self.fill_antix(column+len_left,len_right-len_left+1,color);                                
+                                }else
+                                {
+                                    self.fill_antix(column+len_right,len_left-len_right+1,color);                                
+                                }
+                                self.fill_antix(column, pen_ext,color); // WRONG
+                                //self.buffer[ 2*self.radius_external  -column] = color;
+                            },
         }
     }
 
