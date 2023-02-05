@@ -1,8 +1,6 @@
 #![feature(exclusive_range_pattern)]
 use crate::ili9341::Ili9341;
 use crate::ili9341::sin::SIN_TABLE;
-use alloc::boxed::Box;
-use alloc::vec::Vec;
 
 pub struct Gauge <'a>
 {    
@@ -121,11 +119,15 @@ impl  <'a> Gauge <'a>
                         // external 
                         // internal
                           let mut dex=column;
-                            for _k in 0..=len_left
-                            {                
+                          for _k in 0..=len_left
+                          {                
                                 self.buffer[dex]=0x3f<<5;
                                 dex+=1;
-                            } 
+                          } 
+                          if self.yint[line]!=0
+                          {
+                            self.buffer[column+len_right]=0x3f<<5;
+                          }
                     },
         };
         match right
@@ -159,13 +161,13 @@ impl  <'a> Gauge <'a>
                             }
             },
             Area::Partial => {
-                                    let mut dex=len_left-column;
-                                    for _k in 0..=len_right
-                                    {                
-                                        self.buffer[self.radius_external*2-dex]=0x3f<<5;
-                                        dex+=1;
-                                    }                 
-            },
+                                let mut dex=column+len_left-1; // start at internal , not external here
+                                for _k in 0..=(len_left-len_right)
+                                {                
+                                    self.buffer[dex]=0x3f<<5;
+                                    dex+=1;
+                                } 
+                            },
         }
     }
 
@@ -177,7 +179,7 @@ impl  <'a> Gauge <'a>
         let first_ww: usize = (self.yext[0]-self.yint[0]) as usize;
         ili.hline(x-first_line,y,first_ww,color);
         ili.hline(x+first_line-first_ww-1,y,first_ww,color);
-        let mut color2:u16=color;
+        let color2:u16=color;
         // Check the interieur start of filled
         let over: bool;
         let index: usize;
@@ -203,9 +205,9 @@ impl  <'a> Gauge <'a>
         let mut right : Area;
 
         let mut koeff  : usize = 0;
-        if(line_ext != line_int)
+        if line_ext != line_int
         {
-            koeff=(col_ext-col_int);
+            koeff = col_ext-col_int;
             let den = line_ext-line_int;
             koeff=((256*koeff)+den/2)/den;            
         }
@@ -215,18 +217,18 @@ impl  <'a> Gauge <'a>
         {
             let xext=self.yext[i] as usize;
             let xint=self.yint[i] as usize;
-            let mut w=xext-xint;
+            let w=xext-xint;
             let xext=self.radius_external-xext;
             let _xint=self.radius_external-xint;
             for i in 0..self.buffer.len()
             {
                 self.buffer[i]=0;
             }     
-            let mut ev : Area;   
+            let ev : Area;   
             let mut wleft : usize = w;
             let mut wright : usize = w;
             let mut adj=w;
-            let mut abs_pos : usize=xext;
+            let abs_pos : usize;
             if i<=line_int
             {
                 ev= Area::Empty;                
@@ -273,6 +275,7 @@ impl  <'a> Gauge <'a>
             ili.send_data( x-self.radius_external,y-i,&self.buffer);
             //ili.draw_line(x-abs_pos, y-i, x-abs_pos+1, y-i, crate::colors::RED) ;
         }     
+        
         if over
         {  
             ili.draw_line(x+col_int, y-line_int, x+col_ext, y-line_ext, crate::colors::BLUE) ;
