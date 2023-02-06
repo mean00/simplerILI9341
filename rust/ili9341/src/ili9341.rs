@@ -13,7 +13,6 @@ use crate::settings::ST7735_BUFFER_SIZE_WORD;
 mod sin;
 mod geometry;
 pub mod gauge_meter;
-mod gauge;
 mod text;
 mod text_1nc_r;
 mod text_2nc_r;

@@ -201,7 +201,15 @@ impl  <'a> Gauge <'a>
         {
             let xext=self.yext[i] as usize;
             let xint=self.yint[i] as usize;
-            let w=xext-xint;
+            let w : usize;
+            if xext>xint
+            {
+                w=xext-xint;
+            }
+            else
+            {
+                w=1;
+            }
             let xext=self.radius_external-xext;
             let _xint=self.radius_external-xint;
            
