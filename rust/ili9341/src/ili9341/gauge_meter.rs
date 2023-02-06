@@ -170,16 +170,12 @@ impl  <'a> Gauge <'a>
     {               
         // Check the interieur start of filled
         let over: bool;
-        let index: usize;
-        if percent > 50
+        let index: usize= match percent
         {
-            over=true;
-            index=100-percent;
-        }else
-        {
-            over=false;
-            index=percent;
-        }
+            0..=50      => {over = false; percent},
+            51..=100     => {over = true; 100-percent},
+            _           => {over = true; 0},
+        };
         
 
         let line = SIN_TABLE[index] as usize;
