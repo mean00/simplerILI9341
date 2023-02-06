@@ -24,7 +24,7 @@ opt-level       = 's'
 [profile.release]
 codegen-units = 1
 debug = false
-lto = true
+lto = false
 opt-level       = 's'
 
 [profile.dev.package."*"]
