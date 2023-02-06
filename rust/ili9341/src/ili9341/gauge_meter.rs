@@ -1,4 +1,11 @@
-#![feature(exclusive_range_pattern)]
+/*
+    This may look complicated but we have to deal with the following constraints :
+    1- we want to write each pixel *ONCE*, else it creates flickering
+    2- we dont want to compute using float
+    3- we dont want to precompute too much to avoid using all the ram
+
+
+*/
 use crate::ili9341::Ili9341;
 use crate::ili9341::sin::SIN_TABLE;
 
@@ -76,8 +83,12 @@ impl  <'a> Gauge <'a>
 
     fn pen_size(&self, array : &[u8], indx : usize) -> usize
     {
-        let mut pen = (array[indx]-array[indx+1]) as usize;
-        if pen==0
+        let pen : usize;
+        if array[indx] > array[indx+1]
+        {
+            pen = (array[indx]-array[indx+1]) as usize;
+        }
+        else
         {
             pen=1;
         }
@@ -104,7 +115,7 @@ impl  <'a> Gauge <'a>
     }
     // 
     fn draw_elem(&mut self, color : u16, line: usize, left: Area, right : Area, column: usize, len_left : usize, len_right : usize)
-    {
+    {       
         let  pen_ext = self.pen_size(&self.yext,line);
         let  pen_int = self.pen_size(&self.yint,line);
         match left
@@ -156,14 +167,7 @@ impl  <'a> Gauge <'a>
     }
 
     pub fn draw(&mut self, percent : usize, ili : &mut Ili9341, x : usize, y : usize, color : u16)
-    {
-        let last_line: usize = self.yext[self.radius_external] as usize;
-        ili.hline(x-last_line,y-self.radius_external,2*last_line,color);
-        let first_line: usize = self.yext[0] as usize;
-        let first_ww: usize = (self.yext[0]-self.yint[0]) as usize;
-        ili.hline(x-first_line,y,first_ww,color);
-        ili.hline(x+first_line-first_ww-1,y,first_ww,color);
-        let color2:u16=color;
+    {               
         // Check the interieur start of filled
         let over: bool;
         let index: usize;
@@ -195,7 +199,7 @@ impl  <'a> Gauge <'a>
             let den = line_ext-line_int;
             koeff=((256*koeff)+den/2)/den;            
         }
-
+       
         //--------------Start to fill ------------------------
         for i in 0..self.radius_external        
         {
@@ -204,10 +208,13 @@ impl  <'a> Gauge <'a>
             let w=xext-xint;
             let xext=self.radius_external-xext;
             let _xint=self.radius_external-xint;
+           
             for i in 0..self.buffer.len()
             {
                 self.buffer[i]=0;
-            }     
+            }
+
+
             let ev : Area;   
             let mut wleft : usize = w;
             let mut wright : usize = w;
@@ -230,14 +237,7 @@ impl  <'a> Gauge <'a>
                 if abs_x > abs_pos
                 {
                     adj = abs_x - abs_pos;
-                    if adj > w
-                    {
-                        adj=w;
-                    }
-                    if adj==0
-                    {
-                        adj = 1;
-                    }
+                    adj= crate::util::xmaxu(crate::util::xminu(adj, w),1);
                 }
                 else
                 {
@@ -255,10 +255,15 @@ impl  <'a> Gauge <'a>
                 right=Area::Empty;
                 wleft=adj;                                
             }
-            self.draw_elem(  color2, i,  left, right, xext,wleft,wright);
-            ili.send_data( x-self.radius_external,y-i,&self.buffer);
-            //ili.draw_line(x-abs_pos, y-i, x-abs_pos+1, y-i, crate::colors::RED) ;
-        }     
+            self.draw_elem(  ili.access.color_map(color) , i,  left, right, xext,wleft,wright);
+            ili.send_data( x-self.radius_external,y-i,&self.buffer);            
+        }    
+        let last_line: usize = self.yext[self.radius_external] as usize;
+        ili.hline(x-last_line,y-self.radius_external,2*last_line,color);
+        let first_line: usize = self.yext[0] as usize;
+        let first_ww: usize = (self.yext[0]-self.yint[0]) as usize;
+        ili.hline(x-first_line+1,y,first_ww,color);
+        ili.hline(x+first_line-first_ww,y,first_ww,color);         
         /*
         if over
         {  

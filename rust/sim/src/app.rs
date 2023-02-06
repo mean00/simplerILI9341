@@ -133,7 +133,7 @@ async fn main() {
     let bitmap_height = 96;
     let bitmap = include_bytes!("test_bitmap.bin");
 
-    let ten_millis = time::Duration::from_millis(1000);
+    let ten_millis = time::Duration::from_millis(8);
 
     loop {
     loops+=1;
