@@ -153,7 +153,7 @@ async fn main() {
     
     ili.fill_screen(0x0);
    
-    let mut gauge=Gauge::new(40,64);
+    let mut gauge=Gauge::new(26,32);
     let mut percent : isize =60;
     let mut increment : isize =2;
     loop
