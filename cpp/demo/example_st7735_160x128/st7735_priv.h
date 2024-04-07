@@ -1,6 +1,6 @@
 
-#define WW  128
-#define HH  160
+#define WW  160
+#define HH  128
 
 #define XOFFSET 0 //2
 #define YOFFSET 0 //2
@@ -23,9 +23,9 @@ const uint8_t st7735_data[] = {
       ST7735_GMCTRN1,  16   , 0x10, 0x0e, 0x03, 0x03, 0x0f, 0x06, 0x02, 0x08, 0x0a, 0x13, 0x26, 0x36, 0x00, 0x0d, 0x0e, 0x10,
       ILI_CMD2(ST7735_COLMOD  , 0x05), // 0x3a: 0x6 -> 18 bits /pix, 0x5-> 15 bit/pixel /3 12 bits pixel
       //
-      ST7735_CASET, 4, 0x00, XOFFSET, (WW+XOFFSET-1)>>8, (WW+XOFFSET-1)&0xff, // Column addr set: XSTART=0, XEND=width
-      ST7735_RASET, 4, 0x00, YOFFSET, (HH+YOFFSET-1)>>8, (HH+YOFFSET-1)&0xff, // Row addr set: YSTART=0, YEND=height
-      // 
+      ST7735_CASET, 4, XOFFSET>>8, (XOFFSET)&0xff, (WW+XOFFSET-1)>>8, (WW+XOFFSET-1)&0xff, // Column addr set: XSTART=0, XEND=width
+      ST7735_RASET, 4, YOFFSET>>8, (YOFFSET)&0xff, (HH+YOFFSET-1)>>8, (HH+YOFFSET-1)&0xff, // Row addr set: YSTART=0, YEND=height
+      //
       ILI_CMD2(ST7735_MADCTL,   0x78), //  0x28 <-inverted->:   0x78: <-normal->, || 48 , || 18
       ILI_CMD(ST7735_DISPON),   
       ILI_CMD(ST7735_SLPOUT),   
