@@ -4,40 +4,8 @@
 
 #define XOFFSET 0 //2
 #define YOFFSET 0 //2
-    
-#define ST7735_SWRESET 0x01
-#define ST7735_SLPOUT  0x11
-#define ST7735_NORON   0x13
-#define ST7735_INVOFF  0x20
-#define ST7735_INVON   0x21
-#define ST7735_DISPON  0x29
-#define ST7735_CASET   0x2A
-#define ST7735_RASET   0x2B
-#define ST7735_RAMWR   0x2C
-#define ST7735_RAMRD   0x2E
-#define ST7735_MADCTL  0x36
-#define ST7735_COLMOD  0x3A
-
-#define ST7735_FRMCTR1 0xB1
-#define ST7735_FRMCTR2 0xB2
-#define ST7735_FRMCTR3 0xB3
-#define ST7735_INVCTR  0xB4
-#define ST7735_DISSET5 0xB6
-#define ST7735_FRMCTR1 0xB1
-#define ST7735_FRMCTR2 0xB2
-#define ST7735_FRMCTR3 0xB3
-#define ST7735_INVCTR  0xB4
-#define ST7735_DISSET5 0xB6
-#define ST7735_PWCTR1  0xC0
-#define ST7735_PWCTR2  0xC1
-#define ST7735_PWCTR3  0xC2
-#define ST7735_PWCTR4  0xC3
-#define ST7735_PWCTR5  0xC4
-#define ST7735_VMCTR1  0xC5
-#define ST7735_GMCTRP1 0xE0
-#define ST7735_GMCTRN1 0xE1
-
-
+  
+#include "simpler_9341_st7735_common.h"
 
 const uint8_t st7735_data[] = {
       ILI_CMD(ST7735_INVOFF),
@@ -55,8 +23,8 @@ const uint8_t st7735_data[] = {
       ST7735_GMCTRN1,  16   , 0x10, 0x0e, 0x03, 0x03, 0x0f, 0x06, 0x02, 0x08, 0x0a, 0x13, 0x26, 0x36, 0x00, 0x0d, 0x0e, 0x10,
       ILI_CMD2(ST7735_COLMOD  , 0x05), // 0x3a: 0x6 -> 18 bits /pix, 0x5-> 15 bit/pixel /3 12 bits pixel
       //
-      ST7735_CASET, 4, 0x00, XOFFSET, 0x00, WW+XOFFSET-1, // Column addr set: XSTART=0, XEND=width
-      ST7735_RASET, 4, 0x00, YOFFSET, 0x00, HH+YOFFSET-1, // Row addr set: YSTART=0, YEND=height
+      ST7735_CASET, 4, 0x00, XOFFSET, (WW+XOFFSET-1)>>8, (WW+XOFFSET-1)&0xff, // Column addr set: XSTART=0, XEND=width
+      ST7735_RASET, 4, 0x00, YOFFSET, (HH+YOFFSET-1)>>8, (HH+YOFFSET-1)&0xff, // Row addr set: YSTART=0, YEND=height
       // 
       ILI_CMD2(ST7735_MADCTL,   0x78), //  0x28 <-inverted->:   0x78: <-normal->, || 48 , || 18
       ILI_CMD(ST7735_DISPON),   

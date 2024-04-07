@@ -8,6 +8,8 @@
 #define ILI_CMD2(x,y) x,1,y
 #define ILI_CMD3(x,y,z) x,2,y,z
 #define ILI_CMD4(x,y,z,t) x,3,y,z,t
+#define ILI_CMD5(x,y,z,t,u) x,4,y,z,t,u
+#define ILI_CMD6(x,y,z,t,u,v) x,5,y,z,t,u,v
 
 // Register names
 #define ILI9341_SOFTRESET          0x01
