@@ -291,11 +291,15 @@ void lnSpi9341::updateHwRotation(void)
         case CHIPID_ST7735://         
             switch(_rotation)
             {
-                case 1:        t = ILI9341_MADCTL_MX | ILI9341_MADCTL_MY  ; break;                
-                case 2:        t = ILI9341_MADCTL_MY | ILI9341_MADCTL_MV  ; break;                
-                case 3:        t = 0 ;                                      break;
+                        // No rotation MX+MY+MV+ML
+                        // Rotation 90 : MY
+                        // Rotation 180 :  MX
+                        // Rotation 270 : MX+ML
+                case 1:        t = ILI9341_MADCTL_MY ; break;                
+                case 2:        t = ILI9341_MADCTL_MX ; break;                
+                case 3:        t = ILI9341_MADCTL_MX | ILI9341_MADCTL_ML ;   break;
                 default:
-                case 0:        t = ILI9341_MADCTL_MV|ILI9341_MADCTL_ML|ILI9341_MADCTL_MX ;  break;
+                case 0:        t = ILI9341_MADCTL_MX | ILI9341_MADCTL_MY | ILI9341_MADCTL_MV|ILI9341_MADCTL_ML ;  break;
            }          
            break;
         case CHIPID_ILI9341:       
@@ -320,7 +324,16 @@ void lnSpi9341::updateHwRotation(void)
             xAssert(0);
             break;
     }
-    t|= ILI9341_MADCTL_RGB;
+    switch(_chipId)
+    {  
+       case CHIPID_ST7735://   
+                t|= ILI9341_MADCTL_RGB;
+                break;
+        default:
+                t|= ILI9341_MADCTL_RGB;
+                break;
+    }
+
     _spi->beginSession(8);
     CS_ACTIVE;
     writeCmdParam(ILI9341_MADCTL,1,&t);
