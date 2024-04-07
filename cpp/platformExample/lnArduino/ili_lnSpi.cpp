@@ -327,7 +327,7 @@ void lnSpi9341::updateHwRotation(void)
     switch(_chipId)
     {  
        case CHIPID_ST7735://   
-                t|= ILI9341_MADCTL_RGB;
+                t|= ILI9341_MADCTL_BGR;
                 break;
         default:
                 t|= ILI9341_MADCTL_RGB;
