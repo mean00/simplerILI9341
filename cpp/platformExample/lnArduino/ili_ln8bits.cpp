@@ -418,8 +418,8 @@ void ln8bit9341::floodWords(int nb, const uint16_t data)
     CHECK_ARBITER();
     
     uint16_t f=colorMap(data);
-    register int cl=f&0xff;
-    register int ch=f>>8;
+    int cl=f&0xff;
+    int ch=f>>8;
     
     
     CS_ACTIVE;
@@ -451,8 +451,8 @@ void ln8bit9341::multiFloodWords(int n, int *size, const uint16_t *colors)
     {
         uint16_t f=colorMap(colors[i]);
         int nb=size[i];
-        register int cl=f&0xff;
-        register int ch=f>>8;
+        int cl=f&0xff;
+        int ch=f>>8;
         
         if(1 && (f&0xff)==(f>>8))   // this does not work ?
         {
@@ -558,8 +558,8 @@ void lnFast8bitIo::sendBlock(int nb, uint16_t *data)
     
 #define WRP    *onoff=down;ILI_NOP;*onoff=up;ILI_NOP;
     
-    register uint32_t up=_onbit,down=_offbit;
-    volatile register uint32_t *bop=_bop,*onoff=_onoff;
+    uint32_t up=_onbit,down=_offbit;
+    volatile uint32_t *bop=_bop,*onoff=_onoff;
     
     for(int i=0;i<nb;i++)
     {
@@ -582,8 +582,8 @@ void lnFast8bitIo::pulseData(int nb, int  hi, int lo)
     
 
     
-    register uint32_t hh=WR_DATA8(hi),ll=WR_DATA8(lo),up=_onbit,down=_offbit;
-    volatile register uint32_t *bop=_bop,*onoff=_onoff;
+    uint32_t hh=WR_DATA8(hi),ll=WR_DATA8(lo),up=_onbit,down=_offbit;
+    volatile uint32_t *bop=_bop,*onoff=_onoff;
     
     
         int block=nb>>4;
@@ -610,8 +610,8 @@ void lnFast8bitIo::pulsesLowNop(int nb)
 {
       
     
-    register uint32_t           up=_onbit,down=_offbit;
-    volatile register uint32_t *onoff=_onoff;
+    uint32_t           up=_onbit,down=_offbit;
+    volatile uint32_t *onoff=_onoff;
     
     
         int block=nb>>4;
