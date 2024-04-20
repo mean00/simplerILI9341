@@ -32,7 +32,7 @@ class lnLinkedTranfer;
 class lnSpi9341 : public ili9341
 {
     public:
-                        lnSpi9341(int w, int h , hwlnSPIClass *spi,  lnPin pinDc, lnPin pinCS, lnPin pinReset=NoPin);
+                        lnSpi9341(int w, int h , lnSPI *spi,  lnPin pinDc, lnPin pinCS, lnPin pinReset=NoPin);
             virtual      ~lnSpi9341();
                     void enableCache(int cacheSizeInWords);
                     void enable3WireMode(); // call this if you have only CLK/SDA i.e. not MOSI AND MISO, MISO is used for both tx & rx
@@ -64,7 +64,7 @@ class lnSpi9341 : public ili9341
                     void sendDataToScreen(int nb, const uint16_t *data);
             lnPin           _pinReset,_pinDC,_pinCS;
             lnFastIO        _ioCS,_ioDC;
-            hwlnSPIClass    *_spi;
+            lnSPI           *_spi;
 #define ILI_BUFFER_SIZE 320            
             uint16_t        _buffer[ILI_BUFFER_SIZE];
             uint16_t        *_cache;
