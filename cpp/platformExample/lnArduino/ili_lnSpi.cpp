@@ -134,12 +134,17 @@ void lnSpi9341::sendDataToScreen(int nb, const uint16_t *data)
 void lnSpi9341::writeCmdParam(uint16_t cmd, int payload, const uint8_t *data)
 {
     CD_COMMAND;
-    _spi->write16(cmd); // 8 xx ?
+    _spi->write8(cmd); // 8 xx ?
     _spi->waitForCompletion();
     if (payload)
     {
         CD_DATA;
-        _spi->blockWrite8(payload, data);
+        for (int i = 0; i < payload; i++)
+        {
+            _spi->write8(data[i]); // 8 xx ?
+        }
+        _spi->waitForCompletion();
+        //_spi->blockWrite8(payload, data);
     }
 }
 /**
@@ -451,6 +456,7 @@ void lnSpi9341::dataBegin()
     CS_ACTIVE;
     CD_COMMAND;
     _spi->write16(ILI9341_MEMORYWRITE);
+    _spi->waitForCompletion();
     CD_DATA;
 }
 /**
@@ -475,11 +481,10 @@ void lnSpi9341::nextFlood(lnLinkedTranfer *t)
 {
     if (t->currentStep == t->nbStep)
     {
+        _spi->waitForCompletion();
         _spi->finishAsyncDma();
         return;
     }
-    _spi->waitForCompletion();
-    CD_DATA;
     int dex = t->currentStep++;
     _spi->nextWrite16(t->size[dex], t->data[dex], lnIliAsyncCB, t, t->repeat);
 }
@@ -489,9 +494,10 @@ void lnSpi9341::nextFlood(lnLinkedTranfer *t)
 void lnSpi9341::floodWords(int nb, const uint16_t data)
 {
     _dupeColor = colorMap(data);
+    dataBegin();
+
     if (nb < 100) // small transfer, dont bother doing something fancy
     {
-        dataBegin();
         _spi->blockWrite16Repeat(nb, _dupeColor);
         dataEnd();
         return;
@@ -508,13 +514,8 @@ void lnSpi9341::floodWords(int nb, const uint16_t data)
         nb -= chunk;
         transfer.add(chunk, &_dupeColor);
     }
-
-    CD_COMMAND;
-    // Important!
-    lnDelay(2); // wait a few  us, we have an extra clk tick somewhere here, make sure it happens while CS is off
-    CS_ACTIVE;
-    _spi->begin(16);
-    _spi->asyncWrite16(1, &_dupeCmd, lnIliAsyncCB, &transfer, transfer.repeat);
+    transfer.setIndex(1);
+    _spi->asyncWrite16(transfer.size[0], transfer.data[0], lnIliAsyncCB, &transfer, true);
     _spi->waitForAsync();
     CS_IDLE;
     _spi->end();
