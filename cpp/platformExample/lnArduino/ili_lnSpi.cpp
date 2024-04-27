@@ -106,7 +106,7 @@ void lnSpi9341::write8(uint8_t c)
 void lnSpi9341::sendDataToScreen(int nb, const uint16_t *data)
 {
     //_spi->end();
-    _spi->blockWrite16(nb,data);
+    _spi->blockWrite16(nb,data);    
     //_spi->begin(16);
 }
 
@@ -120,10 +120,11 @@ void lnSpi9341::writeCmdParam(uint16_t cmd, int payload, const uint8_t * data)
 {
     CD_COMMAND;
     _spi->write16(cmd); //8 xx ?
+    _spi->waitForCompletion();
     if(payload)
     {
         CD_DATA;
-        _spi->blockWrite8(payload,data);
+        _spi->blockWrite8(payload,data);         
     }    
 }
 /**
