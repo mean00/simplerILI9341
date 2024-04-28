@@ -21,19 +21,20 @@ const uint8_t no_data[1] = {0};
 
 #define FONT demofont
 
-#define FAST_SPEED (30 * 1000 * 1000)
 #define SLOW_SPEED (50 * 1000)
 #define FAST 1
 
-#define SCREEN_WIDTH WW
-#define SCREEN_HEIGHT HH
+#define SCREEN_WIDTH HH
+#define SCREEN_HEIGHT WW
 
 #ifdef USE_RP2040
+#define FAST_SPEED (50 * 1000 * 1000)
 #define PIN_DC GPIO8
 #define PIN_CS GPIO9
 #define PIN_RST GPIO10
 
 #else
+#define FAST_SPEED (36 * 1000 * 1000)
 #define PIN_DC PB11
 #define PIN_CS PB8
 #define PIN_RST PB9
@@ -66,15 +67,16 @@ void setup()
 
     spi->begin();
 
-    ili = new lnSpi9341(SCREEN_HEIGHT, SCREEN_WIDTH, spi,
+    ili = new lnSpi9341(SCREEN_WIDTH, SCREEN_HEIGHT, spi,
                         PIN_DC,   // DC/RS
                         PIN_CS,   // CS
                         PIN_RST); // Reset
     spi->set(transaction);
 
     ili->init(st7735_data, NULL);
+    ili->setOffset(XOFFSET, XOFFSET);
     ili->forceChipId(CHIPID_ST7735);
-    // ili->setRotation(3);
+    ili->setRotation(0);
     ili->fillScreen(BLACK);
 
     ili->setFontFamily(&FONT, &FONT, &FONT);
