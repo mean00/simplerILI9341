@@ -120,9 +120,7 @@ void lnSpi9341::write8(uint8_t c)
  */
 void lnSpi9341::sendDataToScreen(int nb, const uint16_t *data)
 {
-    //_spi->end();
     _spi->blockWrite16(nb, data);
-    //_spi->begin(16);
 }
 
 /**
