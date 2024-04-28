@@ -48,8 +48,8 @@ lnSpi9341::lnSpi9341(int w, int h, lnSPI *spi, lnPin pinDC, lnPin pinCS, lnPin p
     _pinReset = pinReset;
     _pinDC = pinDC;
     _pinCS = pinCS;
-    _PhysicalYoffset = (320 - h) / 2; // (320-280)=40/2=20 ?
-    _PhysicalXoffset = (240 - w) / 2; //  (240-240)/2=0 ?
+    _PhysicalYoffset = 0; //(320 - h) / 2; // (320-280)=40/2=20 ?
+    _PhysicalXoffset = 0; //(240 - w) / 2; //  (240-240)/2=0 ?
     _cache = NULL;
     _cacheUsed = 0;
     _cacheSize = 0;
@@ -305,22 +305,29 @@ void lnSpi9341::updateHwRotation(void)
     case CHIPID_ST7735: //
         switch (_rotation)
         {
-            // No rotation MX+MY+MV+ML
-            // Rotation 90 : MY
-            // Rotation 180 :  MX
-            // Rotation 270 : MX+ML
-        case 1:
-            t = ILI9341_MADCTL_MY;
-            break;
+
+            // 160x128
+            // Rotation   0: MX+MV+ML  ok  (inv MY)
+            // Rotation  90: MX+MY         (inv MX)
+            // Rotation 180: MY+MV     Ok  (inv MV MX MY)
+            // Rotation 270: MY+ML+MV      (inv MX MY MV)
+
+            // Rotation  0   : MX+MY+MV+ML
+            // Rotation 90   : MY
+            // Rotation 180  : MX
+            // Rotation 270  : MX+ML
         case 2:
-            t = ILI9341_MADCTL_MX;
+            t = ILI9341_MADCTL_MY | ILI9341_MADCTL_MV;
             break;
         case 3:
-            t = ILI9341_MADCTL_MX | ILI9341_MADCTL_ML;
+            t = ILI9341_MADCTL_MY | ILI9341_MADCTL_ML | ILI9341_MADCTL_MV; // ILI9341_MADCTL_MY| ILI9341_MADCTL_MV ;
+            break;
+        case 1:
+            t = ILI9341_MADCTL_MX | ILI9341_MADCTL_MY;
             break;
         default:
         case 0:
-            t = ILI9341_MADCTL_MX | ILI9341_MADCTL_MY | ILI9341_MADCTL_MV | ILI9341_MADCTL_ML;
+            t = ILI9341_MADCTL_MX | ILI9341_MADCTL_MV | ILI9341_MADCTL_ML;
             break;
         }
         break;
@@ -373,7 +380,6 @@ void lnSpi9341::updateHwRotation(void)
         t |= ILI9341_MADCTL_RGB;
         break;
     }
-
     _spi->begin(8);
     CS_ACTIVE;
     writeCmdParam(ILI9341_MADCTL, 1, &t);
