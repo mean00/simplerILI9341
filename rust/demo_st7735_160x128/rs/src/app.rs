@@ -1,3 +1,4 @@
+#![no_std]
 #![allow(non_upper_case_globals)]
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
@@ -16,14 +17,13 @@ use rnarduino as rn;
 use rn::rn_gpio as rnGpio;
 use rn::rn_gpio::rnPin as rnPin;
 use rn::rn_exti as rnExti;
-use rn::rn_os_helper::log as rnLogger;
 use rnarduino::rn_spi::rnSPI;
 use rnarduino::rn_spi::rnPin::{NoPin};
 use rnarduino::rn_spi::rnSpiBitOrder::*;
 use rnarduino::rn_spi::rnSPISettings;
 
 use ili9341::ili9341::Ili9341;
-use crate::spi_ili9341::spi_ili9341 as spi_ili9341;
+use lnspi_ili9341::spi_ili9341 as spi_ili9341;
 
 
 use crate::testfont::NotoSans_Bold20pt7b;
@@ -34,7 +34,8 @@ pub const ILI_PIN_DC         : rnPin =  rnPin::PA11 ;
 pub const ILI_PIN_CS         : rnPin =  rnPin::PA10 ;
 pub const ILI_PIN_RESET      : rnPin =  rnPin::PA12 ;
 
-
+rn::lnLogger_init!();
+use rn::lnLogger;
 
 pub struct runTime
 {
@@ -126,7 +127,7 @@ pub extern "C" fn rnLoop() -> ()
 #[no_mangle]
 pub extern "C" fn rnInit() -> ()
 {
-   rnLogger("Setuping up Power Supply...\n");
+   lnLogger!("Setuping up Power Supply...\n");
    
 }
 // EOF

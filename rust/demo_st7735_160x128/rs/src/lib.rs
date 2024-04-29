@@ -7,6 +7,5 @@
 
 mod testfont;
 mod app;
-mod spi_ili9341;
 mod st7735_init;
 // EOF

@@ -1,0 +1,33 @@
+[package] 
+authors = ["mean00 <mean00@gmail.com>"]
+edition = "2021"
+readme = "README.md"
+name = "lnspi_ili9341"
+version = "0.0.0"
+
+
+[dependencies]
+cty         = "0.2.2"
+rnarduino   =           { path = "../../../../lnArduino/rust/rnArduino/"}
+ili9341     =           { path = "../../ili9341", features = ["hs"]}
+
+[lib]
+name = "lnspi_ili9341"
+path = "src/spi_ili9341.rs"
+crate-type = ["rlib"] # Creates static lib
+
+[profile.dev]
+codegen-units = 1
+debug = true
+lto = true
+opt-level       = 's'
+
+[profile.release]
+codegen-units = 1
+debug = false
+lto = true
+opt-level       = 's'
+
+[profile.dev.package."*"]
+codegen-units   = 1
+opt-level       = "s"
