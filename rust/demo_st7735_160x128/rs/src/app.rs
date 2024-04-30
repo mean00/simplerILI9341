@@ -73,8 +73,7 @@ impl runTime
          pinCS : rnPin::NoPin};
 
       let mut spi = rnSPI::new(0,36*1000*1000);
-      spi.begin();
-      spi.begin_transaction(&transaction);
+      spi.set(&transaction);
 
       let mut ili_access = spi_ili9341::new(spi, ILI_PIN_CS, ILI_PIN_DC,ILI_PIN_RESET);
       // init low level

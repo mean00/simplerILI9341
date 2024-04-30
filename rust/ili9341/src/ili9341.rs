@@ -90,8 +90,8 @@ impl <'a>Ili9341<'a>
         self.bg                 = 0;
         self.src_buf            =  crate::util::unsafe_slice_alloc::<u16>(ST7735_BUFFER_SIZE_WORD);
         self.access             = access;
-        #[cfg(feature = "hs")]
-        self.hs                 = heatshrink::HeatshrinkDecoder::new( &[], &(heatshrink::Config::new(7,4).unwrap()));
+        (#[cfg(feature = "hs")]
+        self.hs)                 = heatshrink::HeatshrinkDecoder::new( &[], &(heatshrink::Config::new(7,4).unwrap()));
         
         self.font_infos[0].font       = smallfont;        
         self.font_infos[1].font       = mediumfont;

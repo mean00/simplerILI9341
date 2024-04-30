@@ -106,15 +106,15 @@ impl spi_ili9341
         let mut rx : [u8;4] = [0;4];
         let mut tx : [u8;4] = [0;4];
         self.CS_ACTIVE();  
-        self.spi.begin_session(8);
+        self.spi.begin(8);
         self.CD_COMMAND();  
-        self.spi.write(r);        
+        self.spi.write16(r as u16);        
         self.CD_DATA();        
         delay_us(5);
-        self.spi.transfer(&mut tx,&mut rx);
+        self.spi.transfer8(&tx,&mut rx);
         // revert
         let rx2: u32 =rx[3] as u32+( (rx[2] as u32) <<8)+( (rx[1] as u32) <<16)+( (rx[0] as u32) <<24);
-        self.spi.end_session();
+        self.spi.end();
         self.CS_IDLE();
         rx2
     }
@@ -155,12 +155,12 @@ impl spi_ili9341
                     rnDelay(len as u32);
                     continue;
                 }
-                self.spi.begin_session(8);
+                self.spi.begin(8);
                 self.CS_ACTIVE();
                 self.write_cmd_param(cmd, &data[index..(index+run)]);
                 index+=run;
                 self.CS_IDLE();
-                self.spi.end_session();
+                self.spi.end();
             }
     }
     pub fn reset(&mut self)
@@ -190,25 +190,30 @@ impl spi_ili9341
     fn write_cmd_param(&mut self, cmd : u8, data : &[u8] )
     {
         self.CD_COMMAND();
-        self.spi.write(cmd);
-        if data.len()!=0
-        {
+        self.spi.write8(cmd);
+        if data.len()!=0 {
             self.CD_DATA();
-            self.spi.write_data(data);
-        }    
+            let n=data.len();
+            for i in 0..n {
+                self.spi.write8(data[i]);
+            }
+        }
     }
     fn send_data_to_screen(&mut self, data: &[u16]) 
     {     
         let n = data.len();
         // for small transfer do it directly...
-        if n < 128
+        if n < 32
         {
-            self.spi.write_data16(data);
+            let n=data.len();
+            for i in 0..n {
+                self.spi.write16(data[i]);
+            }
             return;
         }   
-        self.spi.end_session();
-        self.spi.dma_write_data16(data);
-        self.spi.begin_session(16);        
+        self.spi.end();
+        self.spi.block_write16(data);
+        self.spi.begin(16);        
     }    
 }
 //-----------------------------------
@@ -228,7 +233,7 @@ impl Ili9341Access for spi_ili9341
 
     fn send_byte(&mut self, b: u8)
     {
-        self.spi.write(b);
+        self.spi.write8(b);
     }
     fn send_word(&mut self, b: u16)
     {
@@ -267,12 +272,12 @@ impl Ili9341Access for spi_ili9341
             _ => {fail();0},
         };
         t|= cmd::ILI9341_MADCTL_RGB;
-        self.spi.begin_session(8);
+        self.spi.begin(8);
         self.CS_ACTIVE();
         let tray : [u8;1] = [t];
         self.write_cmd_param(cmd::ILI9341_MADCTL,&tray);  
         self.CS_IDLE();   
-        self.spi.end_session();
+        self.spi.end();
     
     }
    
@@ -287,27 +292,27 @@ impl Ili9341Access for spi_ili9341
         a2=a1+w-1;
         b1=y+self.y_offset;
         b2=b1+h-1;
-        self.spi.begin_session(8);
+        self.spi.begin(8);
         self.CS_ACTIVE();    
         self.write_register32(cmd::ILI9341_COLADDRSET,  ((a1<<16) as u32) | (a2 as u32));  // HX8357D uses same registers!
         self.write_register32(cmd::ILI9341_PAGEADDRSET, ((b1<<16) as u32) | (b2 as u32)); // HX8357D uses same registers!
         self.CS_IDLE();
-        self.spi.end_session();
+        self.spi.end();
     
     }
     fn data_end(&mut self)
     {        
         self.CD_COMMAND();
         self.CS_IDLE();
-        self.spi.end_session();
+        self.spi.end();
     
     }
     fn data_begin(&mut self)
     {
-        self.spi.begin_session(16);
+        self.spi.begin(16);
         self.CS_ACTIVE();
         self.CD_COMMAND();
-        self.spi.write(cmd::ILI9341_MEMORYWRITE);
+        self.spi.write16(cmd::ILI9341_MEMORYWRITE as u16);
         self.CD_DATA();
     
     }
@@ -319,7 +324,7 @@ impl Ili9341Access for spi_ili9341
         if nb > 64 // for "big" transfer use dma, else use plain polling
         {
             self.data_begin();
-            self.spi.end_session();
+            self.spi.end();
 
             while nb>0
             {
@@ -329,10 +334,10 @@ impl Ili9341Access for spi_ili9341
                     r=SINGLE_TRANSFER;
                 }
                 nb-=r;
-                self.spi.dma_write_data16_repeat(r,dupeColor);
+                self.spi.block_write16_repeat(r,dupeColor);
             }               
             self.data_end();
-            self.spi.begin_session(16);
+            self.spi.begin(16);
         }else
         { // small transfer
             self.data_begin();
@@ -344,7 +349,7 @@ impl Ili9341Access for spi_ili9341
                     r=SINGLE_TRANSFER;
                 }
                 nb-=r;
-                self.spi.write16_repeat(r,dupeColor);
+                self.spi.block_write16_repeat(r,dupeColor);
             }   
             self.data_end();
         }
