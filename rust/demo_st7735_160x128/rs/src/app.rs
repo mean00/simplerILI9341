@@ -9,7 +9,7 @@
 #![allow(unused_imports)]
 
 extern crate alloc;
-
+use core::include_bytes;
 use alloc::boxed::Box;
 use cty::c_char;
 use rnarduino as rn;
@@ -28,11 +28,14 @@ use lnspi_ili9341::spi_ili9341 as spi_ili9341;
 
 use crate::testfont::NotoSans_Bold20pt7b;
 
-use crate::st7735_init::ST7735;
+use crate::st7735_init::{WW,HH,ST7735};
 
-pub const ILI_PIN_DC         : rnPin =  rnPin::PA11 ;
-pub const ILI_PIN_CS         : rnPin =  rnPin::PA10 ;
-pub const ILI_PIN_RESET      : rnPin =  rnPin::PA12 ;
+pub const ILI_PIN_DC         : rnPin =  rnPin::PB11 ;
+pub const ILI_PIN_CS         : rnPin =  rnPin::PB8 ;
+pub const ILI_PIN_RESET      : rnPin =  rnPin::PB9 ;
+
+pub const SLOW_SPEED      : u32 =  50*1000;
+pub const FAST_SPEED      : u32 =  36*1000*1000;
 
 rn::lnLogger_init!();
 use rn::lnLogger;
@@ -65,14 +68,15 @@ impl runTime
     * 
     */
    fn run(&mut self) -> ()
-   {          
+   {
+       let speed = FAST*FAST_SPEED +(1-FAST)*SLOW_SPEED; 
       let transaction : rnSPISettings  = rnSPISettings{
-         speed: FAST*36*1000*1000+(1-FAST)*10*1000, 
+         speed ,
          bOrder : SPI_MSBFIRST, 
          dMode : 0, 
          pinCS : rnPin::NoPin};
 
-      let mut spi = rnSPI::new(0,36*1000*1000);
+      let mut spi = rnSPI::new(0,speed);
       spi.set(&transaction);
 
       let mut ili_access = spi_ili9341::new(spi, ILI_PIN_CS, ILI_PIN_DC,ILI_PIN_RESET);
@@ -81,24 +85,34 @@ impl runTime
       ili_access.send_init_sequence(ST7735);
       //ili_access.send_init_sequence(DSO_WAKEUP);
       // Send it over to real ili
-      let  mut ili = Ili9341::new(160,128, 
+      let  mut ili = Ili9341::new(HH,WW, 
                      Box::new(ili_access), 
                      &NotoSans_Bold20pt7b, &NotoSans_Bold20pt7b ,&NotoSans_Bold20pt7b);
 
       let bitmap_width = 96;
       let bitmap_height = 96;
       let bitmap = include_bytes!("test_bitmap.bin");
-                 
-      //ili.set_rotation(1);
-      ili.fill_screen(0);  
-      ili.draw_bitmap_hs(bitmap_width, bitmap_height, 4,4, ili9341::colors::GREEN, ili9341::colors::BLACK, bitmap);
-      ili.circle(60,60,24,ili9341::colors::RED);
-      ili.disc(120,60,24,ili9341::colors::BLUE);  
-      ili.print(5,35,"txt");
-
-
+      let mut toggle = true;                 
+      ili.set_rotation(1);
       loop
       {   
+        if(toggle) {
+            ili.fill_screen(0);  
+            ili.draw_bitmap_hs(bitmap_width, bitmap_height, 4,4, ili9341::colors::GREEN, ili9341::colors::BLACK, bitmap);
+            ili.circle(60,60,24,ili9341::colors::RED);
+            ili.disc(120,60,24,ili9341::colors::BLUE);  
+            ili.print(5,35,"grn/blk");
+        }else {
+            ili.fill_screen(0);  
+            ili.draw_bitmap_hs(bitmap_width, bitmap_height, 4,4, ili9341::colors::RED, ili9341::colors::BLUE, bitmap);
+            ili.circle(60,60,24,ili9341::colors::GREEN);
+            ili.disc(120,60,24,ili9341::colors::BLACK);  
+            ili.print(5,35,"red/blue");
+            
+        }
+        toggle=!toggle;
+        rn::rn_os_helper::delay_ms(1000);
+
        
       }  
    }
