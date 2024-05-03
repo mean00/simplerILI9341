@@ -15,6 +15,9 @@ simpler_gfx =           { git="https://github.com/mean00/simpler_gfx.git"}
 ufmt        = "*"
 heapless    =           { version = "*", features = ["ufmt-impl"] }
 
+[features]
+rp2040 = ["rnarduino/rp2040"] # Forward rp2040 to rnarduino
+
 [lib]
 name = "rsdemo"
 path = "src/lib.rs"
