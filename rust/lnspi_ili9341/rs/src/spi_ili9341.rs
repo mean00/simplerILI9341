@@ -186,7 +186,10 @@ impl spi_ili9341
         }
         self.chip_id=self.read_chip_id();
     }
-
+    pub fn set_chip_id(&mut self, id: u32)
+    {
+        self.chip_id=id;
+    }
     fn write_cmd_param(&mut self, cmd : u8, data : &[u8] )
     {
         self.CD_COMMAND();
@@ -250,6 +253,15 @@ impl Ili9341Access for spi_ili9341
         self.rotation = rotation;
         let mut t =        match self.chip_id
         {
+            0x7735 => {
+                match self.rotation
+                {
+                     1 =>        cmd::ILI9341_MADCTL_MX | cmd::ILI9341_MADCTL_MY ,
+                     2 =>        cmd::ILI9341_MADCTL_MY | cmd::ILI9341_MADCTL_MV ,
+                     3 =>        cmd::ILI9341_MADCTL_MY | cmd::ILI9341_MADCTL_MV | cmd::ILI9341_MADCTL_ML,
+                     0 =>        cmd::ILI9341_MADCTL_MX | cmd::ILI9341_MADCTL_MV | cmd::ILI9341_MADCTL_ML,
+                     _ =>        {fail();0},
+               }},
             0x9341 => {
                 match self.rotation
                 {
