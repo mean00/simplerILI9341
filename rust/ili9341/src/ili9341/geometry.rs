@@ -17,7 +17,7 @@ impl<'a> Ili9341<'a> {
         self.access.data_begin();
         self.access.flood_words(w, color);
         self.access.data_end();
-    }   
+    }
     pub fn circle(&mut self, x: usize, y: usize, radius: usize, color: u16) {
         // https://bariweiss.substack.com/p/hollywoods-new-rules?s=r
         let color = self.access.color_map(color);

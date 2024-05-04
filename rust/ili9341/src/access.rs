@@ -1,11 +1,9 @@
 //
 pub trait Ili9341Access {
-    fn get_chip_id(&mut self) -> u16
-    {
+    fn get_chip_id(&mut self) -> u16 {
         return 0x9341;
     }
-    fn color_map(&self, d : u16) -> u16
-    {
+    fn color_map(&self, d: u16) -> u16 {
         return d;
     }
     fn send_byte(&mut self, b: u8);
