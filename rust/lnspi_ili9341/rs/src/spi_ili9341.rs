@@ -17,7 +17,7 @@ use rn::rn_spi::rnSPI as rnSPI;
 
 use rn::rn_gpio::rnPin as rnPin;
 use rnarduino::rn_os_helper::delay_us;
-use rnGpio::rnFastIO as rnFastIO;
+use rn::rn_gpio::rn_fast_gpio::rnFastIO as rnFastIO;
 
 
 use rnPin::NoPin;

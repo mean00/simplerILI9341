@@ -28,16 +28,22 @@ use lnspi_ili9341::spi_ili9341 as spi_ili9341;
 use crate::testfont::NotoSans_Bold20pt7b;
 
 use crate::st7735_init::{WW,HH,ST7735};
-
-pub const ILI_PIN_DC         : rnPin =  rnPin::PB11 ;
-pub const ILI_PIN_CS         : rnPin =  rnPin::PB8 ;
-pub const ILI_PIN_RESET      : rnPin =  rnPin::PB9 ;
-
+//
 pub const SLOW_SPEED      : u32 =  50*1000;
 pub const FAST_SPEED      : u32 =  36*1000*1000;
 
 rn::lnLogger_init!();
 use rn::lnLogger;
+
+pub const ILI_PIN_DC         : rnPin =  rnPin::GPIO8 ;
+pub const ILI_PIN_CS         : rnPin =  rnPin::GPIO9 ;
+pub const ILI_PIN_RESET      : rnPin =  rnPin::GPIO10 ;
+//
+pub const ILI_PIN_SPI11      : rnPin =  rnPin::GPIO6 ;
+pub const ILI_PIN_SPI12      : rnPin =  rnPin::GPIO7 ;
+
+//use pinout::{ ILI_PIN_DC, ILI_PIN_CS, ILI_PIN_RESET };
+
 
 pub struct runTime
 {
@@ -68,6 +74,10 @@ impl runTime
     */
    fn run(&mut self) -> ()
    {
+      // spi pins
+      rnGpio::pinMode( ILI_PIN_SPI11, rnGpio::rnGpioMode::lnOUTPUT);
+      rnGpio::pinMode( ILI_PIN_SPI12, rnGpio::rnGpioMode::lnOUTPUT);
+
       let speed = FAST*FAST_SPEED +(1-FAST)*SLOW_SPEED; 
       let transaction : rnSPISettings  = rnSPISettings{
          speed ,
@@ -78,7 +88,7 @@ impl runTime
       let mut spi = rnSPI::new(0,speed);
       spi.set(&transaction);
 
-      let mut ili_access = spi_ili9341::new(spi, ILI_PIN_CS, ILI_PIN_DC,ILI_PIN_RESET);
+      let mut ili_access = spi_ili9341::new(spi, ILI_PIN_CS, ILI_PIN_DC, ILI_PIN_RESET);
       // init low level
       ili_access.reset();
       ili_access.set_chip_id(0x7735);
