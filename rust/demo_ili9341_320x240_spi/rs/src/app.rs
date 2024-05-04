@@ -111,7 +111,7 @@ impl runTime {
                 ili.disc(120, 60, 24, ili9341::colors::BLUE);
                 ili.print(5, 35, "grn/blk");
             } else {
-                ili.fill_screen(0);
+                ili.fill_screen(ili9341::colors::WHITE);
                 ili.draw_bitmap_hs(
                     bitmap_width,
                     bitmap_height,
