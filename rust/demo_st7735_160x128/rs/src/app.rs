@@ -24,6 +24,10 @@ use rnarduino::rn_spi::rnSPISettings;
 use ili9341::ili9341::Ili9341;
 use lnspi_ili9341::spi_ili9341 as spi_ili9341;
 
+use crate::pinout_rp2040 as pin;
+
+use pin::{ ILI_PIN_DC, ILI_PIN_CS, ILI_PIN_RESET, ILI_PIN_SPI11, ILI_PIN_SPI12 };
+
 
 use crate::testfont::NotoSans_Bold20pt7b;
 
@@ -35,12 +39,12 @@ pub const FAST_SPEED      : u32 =  36*1000*1000;
 rn::lnLogger_init!();
 use rn::lnLogger;
 
-pub const ILI_PIN_DC         : rnPin =  rnPin::GPIO8 ;
-pub const ILI_PIN_CS         : rnPin =  rnPin::GPIO9 ;
-pub const ILI_PIN_RESET      : rnPin =  rnPin::GPIO10 ;
+//pub const ILI_PIN_DC         : rnPin =  rnPin::GPIO8 ;
+//pub const ILI_PIN_CS         : rnPin =  rnPin::GPIO9 ;
+//pub const ILI_PIN_RESET      : rnPin =  rnPin::GPIO10 ;
 //
-pub const ILI_PIN_SPI11      : rnPin =  rnPin::GPIO6 ;
-pub const ILI_PIN_SPI12      : rnPin =  rnPin::GPIO7 ;
+//pub const ILI_PIN_SPI11      : rnPin =  rnPin::GPIO6 ;
+//pub const ILI_PIN_SPI12      : rnPin =  rnPin::GPIO7 ;
 
 //use pinout::{ ILI_PIN_DC, ILI_PIN_CS, ILI_PIN_RESET };
 
