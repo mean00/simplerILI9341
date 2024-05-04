@@ -54,7 +54,7 @@ pub struct runTime
  * 
  * 
  */
-const FAST : u32 =0;
+const FAST : u32 =1;
 impl runTime
 {
    /**
