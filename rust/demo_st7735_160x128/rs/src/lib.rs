@@ -5,11 +5,11 @@
 #![allow(dead_code)]
 
 #[cfg(not(feature = "rp2040"))]
-mod pinout_bp ;
+mod pinout_bp;
 #[cfg(feature = "rp2040")]
-mod pinout_rp2040 ;
+mod pinout_rp2040;
 
-mod testfont;
 mod app;
 mod st7735_init;
+mod testfont;
 // EOF
