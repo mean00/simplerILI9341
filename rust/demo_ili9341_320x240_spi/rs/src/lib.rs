@@ -3,9 +3,12 @@
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
 #![allow(dead_code)]
-#![feature(default_alloc_error_handler)]
 
-mod testfont;
+#[cfg(not(feature = "rp2040"))]
+mod pinout_bp;
+#[cfg(feature = "rp2040")]
+mod pinout_rp2040;
+
 mod app;
-mod spi_ili9341;
+mod testfont;
 // EOF
