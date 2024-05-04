@@ -194,12 +194,14 @@ impl spi_ili9341
     {
         self.CD_COMMAND();
         self.spi.write8(cmd);
+        self.spi.wait_for_completion();
         if data.len()!=0 {
             self.CD_DATA();
             let n=data.len();
             for i in 0..n {
                 self.spi.write8(data[i]);
             }
+            self.spi.wait_for_completion();
         }
     }
     fn send_data_to_screen(&mut self, data: &[u16]) 
@@ -214,9 +216,9 @@ impl spi_ili9341
             }
             return;
         }   
-        self.spi.end();
+        //self.spi.end();
         self.spi.block_write16(data);
-        self.spi.begin(16);        
+        //self.spi.begin(16);        
     }    
 }
 //-----------------------------------
@@ -325,6 +327,7 @@ impl Ili9341Access for spi_ili9341
         self.CS_ACTIVE();
         self.CD_COMMAND();
         self.spi.write16(cmd::ILI9341_MEMORYWRITE as u16);
+        self.spi.wait_for_completion();
         self.CD_DATA();
     
     }
@@ -332,39 +335,18 @@ impl Ili9341Access for spi_ili9341
     {
         let dupeColor = color; //colorMap(data);     
         let mut nb = nb;
-
-        if nb > 64 // for "big" transfer use dma, else use plain polling
+        self.data_begin();
+        while nb>0
         {
-            self.data_begin();
-            self.spi.end();
-
-            while nb>0
+            let mut r= nb;            
+            if r>SINGLE_TRANSFER
             {
-                let mut r= nb;            
-                if r>SINGLE_TRANSFER
-                {
-                    r=SINGLE_TRANSFER;
-                }
-                nb-=r;
-                self.spi.block_write16_repeat(r,dupeColor);
-            }               
-            self.data_end();
-            self.spi.begin(16);
-        }else
-        { // small transfer
-            self.data_begin();
-            while nb>0
-            {
-                let mut r= nb;            
-                if r>SINGLE_TRANSFER
-                {
-                    r=SINGLE_TRANSFER;
-                }
-                nb-=r;
-                self.spi.block_write16_repeat(r,dupeColor);
-            }   
-            self.data_end();
-        }
-    }          
+                r=SINGLE_TRANSFER;
+            }
+            nb-=r;
+            self.spi.block_write16_repeat(r,dupeColor);
+        }   
+        self.data_end();
+    }
 }
 //---------------------------------------

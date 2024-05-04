@@ -54,7 +54,7 @@ pub struct runTime
  * 
  * 
  */
-const FAST : u32 =1;
+const FAST : u32 =0;
 impl runTime
 {
    /**
@@ -75,8 +75,8 @@ impl runTime
    fn run(&mut self) -> ()
    {
       // spi pins
-      rnGpio::pinMode( ILI_PIN_SPI11, rnGpio::rnGpioMode::lnOUTPUT);
-      rnGpio::pinMode( ILI_PIN_SPI12, rnGpio::rnGpioMode::lnOUTPUT);
+      rnGpio::pinMode( ILI_PIN_SPI11, rnGpio::rnGpioMode::lnSPI_MODE);
+      rnGpio::pinMode( ILI_PIN_SPI12, rnGpio::rnGpioMode::lnSPI_MODE);
 
       let speed = FAST*FAST_SPEED +(1-FAST)*SLOW_SPEED; 
       let transaction : rnSPISettings  = rnSPISettings{
@@ -89,21 +89,22 @@ impl runTime
       spi.set(&transaction);
 
       let mut ili_access = spi_ili9341::new(spi, ILI_PIN_CS, ILI_PIN_DC, ILI_PIN_RESET);
-      // init low level
       ili_access.reset();
-      ili_access.set_chip_id(0x7735);
       ili_access.send_init_sequence(ST7735);
+      ili_access.set_chip_id(0x7735);
+      // init low level
       //ili_access.send_init_sequence(DSO_WAKEUP);
       // Send it over to real ili
       let  mut ili = Ili9341::new(HH,WW, 
                      Box::new(ili_access), 
                      &NotoSans_Bold20pt7b, &NotoSans_Bold20pt7b ,&NotoSans_Bold20pt7b);
 
+      ili.set_rotation(0);
+
       let bitmap_width = 96;
       let bitmap_height = 96;
       let bitmap = include_bytes!("test_bitmap.bin");
       let mut toggle = true;                 
-      ili.set_rotation(0);
       loop
       {   
         if(toggle) {
