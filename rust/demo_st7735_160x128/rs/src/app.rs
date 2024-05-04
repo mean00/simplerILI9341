@@ -14,7 +14,7 @@ use rnarduino::rn_spi::rnSPISettings;
 use rnarduino::rn_spi::rnSpiBitOrder::*;
 
 use ili9341::ili9341::Ili9341;
-use lnspi_ili9341::spi_ili9341;
+use lnspi_ili9341::SpiIli9341;
 // Pick the right pinout
 #[cfg(not(feature = "rp2040"))]
 use crate::pinout_bp as pin;
@@ -73,7 +73,7 @@ impl runTime {
         spi.set(&transaction);
 
         // init access
-        let mut ili_access = spi_ili9341::new(spi, ILI_PIN_CS, ILI_PIN_DC, ILI_PIN_RESET);
+        let mut ili_access = SpiIli9341::new(spi, ILI_PIN_CS, ILI_PIN_DC, ILI_PIN_RESET);
         ili_access.reset();
         ili_access.send_init_sequence(ST7735);
         ili_access.set_chip_id(0x7735);

@@ -1,13 +1,9 @@
 #![no_std]
-#![allow(unused_imports)]
-#![allow(unused_mut)]
-#![allow(unused_variables)]
-#![allow(non_camel_case_types)]
-#![allow(non_snake_case)]
-#![allow(dead_code)]
-#![allow(unreachable_code)]
+/*
+ * Access crate to use SPI / LnArduino
+ *
+ */
 extern crate ili9341;
-
 extern crate rnarduino as rn;
 
 use rn::rn_gpio as rnGpio;
@@ -15,7 +11,6 @@ use rn::rn_spi::rnSPI;
 
 use rn::rn_gpio::rnPin;
 use rn::rn_gpio::rn_fast_gpio::rnFastIO;
-use rnarduino::rn_os_helper::delay_us;
 
 use rnPin::NoPin;
 
@@ -30,28 +25,28 @@ pub fn fail() {
     panic!("oop");
 }
 //---------------------------------------
-pub struct spi_ili9341 {
+pub struct SpiIli9341 {
     spi: rnSPI,
     pin_cs: rnPin,
     pin_dc: rnPin,
     pin_reset: rnPin,
-    ioCS: rnFastIO,
-    ioDC: rnFastIO,
+    io_cs: rnFastIO,
+    io_dc: rnFastIO,
     chip_id: u32,
     rotation: usize,
     x_offset: usize,
     y_offset: usize,
 }
 //---------------------------------------
-impl spi_ili9341 {
+impl SpiIli9341 {
     pub fn new(spi: rnSPI, ics: rnPin, idc: rnPin, ireset: rnPin) -> Self {
-        let mut me: spi_ili9341 = spi_ili9341 {
+        let me: SpiIli9341 = SpiIli9341 {
             spi: spi,
             pin_cs: ics,
             pin_dc: idc,
             pin_reset: ireset,
-            ioCS: rnFastIO::new(ics),
-            ioDC: rnFastIO::new(idc),
+            io_cs: rnFastIO::new(ics),
+            io_dc: rnFastIO::new(idc),
             rotation: 0,
             x_offset: 0,
             y_offset: 0,
@@ -60,24 +55,24 @@ impl spi_ili9341 {
         me
     }
     #[inline(always)]
-    fn CS_ACTIVE(&mut self) {
+    fn cs_active(&mut self) {
         if self.pin_cs != NoPin {
-            self.ioCS.off();
+            self.io_cs.off();
         }
     }
     #[inline(always)]
-    fn CS_IDLE(&mut self) {
+    fn cs_idle(&mut self) {
         if self.pin_cs != NoPin {
-            self.ioCS.on();
+            self.io_cs.on();
         }
     }
     #[inline(always)]
-    fn CD_DATA(&mut self) {
-        self.ioDC.on();
+    fn cd_data(&mut self) {
+        self.io_dc.on();
     }
     #[inline(always)]
-    fn CD_COMMAND(&mut self) {
-        self.ioDC.off();
+    fn cd_command(&mut self) {
+        self.io_dc.off();
     }
 
     fn write_register32(&mut self, r: u8, val: u32) {
@@ -89,26 +84,28 @@ impl spi_ili9341 {
         ];
         self.write_cmd_param(r, &flat);
     }
-
+/*
     fn read_register32(&mut self, r: u8) -> u32 {
         let mut rx: [u8; 4] = [0; 4];
-        let mut tx: [u8; 4] = [0; 4];
-        self.CS_ACTIVE();
+        let tx: [u8; 4] = [0; 4];
+        self.cs_active();
         self.spi.begin(8);
-        self.CD_COMMAND();
+        self.cd_command();
         self.spi.write16(r as u16);
-        self.CD_DATA();
+        self.cd_data();
         delay_us(5);
         self.spi.transfer8(&tx, &mut rx);
         // revert
         let rx2: u32 =
             rx[3] as u32 + ((rx[2] as u32) << 8) + ((rx[1] as u32) << 16) + ((rx[0] as u32) << 24);
         self.spi.end();
-        self.CS_IDLE();
+        self.cs_idle();
         rx2
     }
+    */
     fn read_chip_id(&mut self) -> u32 {
         return 0x9341;
+        /*
         let reg_d3 = self.read_register32(0xd3);
         let mut reg_04 = self.read_register32(0x04);
 
@@ -121,6 +118,7 @@ impl spi_ili9341 {
             return 0x7789; // is it really a 7789 ?
         }
         return 0x9341; // unknown
+        */
     }
 
     pub fn send_init_sequence(&mut self, data: &[u8]) {
@@ -138,10 +136,10 @@ impl spi_ili9341 {
                 continue;
             }
             self.spi.begin(8);
-            self.CS_ACTIVE();
+            self.cs_active();
             self.write_cmd_param(cmd, &data[index..(index + run)]);
             index += run;
-            self.CS_IDLE();
+            self.cs_idle();
             self.spi.end();
         }
     }
@@ -152,8 +150,8 @@ impl spi_ili9341 {
             rnGpio::pinMode(self.pin_cs, rnGpio::rnGpioMode::lnOUTPUT);
             rnGpio::digital_write(self.pin_cs, true);
         }
-        self.CS_IDLE();
-        self.CD_DATA();
+        self.cs_idle();
+        self.cd_data();
         if self.pin_reset != NoPin {
             rnGpio::pinMode(self.pin_reset, rnGpio::rnGpioMode::lnOUTPUT);
             rnGpio::digital_write(self.pin_reset, true);
@@ -169,11 +167,11 @@ impl spi_ili9341 {
         self.chip_id = id;
     }
     fn write_cmd_param(&mut self, cmd: u8, data: &[u8]) {
-        self.CD_COMMAND();
+        self.cd_command();
         self.spi.write8(cmd);
         self.spi.wait_for_completion();
         if data.len() != 0 {
-            self.CD_DATA();
+            self.cd_data();
             let n = data.len();
             for i in 0..n {
                 self.spi.write8(data[i]);
@@ -197,7 +195,7 @@ impl spi_ili9341 {
     }
 }
 //-----------------------------------
-impl Ili9341Access for spi_ili9341 {
+impl Ili9341Access for SpiIli9341 {
     fn color_map(&self, d: u16) -> u16 {
         //  if self.chip_id  != 0x7789
         //{
@@ -215,7 +213,7 @@ impl Ili9341Access for spi_ili9341 {
     fn send_word(&mut self, b: u16) {
         self.spi.write16(b);
     }
-    fn send_bytes(&mut self, data: &[u8]) {
+    fn send_bytes(&mut self, _data: &[u8]) {
         fail();
     }
     fn send_words(&mut self, data: &[u16]) {
@@ -262,10 +260,10 @@ impl Ili9341Access for spi_ili9341 {
         };
         t |= cmd::ILI9341_MADCTL_RGB;
         self.spi.begin(8);
-        self.CS_ACTIVE();
+        self.cs_active();
         let tray: [u8; 1] = [t];
         self.write_cmd_param(cmd::ILI9341_MADCTL, &tray);
-        self.CS_IDLE();
+        self.cs_idle();
         self.spi.end();
     }
 
@@ -280,27 +278,27 @@ impl Ili9341Access for spi_ili9341 {
         b1 = y + self.y_offset;
         b2 = b1 + h - 1;
         self.spi.begin(8);
-        self.CS_ACTIVE();
+        self.cs_active();
         self.write_register32(cmd::ILI9341_COLADDRSET, ((a1 << 16) as u32) | (a2 as u32)); // HX8357D uses same registers!
         self.write_register32(cmd::ILI9341_PAGEADDRSET, ((b1 << 16) as u32) | (b2 as u32)); // HX8357D uses same registers!
-        self.CS_IDLE();
+        self.cs_idle();
         self.spi.end();
     }
     fn data_end(&mut self) {
-        self.CD_COMMAND();
-        self.CS_IDLE();
+        self.cd_command();
+        self.cs_idle();
         self.spi.end();
     }
     fn data_begin(&mut self) {
         self.spi.begin(16);
-        self.CS_ACTIVE();
-        self.CD_COMMAND();
+        self.cs_active();
+        self.cd_command();
         self.spi.write16(cmd::ILI9341_MEMORYWRITE as u16);
         self.spi.wait_for_completion();
-        self.CD_DATA();
+        self.cd_data();
     }
     fn flood_words(&mut self, nb: usize, color: u16) {
-        let dupeColor = color; //colorMap(data);
+        let dupe_color = color; //colorMap(data);
         let mut nb = nb;
         self.data_begin();
         while nb > 0 {
@@ -309,7 +307,7 @@ impl Ili9341Access for spi_ili9341 {
                 r = SINGLE_TRANSFER;
             }
             nb -= r;
-            self.spi.block_write16_repeat(r, dupeColor);
+            self.spi.block_write16_repeat(r, dupe_color);
         }
         self.data_end();
     }
