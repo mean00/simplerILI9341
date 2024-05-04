@@ -57,14 +57,14 @@ pub struct runTime
    
 }
 
-/**
+/*
  * 
  * 
  */
 const FAST : u32 =1;
 impl runTime
 {
-   /**
+   /*
     *     
     */
    fn new() -> runTime
@@ -76,10 +76,10 @@ impl runTime
    }
    
    
-   /**
+   /*
     * 
     */
-   fn run(&mut self) -> ()
+   fn run(&mut self)
    {
       // spi pins
       rnGpio::pinMode( ILI_PIN_SPI11, rnGpio::rnGpioMode::lnSPI_MODE);
@@ -128,20 +128,20 @@ impl runTime
             ili.print(5,35,"red/blue");
             
         }
-        toggle=!toggle;
+        toggle=(!toggle);
         rn::rn_os_helper::delay_ms(1000);
 
        
       }  
    }
 }
-/**
+/*
  * \fn rnLoop
  * 
  * 
  */
 #[no_mangle]
-pub extern "C" fn rnLoop() -> ()
+pub extern "C" fn rnLoop() 
 {
       let r : runTime = runTime::new();
       let boxed : Box<runTime> = Box::new(r);
@@ -156,9 +156,9 @@ pub extern "C" fn rnLoop() -> ()
 }
 
 #[no_mangle]
-pub extern "C" fn rnInit() -> ()
+pub extern "C" fn rnInit()
 {
-   lnLogger!("Setuping up Power Supply...\n");
+   lnLogger!("Setuping up LN9341 Demo...\n");
    
 }
 // EOF
