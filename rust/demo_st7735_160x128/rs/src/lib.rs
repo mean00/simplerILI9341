@@ -3,7 +3,10 @@
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
 #![allow(dead_code)]
+
+#[cfg(not(feature = "rp2040"))]
 mod pinout_bp ;
+#[cfg(feature = "rp2040")]
 mod pinout_rp2040 ;
 
 mod testfont;

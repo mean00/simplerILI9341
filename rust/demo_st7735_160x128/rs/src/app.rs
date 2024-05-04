@@ -24,7 +24,10 @@ use rnarduino::rn_spi::rnSPISettings;
 use ili9341::ili9341::Ili9341;
 use lnspi_ili9341::spi_ili9341 as spi_ili9341;
 
+#[cfg(feature = "rp2040")]
 use crate::pinout_rp2040 as pin;
+#[cfg(not(feature = "rp2040"))]
+use crate::pinout_bp as pin;
 
 use pin::{ ILI_PIN_DC, ILI_PIN_CS, ILI_PIN_RESET, ILI_PIN_SPI11, ILI_PIN_SPI12 };
 
