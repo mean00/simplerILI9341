@@ -1,5 +1,5 @@
 use rnarduino as rn;
-use rn::rn_gpio as rnGpio;
+//use rn::rn_gpio as rnGpio;
 use rn::rn_gpio::rnPin as rnPin;
 
 pub const ILI_PIN_DC         : rnPin =  rnPin::GPIO7 ;
