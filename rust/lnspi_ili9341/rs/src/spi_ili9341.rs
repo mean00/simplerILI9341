@@ -27,10 +27,9 @@ pub fn fail() {
 //---------------------------------------
 pub struct SpiIli9341 {
     spi: rnSPI,
-    pin_cs: rnPin,
     pin_dc: rnPin,
     pin_reset: rnPin,
-    io_cs: rnFastIO,
+    io_cs: Option<rnFastIO>,
     io_dc: rnFastIO,
     chip_id: u32,
     rotation: usize,
@@ -42,10 +41,12 @@ impl SpiIli9341 {
     pub fn new(spi: rnSPI, ics: rnPin, idc: rnPin, ireset: rnPin) -> Self {
         let me: SpiIli9341 = SpiIli9341 {
             spi: spi,
-            pin_cs: ics,
             pin_dc: idc,
             pin_reset: ireset,
-            io_cs: rnFastIO::new(ics),
+            io_cs: match ics {
+                NoPin => None,
+                x => Some(rnFastIO::new(x)),
+            },
             io_dc: rnFastIO::new(idc),
             rotation: 0,
             x_offset: 0,
@@ -56,14 +57,16 @@ impl SpiIli9341 {
     }
     #[inline(always)]
     fn cs_active(&mut self) {
-        if self.pin_cs != NoPin {
-            self.io_cs.off();
+        match &mut self.io_cs {
+            Some(x) => x.off(),
+            _ => (),
         }
     }
     #[inline(always)]
     fn cs_idle(&mut self) {
-        if self.pin_cs != NoPin {
-            self.io_cs.on();
+        match &mut self.io_cs {
+            Some(x) => x.on(),
+            _ => (),
         }
     }
     #[inline(always)]
@@ -84,7 +87,7 @@ impl SpiIli9341 {
         ];
         self.write_cmd_param(r, &flat);
     }
-/*
+    /*
     fn read_register32(&mut self, r: u8) -> u32 {
         let mut rx: [u8; 4] = [0; 4];
         let tx: [u8; 4] = [0; 4];
@@ -146,9 +149,9 @@ impl SpiIli9341 {
     pub fn reset(&mut self) {
         rnGpio::pinMode(self.pin_dc, rnGpio::rnGpioMode::lnOUTPUT);
         rnGpio::digital_write(self.pin_dc, true);
-        if self.pin_cs != NoPin {
-            rnGpio::pinMode(self.pin_cs, rnGpio::rnGpioMode::lnOUTPUT);
-            rnGpio::digital_write(self.pin_cs, true);
+        match &mut self.io_cs {
+            Some(x) => x.on(),
+            _ => (),
         }
         self.cs_idle();
         self.cd_data();
