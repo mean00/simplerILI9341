@@ -15,11 +15,15 @@ pub struct Gauge<'a> {
     yext: &'a mut [u8],
     yint: &'a mut [u8],
     buffer: &'a mut [u16],
+    old_percent: usize,
+    not_first: bool,
 }
+#[derive(PartialEq)]
 enum Area {
     Empty,
     Full,
     Partial,
+    Skip,
 }
 
 fn area_revert(i: Area) -> Area {
@@ -27,6 +31,7 @@ fn area_revert(i: Area) -> Area {
         Area::Empty => Area::Full,
         Area::Full => Area::Empty,
         Area::Partial => Area::Partial,
+        Area::Skip => Area::Skip,
     };
 }
 
@@ -39,6 +44,8 @@ impl<'a> Gauge<'a> {
             yext: crate::util::unsafe_slice_alloc::<u8>(radius_external + 1),
             yint: crate::util::unsafe_slice_alloc::<u8>(radius_external + 1),
             buffer: crate::util::unsafe_slice_alloc::<u16>(2 * radius_external + 1),
+            old_percent: 101,
+            not_first: false,
         };
         r._init();
         r
@@ -98,8 +105,8 @@ impl<'a> Gauge<'a> {
         &mut self,
         color: u16,
         line: usize,
-        left: Area,
-        right: Area,
+        left: &Area,
+        right: &Area,
         column: usize,
         len_left: usize,
         len_right: usize,
@@ -107,6 +114,7 @@ impl<'a> Gauge<'a> {
         let pen_ext = self.pen_size(&self.yext, line);
         let pen_int = self.pen_size(&self.yint, line);
         match left {
+            Area::Skip => {}
             Area::Full => {
                 self.fill_x(column, len_left + 1, color);
             }
@@ -125,6 +133,7 @@ impl<'a> Gauge<'a> {
             }
         };
         match right {
+            Area::Skip => {}
             Area::Full => {
                 self.fill_antix(column, len_right + 1, color);
             }
@@ -146,16 +155,21 @@ impl<'a> Gauge<'a> {
             }
         }
     }
-
+    /*
+     *
+     */
     pub fn draw(&mut self, percent: usize, ili: &mut Ili9341, x: usize, y: usize, color: u16) {
+        if self.old_percent == percent && self.not_first {
+            return;
+        }
         // Check the interieur start of filled
         let over: bool;
         let index: usize = match percent {
-            0..=50 => {
+            0..50 => {
                 over = false;
                 percent
             }
-            51..=100 => {
+            50..=100 => {
                 over = true;
                 100 - percent
             }
@@ -164,7 +178,12 @@ impl<'a> Gauge<'a> {
                 0
             }
         };
-
+        let old_over: bool;
+        if self.old_percent >= 50 {
+            old_over = true;
+        } else {
+            old_over = false;
+        }
         let line = SIN_TABLE[index] as usize;
         let col = SIN_TABLE[50 - index] as usize;
         let line_int = (self.radius_internal * line + 127) >> 8;
@@ -183,7 +202,7 @@ impl<'a> Gauge<'a> {
         }
 
         //--------------Start to fill ------------------------
-        for i in 0..self.radius_external {
+        for i in 1..self.radius_external {
             let xext = self.yext[i] as usize;
             let xint = self.yint[i] as usize;
             let w: usize;
@@ -221,24 +240,49 @@ impl<'a> Gauge<'a> {
                 }
             }
             if over {
-                left = Area::Full;
+                if i != 0 && (self.not_first && old_over) {
+                    left = Area::Skip;
+                } else {
+                    left = Area::Full;
+                }
                 right = ev;
                 wright = adj;
             } else {
+                if i != 0 && (self.not_first && !old_over) {
+                    right = Area::Skip;
+                } else {
+                    right = Area::Empty;
+                }
                 left = area_revert(ev);
-                right = Area::Empty;
                 wleft = adj;
             }
+
             self.draw_elem(
                 ili.access.color_map(color),
                 i,
-                left,
-                right,
+                &left,
+                &right,
                 xext,
                 wleft,
                 wright,
             );
-            ili.send_data(x - self.radius_external, y - i, &self.buffer);
+            let half_width = self.buffer.len() >> 1;
+            if left != Area::Skip && right != Area::Skip {
+                // draw both
+                ili.send_data(x - self.radius_external, y - i, &self.buffer);
+            } else {
+                if left != Area::Skip {
+                    // left only
+                    ili.send_data(x - self.radius_external, y - i, &self.buffer[0..half_width]);
+                } else if right != Area::Skip {
+                    // right only
+                    ili.send_data(
+                        x, //- (self.radius_external >> 1),
+                        y - i,
+                        &self.buffer[half_width..],
+                    );
+                }
+            }
         }
         let last_line: usize = self.yext[self.radius_external] as usize;
         ili.hline(
@@ -247,18 +291,12 @@ impl<'a> Gauge<'a> {
             2 * last_line,
             color,
         );
-        let first_line: usize = self.yext[0] as usize;
-        let first_ww: usize = (self.yext[0] - self.yint[0]) as usize;
-        ili.hline(x - first_line + 1, y, first_ww, color);
-        ili.hline(x + first_line - first_ww, y, first_ww, color);
-        /*
-        if over
-        {
-            ili.draw_line(x+col_int, y-line_int, x+col_ext, y-line_ext, crate::colors::BLUE) ;
-        }else
-        {
-            ili.draw_line(x-col_int, y-line_int, x-col_ext, y-line_ext, crate::colors::BLUE) ;
-        }
-        */
+        let first_ww = self.radius_external - self.radius_internal;
+        let first_x = self.radius_external;
+
+        ili.hline(x - first_x, y, first_ww, color);
+        ili.hline(x + first_x - first_ww, y, first_ww, color);
+        self.old_percent = percent;
+        self.not_first = true;
     }
 }
