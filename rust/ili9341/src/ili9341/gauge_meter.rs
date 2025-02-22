@@ -85,20 +85,17 @@ impl<'a> Gauge<'a> {
         }
         pen
     }
+    fn fast_fill(array: &mut [u16], color: u16) {
+        array.iter_mut().for_each(|m| *m = color)
+    }
     //
     fn fill_x(&mut self, start: usize, pen: usize, color: u16) {
-        let mut dex = start;
-        for _k in 0..pen {
-            self.buffer[dex] = color;
-            dex = dex + 1;
-        }
+        Self::fast_fill(&mut self.buffer[start..(start + pen)], color)
     }
+    //
     fn fill_antix(&mut self, start: usize, pen: usize, color: u16) {
-        let mut dex = start;
-        for _k in 0..pen {
-            self.buffer[2 * self.radius_external - dex] = color;
-            dex = dex + 1;
-        }
+        let dex = 2 * self.radius_external - start - (pen - 1);
+        Self::fast_fill(&mut self.buffer[dex..(dex + pen)], color)
     }
     //
     fn draw_elem(
@@ -113,6 +110,7 @@ impl<'a> Gauge<'a> {
     ) {
         let pen_ext = self.pen_size(&self.yext, line);
         let pen_int = self.pen_size(&self.yint, line);
+        let half_width = self.buffer.len() >> 1;
         match left {
             Area::Skip => {}
             Area::Full => {
@@ -213,11 +211,7 @@ impl<'a> Gauge<'a> {
             }
             let xext = self.radius_external - xext;
             let _xint = self.radius_external - xint;
-
-            for i in 0..self.buffer.len() {
-                self.buffer[i] = 0;
-            }
-
+            Self::fast_fill(&mut self.buffer, 0);
             let ev: Area;
             let mut wleft: usize = w;
             let mut wright: usize = w;
@@ -240,7 +234,7 @@ impl<'a> Gauge<'a> {
                 }
             }
             if over {
-                if i != 0 && (self.not_first && old_over) {
+                if self.not_first && old_over {
                     left = Area::Skip;
                 } else {
                     left = Area::Full;
@@ -248,7 +242,7 @@ impl<'a> Gauge<'a> {
                 right = ev;
                 wright = adj;
             } else {
-                if i != 0 && (self.not_first && !old_over) {
+                if self.not_first && !old_over {
                     right = Area::Skip;
                 } else {
                     right = Area::Empty;
@@ -274,7 +268,8 @@ impl<'a> Gauge<'a> {
                 if left != Area::Skip {
                     // left only
                     ili.send_data(x - self.radius_external, y - i, &self.buffer[0..half_width]);
-                } else if right != Area::Skip {
+                }
+                if right != Area::Skip {
                     // right only
                     ili.send_data(
                         x, //- (self.radius_external >> 1),
