@@ -17,6 +17,8 @@ pub struct Gauge<'a> {
     buffer: &'a mut [u16],
     old_percent: usize,
     not_first: bool,
+    old_line_int: usize,
+    old_line_ext: usize,
 }
 #[derive(PartialEq)]
 enum Area {
@@ -46,6 +48,8 @@ impl<'a> Gauge<'a> {
             buffer: crate::util::unsafe_slice_alloc::<u16>(2 * radius_external + 1),
             old_percent: 101,
             not_first: false,
+            old_line_int: 0,
+            old_line_ext: 0,
         };
         r._init();
         r
@@ -110,7 +114,6 @@ impl<'a> Gauge<'a> {
     ) {
         let pen_ext = self.pen_size(&self.yext, line);
         let pen_int = self.pen_size(&self.yint, line);
-        let half_width = self.buffer.len() >> 1;
         match left {
             Area::Skip => {}
             Area::Full => {
@@ -180,7 +183,7 @@ impl<'a> Gauge<'a> {
         if self.old_percent >= 50 {
             old_over = true;
         } else {
-            old_over = false;
+            old_over = false
         }
         let line = SIN_TABLE[index] as usize;
         let col = SIN_TABLE[50 - index] as usize;
@@ -198,9 +201,21 @@ impl<'a> Gauge<'a> {
             let den = line_ext - line_int;
             koeff = ((256 * koeff) + den / 2) / den;
         }
-
+        let scan_from: usize;
+        let scan_to: usize;
+        // just redraw the part that has changed
+        if true && self.not_first {
+            scan_from = crate::util::xmaxu(1, crate::util::xminu(self.old_line_int, line_int));
+            scan_to = crate::util::xminu(
+                self.radius_external,
+                crate::util::xmaxu(self.old_line_ext, line_ext) + 1,
+            );
+        } else {
+            scan_from = 1;
+            scan_to = self.radius_external;
+        }
         //--------------Start to fill ------------------------
-        for i in 1..self.radius_external {
+        for i in scan_from..scan_to {
             let xext = self.yext[i] as usize;
             let xint = self.yint[i] as usize;
             let w: usize;
@@ -293,5 +308,7 @@ impl<'a> Gauge<'a> {
         ili.hline(x + first_x - first_ww, y, first_ww, color);
         self.old_percent = percent;
         self.not_first = true;
+        self.old_line_int = line_int;
+        self.old_line_ext = line_ext;
     }
 }
