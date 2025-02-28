@@ -195,6 +195,8 @@ impl<'a> Gauge<'a> {
      *
      */
     pub fn draw(&mut self, percent: usize, ili: &mut Ili9341, x: usize, y: usize, color: u16) {
+        //
+        let color = ili.access.color_map(color);
         // if nothing changed, do nothing
         let mut percent = percent;
         if percent > 100 {
