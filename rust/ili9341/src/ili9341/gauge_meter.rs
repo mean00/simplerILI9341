@@ -48,7 +48,7 @@ impl<'a> Gauge<'a> {
             radius_external,
             xext: crate::util::unsafe_slice_alloc::<u8>(radius_external + 1),
             xint: crate::util::unsafe_slice_alloc::<u8>(radius_external + 1),
-            buffer: crate::util::unsafe_slice_alloc::<u16>(2 * radius_external + 1),
+            buffer: crate::util::unsafe_slice_alloc::<u16>(2 * radius_external),
             old_percent: 101,
             not_first: false,
             old_line_int: 0,
@@ -101,7 +101,7 @@ impl<'a> Gauge<'a> {
     }
     // fill a line backward
     fn fill_antix(&mut self, start: usize, pen: usize, color: u16) {
-        let dex = 2 * self.radius_external - start - (pen - 1);
+        let dex = 2 * self.radius_external - start - pen;
         Self::fast_fill(&mut self.buffer[dex..(dex + pen)], color)
     }
     /*
