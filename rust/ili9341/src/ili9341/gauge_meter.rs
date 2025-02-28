@@ -196,6 +196,7 @@ impl<'a> Gauge<'a> {
      */
     pub fn draw(&mut self, percent: usize, ili: &mut Ili9341, x: usize, y: usize, color: u16) {
         //
+        let org_color = color;
         let color = ili.access.color_map(color);
         // if nothing changed, do nothing
         let mut percent = percent;
@@ -340,13 +341,13 @@ impl<'a> Gauge<'a> {
             x - last_line,
             y - self.radius_external,
             2 * last_line,
-            color,
+            org_color,
         );
         let first_ww = self.radius_external - self.radius_internal;
         let first_x = self.radius_external;
 
-        ili.hline(x - first_x, y, first_ww, color);
-        ili.hline(x + first_x - first_ww, y, first_ww, color);
+        ili.hline(x - first_x, y, first_ww, org_color);
+        ili.hline(x + first_x - first_ww, y, first_ww, org_color);
         self.old_percent = percent;
         self.not_first = true;
         self.old_line_int = line_int;
